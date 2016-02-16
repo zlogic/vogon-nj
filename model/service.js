@@ -53,8 +53,6 @@ Transaction.hasMany(TransactionComponent);
 User.hasMany(Transaction);
 User.hasMany(Account);
 
-//sequelize.sync();
-
 exports.sequelize = sequelize;
 exports.User = User;
 exports.Transaction = Transaction;
