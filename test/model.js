@@ -45,7 +45,7 @@ describe('Model', function() {
       done();
     });
   });
-  
+
   describe('populate', function () {
     it('should be able to create related entities in sequence', function (done) {
       var user1= createUser1();
@@ -53,15 +53,15 @@ describe('Model', function() {
       var transaction1 = createTransaction1();
       var transactionComponent1 = createTransactionComponent1();
       user1.save().then(function(){
-         return account1.save();
+        return account1.save();
       }).then(function(){
-         return user1.addAccount(account1);
+        return user1.addAccount(account1);
       }).then(function(){
-         return transaction1.save();
+        return transaction1.save();
       }).then(function(){
         return user1.addTransaction(transaction1);
       }).then(function(){
-         return transactionComponent1.save();
+        return transactionComponent1.save();
       }).then(function(){
         return transactionComponent1.setTransaction(transaction1);
       }).then(function(){
