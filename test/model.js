@@ -21,7 +21,7 @@ describe('Model', function() {
       });
       var account1 = dbService.Account.build({
         name: "test account 1",
-        balance: 0,
+        balance: 5,
         currency: "RUB",
         includeInTotal: true,
         showInList: true
@@ -30,6 +30,7 @@ describe('Model', function() {
         description: "test transaction 1",
         type: "expenseincome",
         date: currentDate(),
+        tags: ["hello", "world"],
         amount: 100
       });
       var transactionComponent1 = dbService.TransactionComponent.build({
@@ -55,7 +56,7 @@ describe('Model', function() {
           //include: [{ all: true }]
         });
       }).then(function(users){
-        assert.equal(users.length, 1, "check users count")
+        assert.equal(users.length, 1, "check users count");
         var user = users[0];
         assert.equal(user.username, "user01", "check user01 username");
         assert.equal(user.password, "mypassword", "check user01 password");
@@ -72,6 +73,7 @@ describe('Model', function() {
         assert.equal(transaction.type, "expenseincome", "check transaction type");
         assert.equal(transaction.date.getTime(), currentDate().getTime(), "check transaction date");
         assert.equal(transaction.amount, 100, "check transaction amount");
+        assert.deepEqual(transaction.tags, ["hello", "world"], "check transaction tags");
         assert.equal(transaction.TransactionComponents.length, 1, "check transaction components count");
         var component = transaction.TransactionComponents[0];
         assert.equal(component.amount, 100, "check component amount");
@@ -88,7 +90,7 @@ describe('Model', function() {
         Accounts: [
           {
             name: "test account 1",
-            balance: 0,
+            balance: 5,
             currency: "RUB",
             includeInTotal: true,
             showInList: true
@@ -99,6 +101,7 @@ describe('Model', function() {
             description: "test transaction 1",
             type: "expenseincome",
             date: currentDate(),
+            tags: ["hello", "world"],
             amount: 100
           }
         ]
@@ -116,7 +119,7 @@ describe('Model', function() {
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
         });
       }).then(function(users){
-        assert.equal(users.length, 1, "check users count")
+        assert.equal(users.length, 1, "check users count");
         var user = users[0];
         assert.equal(user.username, "user01", "check user01 username");
         assert.equal(user.password, "mypassword", "check user01 password");
@@ -131,6 +134,7 @@ describe('Model', function() {
         var transaction = user.Transactions[0];
         assert.equal(transaction.description,  "test transaction 1", "check transaction description");
         assert.equal(transaction.type, "expenseincome", "check transaction type");
+        assert.deepEqual(transaction.tags, ["hello", "world"], "check transaction tags");
         assert.equal(transaction.date.getTime(), currentDate().getTime(), "check transaction date");
         assert.equal(transaction.amount, 100, "check transaction amount");
         assert.equal(transaction.TransactionComponents.length, 1, "check transaction components count");

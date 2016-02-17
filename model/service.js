@@ -11,6 +11,7 @@ var sequelizeConfigurer = function(){
 
 var sequelize = sequelizeConfigurer();
 
+// Model
 var Account = sequelize.define('Account', {
   name: Sequelize.STRING,
   balance: Sequelize.BIGINT,
@@ -22,9 +23,21 @@ var Account = sequelize.define('Account', {
 });
 
 var Transaction = sequelize.define('Transaction', {
-  type: Sequelize.ENUM("expenseincome", "transfer", "undefined"),
+  type: Sequelize.ENUM("expenseincome", "transfer"),
   description: Sequelize.STRING,
-  //tags: Sequelize.ARRAY(Sequelize.STRING),
+  tags: {
+    type: Sequelize.STRING,
+    get: function() {
+      if(this.getDataValue("tags") === undefined)
+        return undefined;
+      return JSON.parse(this.getDataValue("tags"));
+    },
+    set: function(value) {
+      if(!Array.isArray(value))
+        throw new Error("Tags must be an array");
+      this.setDataValue("tags", JSON.stringify(value));
+    }
+  },
   date: Sequelize.DATE,
   amount: Sequelize.BIGINT
 }, {
@@ -47,6 +60,7 @@ var User = sequelize.define('User', {
   timestamps: false
 });
 
+// Associations
 TransactionComponent.belongsTo(Transaction);
 TransactionComponent.belongsTo(Account);
 Transaction.hasMany(TransactionComponent);
