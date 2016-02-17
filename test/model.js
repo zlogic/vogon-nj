@@ -6,39 +6,6 @@ var currentDate = function(){
   return new Date(currentTime.getFullYear(), currentTime.getMonth(), currentTime.getDate());
 };
 
-var createUser1 = function(){
-  return dbService.User.build({
-    username: "user01",
-    password: "mypassword"
-  });
-};
-
-var createAccount1 = function(){
-  return dbService.Account.build({
-    name: "test account 1",
-    balance: 0,
-    currency: "RUB",
-    includeInTotal: true,
-    showInList: true
-  });
-};
-
-var createTransaction1 = function(){
-  return dbService.Transaction.build({
-    description: "test transaction 1",
-    type: "expenseincome",
-    date: currentDate(),
-    amount: 100
-  });
-};
-
-var createTransactionComponent1 = function(){
-  return dbService.TransactionComponent.build({
-    amount: 100
-  });
-};
-
-
 describe('Model', function() {
   beforeEach(function(done) {
     return dbService.sequelize.sync({force: true}).then(function(task){
@@ -48,10 +15,26 @@ describe('Model', function() {
 
   describe('populate', function () {
     it('should be able to create related entities in sequence', function (done) {
-      var user1= createUser1();
-      var account1 = createAccount1();
-      var transaction1 = createTransaction1();
-      var transactionComponent1 = createTransactionComponent1();
+      var user1 = dbService.User.build({
+        username: "user01",
+        password: "mypassword"
+      });
+      var account1 = dbService.Account.build({
+        name: "test account 1",
+        balance: 0,
+        currency: "RUB",
+        includeInTotal: true,
+        showInList: true
+      });
+      var transaction1 = dbService.Transaction.build({
+        description: "test transaction 1",
+        type: "expenseincome",
+        date: currentDate(),
+        amount: 100
+      });
+      var transactionComponent1 = dbService.TransactionComponent.build({
+        amount: 100
+      });
       user1.save().then(function(){
         return account1.save();
       }).then(function(){
