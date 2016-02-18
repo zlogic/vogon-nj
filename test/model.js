@@ -13,7 +13,7 @@ describe('Model', function() {
     });
   });
 
-  describe('populate', function () {
+  describe('operations', function () {
     it('should be able to create related entities in sequence', function (done) {
       var user1 = dbService.User.build({
         username: "user01",
@@ -142,6 +142,323 @@ describe('Model', function() {
         assert.equal(component.amount, 100);
         assert.equal(component.AccountId, account.id);
         assert.equal(component.TransactionId, transaction.id);
+        done();
+      });
+    });
+    it('should correctly handle adding a transaction', function (done) {
+      var user = undefined;
+      var account1 = undefined;
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword",
+        Accounts: [
+          {
+            name: "test account 1",
+            balance: 5,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          },
+          {
+            name: "test account 2",
+            balance: 15,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }
+        ],
+      }, {include: [dbService.Account]}).then(function(createdUser){
+        user = createdUser;
+        account1 = user.Accounts[0];
+        return dbService.Transaction.create({
+          description: "test transaction 1",
+          type: "expenseincome",
+          date: currentDate(),
+          TransactionComponents: [
+            {
+              amount: 42
+            }
+          ]
+        }, {include: [dbService.TransactionComponent]});
+      }).then(function(transaction){
+        return transaction.setUser(user);
+      }).then(function(transaction){
+        return transaction.TransactionComponents[0].setAccount(account1,{include: [dbService.Transaction]});
+      }).then(function(){
+        return dbService.User.findAll({
+          include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
+        });
+      }).then(function(users){
+        assert.equal(users.length, 1);
+        var user = users[0];
+        assert.equal(user.Accounts.length, 2);
+        var account1 = user.Accounts[0];
+        assert.equal(account1.name, "test account 1");
+        assert.equal(account1.balance, 42);
+        var account2 = user.Accounts[1];
+        assert.equal(account2.name, "test account 2");
+        assert.equal(account2.balance, 0);
+        assert.equal(user.Transactions.length, 1);
+        var transaction = user.Transactions[0];
+        assert.equal(transaction.description,  "test transaction 1");
+        assert.equal(transaction.type, "expenseincome");
+        assert.equal(transaction.date.getTime(), currentDate().getTime());
+        assert.equal(transaction.amount, 42);
+        assert.equal(transaction.TransactionComponents.length, 1);
+        var component = transaction.TransactionComponents[0];
+        assert.equal(component.amount, 42);
+        assert.equal(component.AccountId, account1.id);
+        assert.equal(component.TransactionId, transaction.id);
+        done();
+      });
+    });
+    it('should correctly handle changing a transaction amount', function (done) {
+      var transactionComponent1 = undefined;
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword",
+        Accounts: [
+          {
+            name: "test account 1",
+            balance: 5,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          },
+          {
+            name: "test account 2",
+            balance: 15,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }
+        ],
+        Transactions: [
+          {
+            description: "test transaction 1",
+            type: "expenseincome",
+            date: currentDate(),
+            TransactionComponents: [
+              {
+                amount: 42
+              }
+            ]
+          }
+        ],
+      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
+        var account1 = createdUser.Accounts[0];
+        var transaction1 = createdUser.Transactions[0];
+        transactionComponent1 = transaction1.TransactionComponents[0];
+        return transactionComponent1.setAccount(account1).then(function(){
+          return transaction1.setUser(createdUser);
+        });
+      }).then(function(){
+        transactionComponent1.amount = 50;
+        return transactionComponent1.save();
+      }).then(function(){
+        return dbService.User.findAll({
+          include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
+        });
+      }).then(function(users){
+        assert.equal(users.length, 1);
+        var user = users[0];
+        assert.equal(user.Accounts.length, 2);
+        var account1 = user.Accounts[0];
+        assert.equal(account1.name, "test account 1");
+        assert.equal(account1.balance, 50);
+        var account2 = user.Accounts[1];
+        assert.equal(account2.name, "test account 2");
+        assert.equal(account2.balance, 0);
+        assert.equal(user.Transactions.length, 1);
+        var transaction = user.Transactions[0];
+        assert.equal(transaction.description,  "test transaction 1");
+        assert.equal(transaction.amount, 50);
+        assert.equal(transaction.TransactionComponents.length, 1);
+        var component = transaction.TransactionComponents[0];
+        assert.equal(component.amount, 50);
+        assert.equal(component.AccountId, account1.id);
+        assert.equal(component.TransactionId, transaction.id);
+        done();
+      });
+    });
+    it('should correctly handle changing a transaction component account', function (done) {
+      var transactionComponent2 = undefined;
+      var account2 = undefined;
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword",
+        Accounts: [
+          {
+            name: "test account 1",
+            balance: 5,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          },
+          {
+            name: "test account 2",
+            balance: 15,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }
+        ],
+        Transactions: [
+          {
+            description: "test transaction 1",
+            type: "expenseincome",
+            date: currentDate(),
+            TransactionComponents: [
+              {
+                amount: 42
+              },
+              {
+                amount: 160
+              }
+            ]
+          }
+        ],
+      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
+        var account1 = createdUser.Accounts[0];
+        account2 = createdUser.Accounts[1];
+        var transaction1 = createdUser.Transactions[0];
+        var transactionComponent1 = transaction1.TransactionComponents[0];
+        transactionComponent2 = transaction1.TransactionComponents[1];
+        return transactionComponent1.setAccount(account1).then(function(){
+          return transactionComponent2.setAccount(account1);
+        }).then(function(){
+          return transaction1.setUser(createdUser);
+        })
+      }).then(function(){
+        return dbService.User.findAll({
+          include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
+        });
+      }).then(function(users){
+        assert.equal(users.length, 1);
+        var user = users[0];
+        assert.equal(user.Accounts.length, 2);
+        var account1 = user.Accounts[0];
+        assert.equal(account1.balance, 42+160);
+        var account2 = user.Accounts[1];
+        assert.equal(account2.balance, 0);
+        assert.equal(user.Transactions.length, 1);
+        var transaction = user.Transactions[0];
+        assert.equal(transaction.amount, 42+160);
+        assert.equal(transaction.TransactionComponents.length, 2);
+        var component1 = transaction.TransactionComponents[0];
+        var component2 = transaction.TransactionComponents[1];
+        assert.equal(component1.amount, 42);
+        assert.equal(component1.AccountId, account1.id);
+        assert.equal(component1.TransactionId, transaction.id);
+        assert.equal(component2.amount, 160);
+        assert.equal(component2.AccountId, account1.id);
+        assert.equal(component2.TransactionId, transaction.id);
+      }).then(function(){
+        return transactionComponent2.setAccount(account2);
+      }).then(function(){
+        return dbService.User.findAll({
+          include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
+        });
+      }).then(function(users){
+        assert.equal(users.length, 1);
+        var user = users[0];
+        assert.equal(user.Accounts.length, 2);
+        var account1 = user.Accounts[0];
+        assert.equal(account1.name, "test account 1");
+        assert.equal(account1.balance, 42);
+        var account2 = user.Accounts[1];
+        assert.equal(account2.name, "test account 2");
+        assert.equal(account2.balance, 160);
+        assert.equal(user.Transactions.length, 1);
+        var transaction = user.Transactions[0];
+        assert.equal(transaction.amount, 42+160);
+        assert.equal(transaction.TransactionComponents.length, 2);
+        var component1 = transaction.TransactionComponents[0];
+        var component2 = transaction.TransactionComponents[1];
+        assert.equal(component1.amount, 42);
+        assert.equal(component1.AccountId, account1.id);
+        assert.equal(component1.TransactionId, transaction.id);
+        assert.equal(component2.amount, 160);
+        assert.equal(component2.AccountId, account2.id);
+        assert.equal(component2.TransactionId, transaction.id);
+        done();
+      });
+    });
+    it('should correctly handle adding a transaction component to an existing transaction', function (done) {
+      var transaction1 = undefined;
+      var account1 = undefined;
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword",
+        Accounts: [
+          {
+            name: "test account 1",
+            balance: 5,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          },
+          {
+            name: "test account 2",
+            balance: 15,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }
+        ],
+        Transactions: [
+          {
+            description: "test transaction 1",
+            type: "expenseincome",
+            date: currentDate(),
+            TransactionComponents: [
+              {
+                amount: 42
+              }
+            ]
+          }
+        ],
+      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
+        account1 = createdUser.Accounts[0];
+        transaction1 = createdUser.Transactions[0];
+        var transactionComponent1 = transaction1.TransactionComponents[0];
+        return transactionComponent1.setAccount(account1).then(function(){
+          return transaction1.setUser(createdUser);
+        });
+      }).then(function(){
+        return dbService.TransactionComponent.create({
+          amount: 160
+        });
+      }).then(function(transactionComponent){
+          return transactionComponent.setAccount(account1);
+      }).then(function(transactionComponent){
+          return transactionComponent.setTransaction(transaction1);
+      }).then(function(){
+        return dbService.User.findAll({
+          include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
+        });
+      }).then(function(users){
+        assert.equal(users.length, 1);
+        var user = users[0];
+        assert.equal(user.Accounts.length, 2);
+        var account1 = user.Accounts[0];
+        assert.equal(account1.name, "test account 1");
+        assert.equal(account1.balance, 42+160);
+        var account2 = user.Accounts[1];
+        assert.equal(account2.name, "test account 2");
+        assert.equal(account2.balance, 0);
+        assert.equal(user.Transactions.length, 1);
+        var transaction = user.Transactions[0];
+        assert.equal(transaction.amount, 42+160);
+        assert.equal(transaction.TransactionComponents.length, 2);
+        var component1 = transaction.TransactionComponents[0];
+        var component2 = transaction.TransactionComponents[1];
+        assert.equal(component1.amount, 42);
+        assert.equal(component1.AccountId, account1.id);
+        assert.equal(component1.TransactionId, transaction.id);
+        assert.equal(component2.amount, 160);
+        assert.equal(component2.AccountId, account1.id);
+        assert.equal(component2.TransactionId, transaction.id);
         done();
       });
     });
