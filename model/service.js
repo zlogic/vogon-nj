@@ -11,7 +11,9 @@ var sequelizeConfigurer = function(){
 
 var sequelize = sequelizeConfigurer();
 
-// Model
+/**
+ * Model
+ */
 var Account = sequelize.define('Account', {
   name: Sequelize.STRING,
   balance: Sequelize.BIGINT,
@@ -39,7 +41,17 @@ var Transaction = sequelize.define('Transaction', {
     }
   },
   date: Sequelize.DATE,
-  amount: Sequelize.BIGINT
+  //TODO: Delete this, as this doesn't work well with currencies and is calculated on the client side
+  amount: {
+    type: Sequelize.VIRTUAL,
+    get: function(){
+      if(this.getDataValue("TransactionComponents") === undefined)
+        return 0;
+      return this.getDataValue("TransactionComponents").reduce(function(acc, transactionComponent){
+        return acc + transactionComponent.amount;
+      }, 0);
+    }
+  }
 }, {
   timestamps: false
 });
@@ -60,12 +72,45 @@ var User = sequelize.define('User', {
   timestamps: false
 });
 
-// Associations
+/**
+ * Associations
+ */
 TransactionComponent.belongsTo(Transaction);
 TransactionComponent.belongsTo(Account);
 Transaction.hasMany(TransactionComponent);
 User.hasMany(Transaction);
 User.hasMany(Account);
+
+/**
+ * Hooks
+ */
+//TODO: set default values or do validation for all fields
+Account.hook('beforeCreate', function(account, options){
+  account.balance = 0;
+});
+
+TransactionComponent.hook('afterUpdate', function(transactionComponent, options){
+  var previousAccount = transactionComponent.previous("AccountId");
+  var previousAmount = transactionComponent.previous("amount");
+  if(transactionComponent.AccountId === undefined && previousAccount === undefined)
+    return;
+  var updatePreviousAccount = function(){
+    return Account.findById(previousAccount).then(function(account){
+      return account.decrement("balance", {by: previousAmount});
+    });
+  };
+  var updateNewAccount = function(){
+    return Account.findById(transactionComponent.AccountId).then(function(account){
+      return account.increment("balance", {by: transactionComponent.amount});
+    });
+  };
+  var updates = [];
+  if(previousAccount !== undefined)
+    updates.push(updatePreviousAccount());
+  if(transactionComponent.AccountId !== undefined)
+    updates.push(updateNewAccount());
+  return Promise.all(updates);
+});
 
 exports.sequelize = sequelize;
 exports.User = User;

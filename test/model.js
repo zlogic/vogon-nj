@@ -31,7 +31,7 @@ describe('Model', function() {
         type: "expenseincome",
         date: currentDate(),
         tags: ["hello", "world"],
-        amount: 100
+        amount: 3
       });
       var transactionComponent1 = dbService.TransactionComponent.build({
         amount: 100
@@ -63,7 +63,7 @@ describe('Model', function() {
         assert.equal(user.Accounts.length, 1, "check accounts count");
         var account = user.Accounts[0];
         assert.equal(account.name, "test account 1", "check account name");
-        assert.equal(account.balance, 0, "check account balance");
+        assert.equal(account.balance, 100, "check account balance");
         assert.equal(account.currency, "RUB", "check account currency");
         assert.equal(account.includeInTotal, true, "check account includeInTotal");
         assert.equal(account.showInList, true, "check account showInList");
@@ -102,7 +102,7 @@ describe('Model', function() {
             type: "expenseincome",
             date: currentDate(),
             tags: ["hello", "world"],
-            amount: 100
+            amount: 3
           }
         ]
       }, {include: [dbService.Account, dbService.Transaction]}).then(function(createdUser){
@@ -126,7 +126,7 @@ describe('Model', function() {
         assert.equal(user.Accounts.length, 1, "check accounts count");
         var account = user.Accounts[0];
         assert.equal(account.name, "test account 1", "check account name");
-        assert.equal(account.balance, 0, "check account balance");
+        assert.equal(account.balance, 100, "check account balance");
         assert.equal(account.currency, "RUB", "check account currency");
         assert.equal(account.includeInTotal, true, "check account includeInTotal");
         assert.equal(account.showInList, true, "check account showInList");
