@@ -77,10 +77,10 @@ var User = sequelize.define('User', {
  */
 TransactionComponent.belongsTo(Transaction);
 TransactionComponent.belongsTo(Account);
-Transaction.hasMany(TransactionComponent);
+Transaction.hasMany(TransactionComponent, {onDelete: 'cascade', hooks:true});
 Transaction.belongsTo(User);
-User.hasMany(Transaction);
-User.hasMany(Account);
+User.hasMany(Transaction, {onDelete: 'cascade', hooks:true});
+User.hasMany(Account, {onDelete: 'cascade', hooks:true});
 
 /**
  * Hooks
@@ -94,7 +94,7 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
   var previousAccount = transactionComponent.previous("AccountId");
   var previousAmount = transactionComponent.previous("amount");
   if(transactionComponent.AccountId === undefined && previousAccount === undefined)
-    return;
+    return sequelize.Promise.resolve();
   var updatePreviousAccount = function(){
     return Account.findById(previousAccount).then(function(account){
       return account.decrement("balance", {by: previousAmount});
@@ -112,6 +112,19 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
   if(previousAccount === undefined && transactionComponent.AccountId !== undefined)
     return updateNewAccount();
   return sequelize.Promise.resolve();
+});
+
+TransactionComponent.hook('afterDestroy', function(transactionComponent, options){
+  var previousAccount = transactionComponent.previous("AccountId");
+  var previousAmount = transactionComponent.previous("amount");
+  if(previousAccount === undefined)
+    return sequelize.Promise.resolve();
+  var updatePreviousAccount = function(){
+    return Account.findById(previousAccount).then(function(account){
+      return account.decrement("balance", {by: previousAmount});
+    });
+  };
+  return updatePreviousAccount();
 });
 
 exports.sequelize = sequelize;
