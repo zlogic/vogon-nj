@@ -591,5 +591,86 @@ describe('Model', function() {
         done();
       });
     });
+    it('should correctly handle deleting an account', function (done) {
+      var account2 = undefined;
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword",
+        Accounts: [
+          {
+            name: "test account 1",
+            balance: 5,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          },
+          {
+            name: "test account 2",
+            balance: 15,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }
+        ],
+        Transactions: [
+          {
+            description: "test transaction 1",
+            type: "expenseincome",
+            date: currentDate(),
+            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+          }, {
+            description: "test transaction 2",
+            type: "expenseincome",
+            date: currentDate(),
+            TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
+          }
+        ],
+      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
+        var account1 = createdUser.Accounts[0];
+        account2 = createdUser.Accounts[1];
+        var transaction1 = createdUser.Transactions[0];
+        var transaction2 = createdUser.Transactions[1];
+        return transaction1.TransactionComponents[0].setAccount(account1).then(function(){
+          return transaction1.TransactionComponents[1].setAccount(account2);
+        }).then(function(){
+          return transaction2.TransactionComponents[0].setAccount(account1);
+        }).then(function(){
+          return transaction2.TransactionComponents[1].setAccount(account2);
+        }).then(function(){
+          return transaction1.setUser(createdUser);
+        }).then(function(){
+          return transaction2.setUser(createdUser);
+        });
+      }).then(function(){
+        return account2.destroy();
+      }).then(function(){
+        return dbService.User.findAll({
+          include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
+        });
+      }).then(function(users){
+        assert.equal(users.length, 1);
+        var user = users[0];
+        assert.equal(user.Accounts.length, 1);
+        var account1 = user.Accounts[0];
+        assert.equal(account1.name, "test account 1");
+        assert.equal(account1.balance, 42+7);
+        assert.equal(user.Transactions.length, 2);
+        var transaction1 = user.Transactions[0];
+        assert.equal(transaction1.amount, 42);
+        assert.equal(transaction1.TransactionComponents.length, 1);
+        var component1 = transaction1.TransactionComponents[0];
+        assert.equal(component1.amount, 42);
+        assert.equal(component1.AccountId, account1.id);
+        assert.equal(component1.TransactionId, transaction1.id);
+        var transaction2 = user.Transactions[1];
+        assert.equal(transaction2.amount, 7);
+        assert.equal(transaction2.TransactionComponents.length, 1);
+        var component2 = transaction2.TransactionComponents[0];
+        assert.equal(component2.amount, 7);
+        assert.equal(component2.AccountId, account1.id);
+        assert.equal(component2.TransactionId, transaction2.id);
+        done();
+      });
+    });
   });
 });

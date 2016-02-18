@@ -81,6 +81,7 @@ Transaction.hasMany(TransactionComponent, {onDelete: 'cascade', hooks:true});
 Transaction.belongsTo(User);
 User.hasMany(Transaction, {onDelete: 'cascade', hooks:true});
 User.hasMany(Account, {onDelete: 'cascade', hooks:true});
+Account.hasMany(TransactionComponent, {onDelete: 'cascade', hooks:true});
 
 /**
  * Hooks
