@@ -78,6 +78,7 @@ var User = sequelize.define('User', {
 TransactionComponent.belongsTo(Transaction);
 TransactionComponent.belongsTo(Account);
 Transaction.hasMany(TransactionComponent);
+Transaction.belongsTo(User);
 User.hasMany(Transaction);
 User.hasMany(Account);
 
@@ -104,12 +105,13 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
       return account.increment("balance", {by: transactionComponent.amount});
     });
   };
-  var updates = [];
-  if(previousAccount !== undefined)
-    updates.push(updatePreviousAccount());
-  if(transactionComponent.AccountId !== undefined)
-    updates.push(updateNewAccount());
-  return Promise.all(updates);
+  if(previousAccount !== undefined && transactionComponent.AccountId !== undefined)
+    return updatePreviousAccount().then(updateNewAccount());
+  if(previousAccount !== undefined && transactionComponent.AccountId === undefined)
+    return updatePreviousAccount();
+  if(previousAccount === undefined && transactionComponent.AccountId !== undefined)
+    return updateNewAccount();
+  return sequelize.Promise.resolve();
 });
 
 exports.sequelize = sequelize;
