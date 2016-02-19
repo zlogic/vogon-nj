@@ -11,12 +11,25 @@ var sequelizeConfigurer = function(){
 
 var sequelize = sequelizeConfigurer();
 
+var fixedPointMultiplier = 100.0;
+var convertAmountToFloat = function (amount){
+  return amount / fixedPointMultiplier;
+};
+var convertAmountToFixed = function (amount){
+  return (amount * fixedPointMultiplier).toFixed();
+};
+
 /**
  * Model
  */
 var Account = sequelize.define('Account', {
   name: Sequelize.STRING,
-  balance: Sequelize.BIGINT,
+  balance: {
+    type: Sequelize.BIGINT,
+    get: function(){
+      return convertAmountToFloat(this.getDataValue("balance"));
+    }
+  },
   currency: Sequelize.STRING,
   includeInTotal: Sequelize.BOOLEAN,
   showInList: Sequelize.BOOLEAN
@@ -40,24 +53,21 @@ var Transaction = sequelize.define('Transaction', {
       this.setDataValue("tags", JSON.stringify(value));
     }
   },
-  date: Sequelize.DATE,
-  //TODO: Delete this, as this doesn't work well with currencies and is calculated on the client side
-  amount: {
-    type: Sequelize.VIRTUAL,
-    get: function(){
-      if(this.getDataValue("TransactionComponents") === undefined)
-        return 0;
-      return this.getDataValue("TransactionComponents").reduce(function(acc, transactionComponent){
-        return acc + transactionComponent.amount;
-      }, 0);
-    }
-  }
+  date: Sequelize.DATE
 }, {
   timestamps: false
 });
 
 var TransactionComponent = sequelize.define('TransactionComponent', {
-  amount: Sequelize.BIGINT
+  amount: {
+    type: Sequelize.BIGINT,
+    get: function(){
+      return convertAmountToFloat(this.getDataValue("amount"));
+    },
+    set: function(val){
+      this.setDataValue("amount", convertAmountToFixed(val));
+    }
+  }
 }, {
   timestamps: false
 });
@@ -103,7 +113,7 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
   };
   var updateNewAccount = function(){
     return Account.findById(transactionComponent.AccountId).then(function(account){
-      return account.increment("balance", {by: transactionComponent.amount});
+      return account.increment("balance", {by: transactionComponent.getDataValue("amount")});
     });
   };
   if(previousAccount !== undefined && transactionComponent.AccountId !== undefined)

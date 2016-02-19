@@ -72,7 +72,6 @@ describe('Model', function() {
         assert.equal(transaction.description,  "test transaction 1");
         assert.equal(transaction.type, "expenseincome");
         assert.equal(transaction.date.getTime(), currentDate().getTime());
-        assert.equal(transaction.amount, 100);
         assert.deepEqual(transaction.tags, ["hello", "world"]);
         assert.equal(transaction.TransactionComponents.length, 1);
         var component = transaction.TransactionComponents[0];
@@ -135,7 +134,6 @@ describe('Model', function() {
         assert.equal(transaction.description,  "test transaction 1");
         assert.equal(transaction.type, "expenseincome");
         assert.equal(transaction.date.getTime(), currentDate().getTime());
-        assert.equal(transaction.amount, 100);
         assert.deepEqual(transaction.tags, ["hello", "world"]);
         assert.equal(transaction.TransactionComponents.length, 1);
         var component = transaction.TransactionComponents[0];
@@ -199,7 +197,6 @@ describe('Model', function() {
         assert.equal(transaction.description,  "test transaction 1");
         assert.equal(transaction.type, "expenseincome");
         assert.equal(transaction.date.getTime(), currentDate().getTime());
-        assert.equal(transaction.amount, 42);
         assert.equal(transaction.TransactionComponents.length, 1);
         var component = transaction.TransactionComponents[0];
         assert.equal(component.amount, 42);
@@ -264,10 +261,8 @@ describe('Model', function() {
         assert.equal(user.Transactions.length, 1);
         var transaction = user.Transactions[0];
         assert.equal(transaction.description,  "test transaction 1");
-        assert.equal(transaction.amount, 50);
         assert.equal(transaction.TransactionComponents.length, 1);
         var component = transaction.TransactionComponents[0];
-        assert.equal(component.amount, 50);
         assert.equal(component.AccountId, account1.id);
         assert.equal(component.TransactionId, transaction.id);
         done();
@@ -328,7 +323,6 @@ describe('Model', function() {
         assert.equal(account2.balance, 0);
         assert.equal(user.Transactions.length, 1);
         var transaction = user.Transactions[0];
-        assert.equal(transaction.amount, 42+160);
         assert.equal(transaction.TransactionComponents.length, 2);
         var component1 = transaction.TransactionComponents[0];
         var component2 = transaction.TransactionComponents[1];
@@ -356,7 +350,6 @@ describe('Model', function() {
         assert.equal(account2.balance, 160);
         assert.equal(user.Transactions.length, 1);
         var transaction = user.Transactions[0];
-        assert.equal(transaction.amount, 42+160);
         assert.equal(transaction.TransactionComponents.length, 2);
         var component1 = transaction.TransactionComponents[0];
         var component2 = transaction.TransactionComponents[1];
@@ -430,7 +423,6 @@ describe('Model', function() {
         assert.equal(account2.balance, 0);
         assert.equal(user.Transactions.length, 1);
         var transaction = user.Transactions[0];
-        assert.equal(transaction.amount, 42+160);
         assert.equal(transaction.TransactionComponents.length, 2);
         var component1 = transaction.TransactionComponents[0];
         var component2 = transaction.TransactionComponents[1];
@@ -501,7 +493,6 @@ describe('Model', function() {
         assert.equal(account2.balance, 0);
         assert.equal(user.Transactions.length, 1);
         var transaction = user.Transactions[0];
-        assert.equal(transaction.amount, 42);
         assert.equal(transaction.TransactionComponents.length, 1);
         var component1 = transaction.TransactionComponents[0];
         assert.equal(component1.amount, 42);
@@ -578,7 +569,6 @@ describe('Model', function() {
         assert.equal(account2.balance, 160);
         assert.equal(user.Transactions.length, 1);
         var transaction = user.Transactions[0];
-        assert.equal(transaction.amount, 42+160);
         assert.equal(transaction.TransactionComponents.length, 2);
         var component1 = transaction.TransactionComponents[0];
         assert.equal(component1.amount, 42);
@@ -656,14 +646,12 @@ describe('Model', function() {
         assert.equal(account1.balance, 42+7);
         assert.equal(user.Transactions.length, 2);
         var transaction1 = user.Transactions[0];
-        assert.equal(transaction1.amount, 42);
         assert.equal(transaction1.TransactionComponents.length, 1);
         var component1 = transaction1.TransactionComponents[0];
         assert.equal(component1.amount, 42);
         assert.equal(component1.AccountId, account1.id);
         assert.equal(component1.TransactionId, transaction1.id);
         var transaction2 = user.Transactions[1];
-        assert.equal(transaction2.amount, 7);
         assert.equal(transaction2.TransactionComponents.length, 1);
         var component2 = transaction2.TransactionComponents[0];
         assert.equal(component2.amount, 7);
