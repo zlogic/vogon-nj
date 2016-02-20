@@ -1,0 +1,92 @@
+div(class="panel panel-default")
+  div(class="panel-body")
+    button(ng-click="addTransaction()", class="btn btn-primary")
+      span(class="glyphicon glyphicon-plus", aria-hidden="true")
+      | #{__('Add transaction')}
+    div(infinite-scroll="transactionsService.nextPage()", infinite-scroll-disabled="transactionsService.loadingNextPage")
+      div(class="container-fluid")
+        div(class="row", id="transactionsTable")
+          hr
+          div(class="col-md-5 col-sm-12")
+            label
+              div(class="clickable", ng-click="transactionsService.applySort('description')")
+                | #{__('Transaction name')} &nbsp;
+                span(ng-show="transactionsService.sortColumn === 'description'", class="glyphicon", ng-class="{'glyphicon-sort-by-alphabet': transactionsService.sortAsc, 'glyphicon-sort-by-alphabet-alt': !transactionsService.sortAsc}")
+            div(class="form-horizontal")
+              div(class="input-group")
+                span(class="input-group-addon")
+                  span(class="glyphicon glyphicon-filter", aria-hidden="true")
+                input(type="text", class="form-control", placeholder=__('Enter description filter'), ng-model="transactionsService.filterDescription", ng-change="applyFilter()")
+          div(class="col-md-2 col-sm-4")
+            label
+              div(class="clickable", ng-click="transactionsService.applySort('date')")
+                | #{__('Date')} &nbsp;
+                span(ng-show="transactionsService.sortColumn === 'date'", class="glyphicon", ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}")
+            div(class="form-horizontal")
+              div(class="input-group", ng-class="{ 'has-error': transactionsDateFilterForm.filterDate.$invalid }")
+                span(class="input-group-addon")
+                  span(class="glyphicon glyphicon-filter", aria-hidden="true")
+                input(type="text", class="form-control", uib-datepicker-popup ng-model="transactionsService.filterDate", name="filterDate", ng-change="applyFilter()", is-open="filterDateCalendar.opened", placeholder=__('Enter date filter'))
+                span(class="input-group-btn")
+                  button(type="button", class="btn btn-default", ng-click="openFilterDateCalendar($event)")
+                    span(class="glyphicon glyphicon-calendar")
+          div(class="col-md-2 col-sm-4")
+            label
+              | #{__('Tags')}
+            div(class="form-horizontal")
+              div(class="input-group")
+                span(class="input-group-addon")
+                  span(class="glyphicon glyphicon-filter", aria-hidden="true")
+                tags-input(class="bootstrap", ng-model="transactionsService.filterTags", placeholder=__('Add filter tags'), on-tag-added="applyFilter()", on-tag-removed="applyFilter()", replace-spaces-with-dashes="false", add-on-comma="false")
+                  auto-complete(source="tagsService.autocompleteQuery($query)")
+          div(class="col-md-1 col-sm-12 text-right")
+            label
+              div(class="clickable", ng-click="transactionsService.applySort('amount')")
+                | #{__('Amount')} &nbsp;
+                span(ng-show="transactionsService.sortColumn === 'amount'", class="glyphicon", ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}")
+          div(class="col-md-1 col-sm-4")
+            label
+              | #{__('Account')}
+        div(class="row", id="transactionsTable", ng-repeat="transaction in transactionsService.transactions", ng-switch on="editingTransaction == transaction")
+          hr
+          div(class="row", ng-class="{'bg-danger':!transactionsService.isAmountOk(transaction)}", ng-switch-when="false")
+            div(class="col-md-5 col-sm-12")
+              label
+                | {{transaction.description}}
+              div(class="form-inline")
+                div(class="form-group")
+                  button(ng-click="startEditing(transaction)", class="btn btn-default")
+                    span(class="glyphicon glyphicon-edit", aria-hidden="true")
+                    | #{__('Edit')}
+                  button(ng-click="duplicateTransaction(transaction)", class="btn btn-default")
+                    span(class="glyphicon glyphicon-asterisk", aria-hidden="true")
+                    | #{__('Duplicate')}
+            div(class="col-md-2 col-sm-4")
+              p
+                | {{transaction.date| date}}
+            div(class="col-md-2 col-sm-4")
+              div(ng-repeat="tag in transaction.tags")
+                p
+                  | {{tag}}{{$last ? "" : ", " }}
+            div(class="col-md-1 col-sm-4 text-right")
+              div(ng-repeat="(currencyCode,total) in totals = (transactionsService.totalsByCurrency(transaction))")
+                span(ng-show="transactionsService.isTransferTransaction(transaction)")
+                  | &sum;
+                | {{total| number:2}} {{currencyCode}}
+            div(class="col-md-1 col-sm-4")
+              div(ng-show="transactionsService.isExpenseIncomeTransaction(transaction)")
+                div(ng-repeat="account in accounts = (transactionsService.getAccounts(transaction, transactionsService.allAccountsPredicate))")
+                  | {{account.name}}{{$last ? '' : ', '}}
+              div(ng-show="transactionsService.isTransferTransaction(transaction)")
+                div(ng-repeat="account in accounts = (transactionsService.getAccounts(transaction, transactionsService.fromAccountsPredicate))")
+                  | {{$first && accounts.length ) 1 ? '(' : ''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length)1?')':''}}
+                span(class="glyphicon glyphicon-chevron-down", aria-hidden="true")
+                div(ng-repeat="account in accounts = (transactionsService.getAccounts(transaction, transactionsService.toAccountsPredicate))")
+                  | {{$first && accounts.length ) 1 ? '(' : ''}}{{account.name}}{{$last ? '' : ', '}}{{$last && accounts.length)1?')':''}}
+          div(ng-switch-when="true", class="col-md-12 well")
+            div(ng-controller="TransactionEditorController", ng-include="'fragments/transactioneditor.fragment'", ng-init="transaction = transaction")
+        div(class="row text-center", ng-show="transactionsService.loadingNextPage")
+          hr
+          div(class="col-md-12")
+            span(class="glyphicon glyphicon-refresh", aria-hidden="true")
+            | #{__('Loading...')}

@@ -4,9 +4,10 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var i18n = require('i18n');
 
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var fragments = require('./routes/fragments');
 
 var app = express();
 
@@ -14,16 +15,17 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'images/vogon-favicon.png')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/bower', express.static(path.join(__dirname , '/bower_components')));
+
 
 app.use('/', routes);
-app.use('/users', users);
+app.use('/fragments', fragments);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -31,6 +33,14 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
+
+// i18n
+i18n.configure({
+  locales: ['en'],
+  directory: __dirname + '/locales'
+});
+app.use(i18n.init);
+app.locals.__= i18n.__;
 
 // error handlers
 

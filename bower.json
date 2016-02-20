@@ -1,0 +1,18 @@
+{
+	"name": "vogon-nj",
+	"version": "0.0.0",
+	"private": true,
+	"dependencies": {
+		"angularjs": "~1.5.0",
+		"angular-cookies": "~1.5.0",
+		"angular-route": "~1.5.0",
+		"jquery": "~2.2.0",
+		"bootstrap": "~3.3.6",
+		"angular-bootstrap": "~1.1.2",
+		"ngInfiniteScroll": "~1.2.2",
+		"ng-tags-input": "~2.3.0",
+		"d3": "~3.5.14",
+		"nvd3": "~1.8.2",
+		"angular-nvd3": "~1.0.5"
+	}
+}
