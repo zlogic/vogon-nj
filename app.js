@@ -5,9 +5,13 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var i18n = require('i18n');
+var passport = require('passport');
 
 var routes = require('./routes/index');
 var fragments = require('./routes/fragments');
+var register = require('./routes/register');
+var oauth = require('./routes/oauth');
+var service = require('./routes/service');
 
 var app = express();
 
@@ -26,6 +30,9 @@ app.use('/bower', express.static(path.join(__dirname , '/bower_components')));
 
 app.use('/', routes);
 app.use('/fragments', fragments);
+app.use('/register', register);
+app.use('/oauth', oauth);
+app.use('/service', service);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -41,6 +48,9 @@ i18n.configure({
 });
 app.use(i18n.init);
 app.locals.__= i18n.__;
+
+// authentication
+app.use(passport.initialize());
 
 // error handlers
 

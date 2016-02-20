@@ -29,7 +29,6 @@ html
     script(type='text/javascript', src='js/fragments/usersettings.js')
     script(type='text/javascript', src='js/fragments/transactioneditor.js')
     script(type='text/javascript', src='js/fragments/analytics.js')
-    script(type='text/javascript', src='js/fragments/adminsettings.js')
     script(type='text/javascript', src='js/fragments/accounts.js')
     script(type='text/javascript', src='js/fragments/transactions.js')
     link(rel='stylesheet', type='text/css', href='stylesheets/style.css')
@@ -75,10 +74,6 @@ html
                   a(href="#/usersettings")
                     span(class="glyphicon glyphicon-edit", aria-hidden="true")
                     | #{__('User settings')}
-                li(ng-class="{active: isActivePath('adminsettings')}", ng-show="userService.isAdmin()")
-                  a(href="#/adminsettings")
-                    span(class="glyphicon glyphicon-wrench", aria-hidden="true")
-                    | #{__('Administrative settings')}
               ul(class="nav navbar-nav navbar-right")
                 li
                   p(class="navbar-text")

@@ -30,11 +30,6 @@ app.service("UserService", function ($rootScope, AuthorizationService, HTTPServi
           HTTPService.updateAccounts();
         });
   };
-  this.isAdmin = function () {
-    return that.userData !== undefined && that.userData.authorities.some(function (authority) {
-      return authority === "ROLE_VOGON_ADMIN";
-    });
-  };
   $rootScope.$watch(function () {
     return AuthorizationService.authorized;
   }, function () {
