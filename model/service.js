@@ -53,7 +53,7 @@ var Transaction = sequelize.define('Transaction', {
       this.setDataValue("tags", JSON.stringify(value));
     }
   },
-  date: Sequelize.DATE
+  date: Sequelize.DATEONLY
 }, {
   timestamps: false
 });
@@ -138,7 +138,58 @@ TransactionComponent.hook('afterDestroy', function(transactionComponent, options
   return updatePreviousAccount();
 });
 
+/**
+ * Helper tools
+ */
+var importData = function(user, data){
+  var accountRemappings = {};
+  var createdAccounts = undefined;
+  var createdTransactions = undefined;
+
+  var processAccounts = function(){
+    return Promise.all(data.accounts.map(function(account, i){
+      accountRemappings[account.id] = i;
+      account.id = undefined;
+      return Account.create(account);
+    }));
+  };
+  var processTransactions = function(){
+    return Promise.all(data.transactions.map(function(transaction){
+      transaction.id = undefined;
+      transaction.type = transaction.type.toLowerCase();
+      transaction.TransactionComponents = transaction.components.map(function(transactionComponent){
+        transactionComponent.id = undefined;
+        return transactionComponent;
+      });
+      return Transaction.create(transaction, {include: [TransactionComponent]});
+    }));
+  };
+  var processTransactionComponents = function(){
+    var promises = [];
+    createdTransactions.forEach(function(transaction,i){
+      createdTransactions[i].TransactionComponents.forEach(function(transactionComponent, j){
+        var accountIdSource = data.transactions[i].components[j].accountId;
+        var account = createdAccounts[accountRemappings[accountIdSource]];
+        promises.push(transactionComponent.setAccount(account));
+      });
+    });
+    return Promise.all(promises);
+  };
+
+  return processAccounts().then(function(accounts){
+    createdAccounts = accounts;
+    return user.addAccounts(accounts);
+  }).then(function(){
+    return processTransactions();
+  }).then(function(transactions){
+    createdTransactions = transactions;
+    return user.addTransactions(transactions);
+  }).then(processTransactionComponents);
+};
+
 exports.sequelize = sequelize;
+exports.importData = importData;
+
 exports.User = User;
 exports.Transaction = Transaction;
 exports.TransactionComponent = TransactionComponent;

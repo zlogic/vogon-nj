@@ -1,0 +1,133 @@
+{
+  "user" : {
+    "id" : 1,
+    "username" : "user01",
+    "defaultCurrency" : "RUB",
+    "authorities" : [ "ROLE_VOGON_USER", "ROLE_VOGON_ADMIN" ]
+  },
+  "accounts" : [ {
+    "id" : 2,
+    "version" : 1,
+    "name" : "Orange Bank",
+    "balance" : 990.0,
+    "currency" : "PLN",
+    "includeInTotal" : true,
+    "showInList" : true
+  }, {
+    "id" : 3,
+    "version" : 1,
+    "name" : "Green Bank",
+    "balance" : 900.0,
+    "currency" : "ALL",
+    "includeInTotal" : true,
+    "showInList" : false
+  }, {
+    "id" : 4,
+    "version" : 1,
+    "name" : "Purple Bank",
+    "balance" : 800.0,
+    "currency" : "ZWL",
+    "includeInTotal" : false,
+    "showInList" : true
+  }, {
+    "id" : 5,
+    "version" : 1,
+    "name" : "Magical Credit Card",
+    "balance" : -80.0,
+    "currency" : "PLN",
+    "includeInTotal" : false,
+    "showInList" : false
+  } ],
+  "transactions" : [ {
+    "id" : 6,
+    "version" : 1,
+    "type" : "EXPENSEINCOME",
+    "description" : "Widgets",
+    "tags" : [ "Widgets" ],
+    "amount" : -100.0,
+    "date" : "2015-11-02",
+    "components" : [ {
+      "id" : 7,
+      "version" : 0,
+      "amount" : -100.0,
+      "accountId" : 3
+    } ]
+  }, {
+    "id" : 8,
+    "version" : 1,
+    "type" : "EXPENSEINCOME",
+    "description" : "Salary",
+    "tags" : [ "Salary" ],
+    "amount" : 3000.0,
+    "date" : "2015-11-01",
+    "components" : [ {
+      "id" : 9,
+      "version" : 0,
+      "amount" : 1000.0,
+      "accountId" : 2
+    }, {
+      "id" : 10,
+      "version" : 0,
+      "amount" : 1000.0,
+      "accountId" : 3
+    }, {
+      "id" : 11,
+      "version" : 0,
+      "amount" : 1000.0,
+      "accountId" : 4
+    } ]
+  }, {
+    "id" : 12,
+    "version" : 1,
+    "type" : "EXPENSEINCOME",
+    "description" : "Gadgets",
+    "tags" : [ "Gadgets" ],
+    "amount" : -100.0,
+    "date" : "2015-11-03",
+    "components" : [ {
+      "id" : 13,
+      "version" : 0,
+      "amount" : -100.0,
+      "accountId" : 5
+    } ]
+  }, {
+    "id" : 14,
+    "version" : 1,
+    "type" : "TRANSFER",
+    "description" : "Credit card payment",
+    "tags" : [ "Credit" ],
+    "amount" : 100.0,
+    "date" : "2015-11-09",
+    "components" : [ {
+      "id" : 15,
+      "version" : 0,
+      "amount" : -100.0,
+      "accountId" : 4
+    }, {
+      "id" : 16,
+      "version" : 0,
+      "amount" : 20.0,
+      "accountId" : 5
+    } ]
+  }, {
+    "id" : 17,
+    "version" : 1,
+    "type" : "EXPENSEINCOME",
+    "description" : "Stuff",
+    "tags" : [ "Widgets", "Gadgets" ],
+    "amount" : -110.0,
+    "date" : "2015-11-07",
+    "components" : [ {
+      "id" : 18,
+      "version" : 0,
+      "amount" : -10.0,
+      "accountId" : 2
+    }, {
+      "id" : 19,
+      "version" : 0,
+      "amount" : -100.0,
+      "accountId" : 4
+    } ]
+  } ],
+  "currencyRates" : null
+}
