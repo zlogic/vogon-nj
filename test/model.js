@@ -681,7 +681,6 @@ describe('Model', function() {
           }).then(function(users){
             assert.equal(users.length, 1);
             var user = users[0];
-            console.log(users[0].toJSON());
             assert.equal(user.Accounts.length, 4);
             assert.equal(user.Accounts[0].name, "Orange Bank");
             assert.equal(user.Accounts[0].balance, 990.0);
@@ -758,6 +757,74 @@ describe('Model', function() {
           }).catch(done);
         });
       });
+    });
+    it('should correctly handle exporting data', function (done) {
+      var user = undefined;
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword",
+        Accounts: [
+          {
+            name: "test account 1",
+            balance: 5,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          },
+          {
+            name: "test account 2",
+            balance: 15,
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }
+        ],
+        Transactions: [
+          {
+            description: "test transaction 1",
+            type: "expenseincome",
+            date: currentDate(),
+            tags: ["magic", "awesome"],
+            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+          }, {
+            description: "test transaction 2",
+            type: "expenseincome",
+            date: currentDate(),
+            tags: ["magic"],
+            TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
+          }
+        ],
+      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
+        user = createdUser;
+        var account1 = createdUser.Accounts[0];
+        var account2 = createdUser.Accounts[1];
+        var transaction1 = createdUser.Transactions[0];
+        var transaction2 = createdUser.Transactions[1];
+        return transaction1.TransactionComponents[0].setAccount(account1).then(function(){
+          return transaction1.TransactionComponents[1].setAccount(account2);
+        }).then(function(){
+          return transaction2.TransactionComponents[0].setAccount(account1);
+        }).then(function(){
+          return transaction2.TransactionComponents[1].setAccount(account2);
+        }).then(function(){
+          return transaction1.setUser(createdUser);
+        }).then(function(){
+          return transaction2.setUser(createdUser);
+        });
+      }).then(function(){
+        return dbService.exportData(user);
+      }).then(function(exportData){
+        assert.deepEqual(exportData, {
+          username:"user01",
+          Accounts:[
+            {id:1, name:"test account 1", balance:49, currency:"RUB", includeInTotal:true, showInList:true},
+            {id:2, name:"test account 2", balance:173, currency:"RUB", includeInTotal:true, showInList:true}
+          ],
+          Transactions:[
+            {id:1, type:"expenseincome", description:"test transaction 1", date:"2016-02-20", tags:["magic","awesome"], TransactionComponents:[{id:1 ,amount:42, AccountId:1}, {id:2, amount:160, AccountId:2}]},
+            {id:2, type:"expenseincome", description:"test transaction 2", date:"2016-02-20", tags:["magic"], TransactionComponents:[{id:3, amount:7, AccountId:1}, {id:4, amount:13, AccountId:2}]}]});
+        done();
+      }).catch(done);
     });
   });
 });

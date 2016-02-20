@@ -149,16 +149,16 @@ var importData = function(user, data){
   var processAccounts = function(){
     return Promise.all(data.accounts.map(function(account, i){
       accountRemappings[account.id] = i;
-      account.id = undefined;
+      delete account.id;
       return Account.create(account);
     }));
   };
   var processTransactions = function(){
     return Promise.all(data.transactions.map(function(transaction){
-      transaction.id = undefined;
+      delete transaction.id;
       transaction.type = transaction.type.toLowerCase();
       transaction.TransactionComponents = transaction.components.map(function(transactionComponent){
-        transactionComponent.id = undefined;
+        delete transactionComponent.id;
         return transactionComponent;
       });
       return Transaction.create(transaction, {include: [TransactionComponent]});
@@ -187,8 +187,38 @@ var importData = function(user, data){
   }).then(processTransactionComponents);
 };
 
+var exportData = function(user){
+  return user.reload({
+    include: [Account, {model: Transaction, include: [TransactionComponent]}],
+    order: [
+      [Account, "id", "ASC"],
+      [Transaction, "id", "ASC"],
+      [Transaction, TransactionComponent, "id", "ASC"]
+    ]
+  }).then(function(user){
+    user = user.toJSON();
+    delete user.password;
+    user.Accounts = user.Accounts.map(function(account){
+      delete account.UserUsername;
+      return account;
+    });
+    user.Transactions = user.Transactions.map(function(transaction){
+      delete transaction.UserUsername;
+      return transaction;
+    }).map(function(transaction){
+      transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent){
+        delete transactionComponent.TransactionId;
+        return transactionComponent;
+      });
+      return transaction;
+    });
+    return user;
+  });
+};
+
 exports.sequelize = sequelize;
 exports.importData = importData;
+exports.exportData = exportData;
 
 exports.User = User;
 exports.Transaction = Transaction;
