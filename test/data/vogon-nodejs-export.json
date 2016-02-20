@@ -1,0 +1,104 @@
+{
+	"username": "user01",
+	"Accounts": [{
+		"balance": 990,
+		"id": 1,
+		"name": "Orange Bank",
+		"currency": "PLN",
+		"includeInTotal": true,
+		"showInList": true
+	}, {
+		"balance": 900,
+		"id": 2,
+		"name": "Green Bank",
+		"currency": "ALL",
+		"includeInTotal": true,
+		"showInList": false
+	}, {
+		"balance": 800,
+		"id": 3,
+		"name": "Purple Bank",
+		"currency": "ZWL",
+		"includeInTotal": false,
+		"showInList": true
+	}, {
+		"balance": -80,
+		"id": 4,
+		"name": "Magical Credit Card",
+		"currency": "PLN",
+		"includeInTotal": false,
+		"showInList": false
+	}],
+	"Transactions": [{
+		"tags": ["Widgets"],
+		"id": 1,
+		"type": "expenseincome",
+		"description": "Widgets",
+		"date": "2015-11-02",
+		"TransactionComponents": [{
+			"amount": -100,
+			"id": 1,
+			"AccountId": 2
+		}]
+	}, {
+		"tags": ["Salary"],
+		"id": 2,
+		"type": "expenseincome",
+		"description": "Salary",
+		"date": "2015-11-01",
+		"TransactionComponents": [{
+			"amount": 1000,
+			"id": 2,
+			"AccountId": 1
+		}, {
+			"amount": 1000,
+			"id": 3,
+			"AccountId": 2
+		}, {
+			"amount": 1000,
+			"id": 4,
+			"AccountId": 3
+		}]
+	}, {
+		"tags": ["Gadgets"],
+		"id": 3,
+		"type": "expenseincome",
+		"description": "Gadgets",
+		"date": "2015-11-03",
+		"TransactionComponents": [{
+			"amount": -100,
+			"id": 5,
+			"AccountId": 4
+		}]
+	}, {
+		"tags": ["Credit"],
+		"id": 4,
+		"type": "transfer",
+		"description": "Credit card payment",
+		"date": "2015-11-09",
+		"TransactionComponents": [{
+			"amount": -100,
+			"id": 6,
+			"AccountId": 3
+		}, {
+			"amount": 20,
+			"id": 7,
+			"AccountId": 4
+		}]
+	}, {
+		"tags": ["Widgets", "Gadgets"],
+		"id": 5,
+		"type": "expenseincome",
+		"description": "Stuff",
+		"date": "2015-11-07",
+		"TransactionComponents": [{
+			"amount": -10,
+			"id": 8,
+			"AccountId": 1
+		}, {
+			"amount": -100,
+			"id": 9,
+			"AccountId": 3
+		}]
+	}]
+}

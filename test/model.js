@@ -670,6 +670,107 @@ describe('Model', function() {
           if (error) done(error);
           data = JSON.parse(data);
           dbService.importData(user, data).then(function(){
+            dbService.exportData(user).then(function(exportData){console.log(JSON.stringify(exportData))});
+          }).then(function(){
+            return dbService.User.findAll({
+              include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}],
+              order: [
+                [dbService.Account, "id", "ASC"],
+                [dbService.Transaction, "id", "ASC"],
+                [dbService.Transaction, dbService.TransactionComponent, "id", "ASC"]
+              ]
+            });
+          }).then(function(users){
+            assert.equal(users.length, 1);
+            var user = users[0];
+            assert.equal(user.Accounts.length, 4);
+            assert.equal(user.Accounts[0].name, "Orange Bank");
+            assert.equal(user.Accounts[0].balance, 990.0);
+            assert.equal(user.Accounts[0].currency, "PLN");
+            assert.equal(user.Accounts[0].includeInTotal, true);
+            assert.equal(user.Accounts[0].showInList, true);
+            assert.equal(user.Accounts[1].name, "Green Bank");
+            assert.equal(user.Accounts[1].balance, 900.0);
+            assert.equal(user.Accounts[1].currency, "ALL");
+            assert.equal(user.Accounts[1].includeInTotal, true);
+            assert.equal(user.Accounts[1].showInList, false);
+            assert.equal(user.Accounts[2].name, "Purple Bank");
+            assert.equal(user.Accounts[2].balance, 800.0);
+            assert.equal(user.Accounts[2].currency, "ZWL");
+            assert.equal(user.Accounts[2].includeInTotal, false);
+            assert.equal(user.Accounts[2].showInList, true);
+            assert.equal(user.Accounts[3].name, "Magical Credit Card");
+            assert.equal(user.Accounts[3].balance, -80.0);
+            assert.equal(user.Accounts[3].currency, "PLN");
+            assert.equal(user.Accounts[3].includeInTotal, false);
+            assert.equal(user.Accounts[3].showInList, false);
+
+            assert.equal(user.Transactions.length, 5);
+
+            assert.equal(user.Transactions[0].type, "expenseincome");
+            assert.equal(user.Transactions[0].description, "Widgets");
+            assert.deepEqual(user.Transactions[0].tags, ["Widgets"]);
+            assert.equal(user.Transactions[0].date, "2015-11-02");
+            assert.equal(user.Transactions[0].TransactionComponents.length, 1);
+            assert.equal(user.Transactions[0].TransactionComponents[0].amount, -100.0);
+            assert.equal(user.Transactions[0].TransactionComponents[0].AccountId, user.Accounts[1].id);
+
+            assert.equal(user.Transactions[1].type, "expenseincome");
+            assert.equal(user.Transactions[1].description, "Salary");
+            assert.deepEqual(user.Transactions[1].tags, ["Salary"]);
+            assert.equal(user.Transactions[1].date, "2015-11-01");
+            assert.equal(user.Transactions[1].TransactionComponents.length, 3);
+            assert.equal(user.Transactions[1].TransactionComponents[0].amount, 1000.0);
+            assert.equal(user.Transactions[1].TransactionComponents[0].AccountId, user.Accounts[0].id);
+            assert.equal(user.Transactions[1].TransactionComponents[1].amount, 1000.0);
+            assert.equal(user.Transactions[1].TransactionComponents[1].AccountId, user.Accounts[1].id);
+            assert.equal(user.Transactions[1].TransactionComponents[2].amount, 1000.0);
+            assert.equal(user.Transactions[1].TransactionComponents[2].AccountId, user.Accounts[2].id);
+
+            assert.equal(user.Transactions[2].type, "expenseincome");
+            assert.equal(user.Transactions[2].description, "Gadgets");
+            assert.deepEqual(user.Transactions[2].tags, ["Gadgets"]);
+            assert.equal(user.Transactions[2].date, "2015-11-03");
+            assert.equal(user.Transactions[2].TransactionComponents.length, 1);
+            assert.equal(user.Transactions[2].TransactionComponents[0].amount, -100.0);
+            assert.equal(user.Transactions[2].TransactionComponents[0].AccountId, user.Accounts[3].id);
+
+            assert.equal(user.Transactions[3].type, "transfer");
+            assert.equal(user.Transactions[3].description, "Credit card payment");
+            assert.deepEqual(user.Transactions[3].tags, ["Credit"]);
+            assert.equal(user.Transactions[3].date, "2015-11-09");
+            assert.equal(user.Transactions[3].TransactionComponents.length, 2);
+            assert.equal(user.Transactions[3].TransactionComponents[0].amount, -100.0);
+            assert.equal(user.Transactions[3].TransactionComponents[0].AccountId, user.Accounts[2].id);
+            assert.equal(user.Transactions[3].TransactionComponents[1].amount, 20.0);
+            assert.equal(user.Transactions[3].TransactionComponents[1].AccountId, user.Accounts[3].id);
+
+            assert.equal(user.Transactions[4].type, "expenseincome");
+            assert.equal(user.Transactions[4].description, "Stuff");
+            assert.deepEqual(user.Transactions[4].tags, ["Widgets","Gadgets"]);
+            assert.equal(user.Transactions[4].date, "2015-11-07");
+            assert.equal(user.Transactions[4].TransactionComponents.length, 2);
+            assert.equal(user.Transactions[4].TransactionComponents[0].amount, -10.0);
+            assert.equal(user.Transactions[4].TransactionComponents[0].AccountId, user.Accounts[0].id);
+            assert.equal(user.Transactions[4].TransactionComponents[1].amount, -100.0);
+            assert.equal(user.Transactions[4].TransactionComponents[1].AccountId, user.Accounts[2].id);
+
+            done();
+          }).catch(done);
+        });
+      });
+    });
+    it('should correctly handle import data from the node.js version of vogon', function (done) {
+      dbService.User.create({
+        username: "user01",
+        password: "mypassword"
+      }).then(function(user){
+        return fs.readFile("./test/data/vogon-nodejs-export.json", function(error, data){
+          if (error) done(error);
+          data = JSON.parse(data);
+          dbService.importData(user, data).then(function(){
+            dbService.exportData(user).then(function(exportData){console.log(JSON.stringify(exportData))});
+          }).then(function(){
             return dbService.User.findAll({
               include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}],
               order: [

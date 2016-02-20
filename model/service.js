@@ -146,45 +146,70 @@ var importData = function(user, data){
   var createdAccounts = undefined;
   var createdTransactions = undefined;
 
-  var processAccounts = function(){
-    return Promise.all(data.accounts.map(function(account, i){
+  //Java version workarounds
+  if(data.accounts !== undefined){
+    data.Accounts = data.accounts;
+    delete data.accounts;
+  }
+  if(data.transactions !== undefined){
+    data.Transactions = data.transactions.map(function(transaction){
+      transaction.TransactionComponents = transaction.components.map(function(transactionComponent){
+        transactionComponent.AccountId = transactionComponent.accountId;
+        delete transactionComponent.accountId;
+        return transactionComponent;
+      });
+      delete transaction.components;
+      return transaction;
+    });
+    delete data.transactions;
+  }
+
+  //Preprocess data
+  data.Accounts = data.Accounts.map(function(account, i){
       accountRemappings[account.id] = i;
       delete account.id;
-      return Account.create(account);
-    }));
-  };
-  var processTransactions = function(){
-    return Promise.all(data.transactions.map(function(transaction){
-      delete transaction.id;
-      transaction.type = transaction.type.toLowerCase();
-      transaction.TransactionComponents = transaction.components.map(function(transactionComponent){
-        delete transactionComponent.id;
+      return account;
+  });
+  data.Transactions = data.Transactions.map(function(transaction){
+    delete transaction.id;
+    transaction.type = transaction.type.toLowerCase();
+    transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent){
+      delete transactionComponent.id;
+      return transactionComponent;
+    });
+    return transaction;
+  });
+
+  return Promise.all(data.Accounts.map(function(account){
+    return Account.create(account);
+  })).then(function(accounts){
+    createdAccounts = accounts;
+    return user.addAccounts(accounts);
+  }).then(function(){
+    return Promise.all(data.Transactions.map(function(transaction, i){
+      transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent, j){
+        var accountId = transactionComponent.AccountId;
+        delete transactionComponent.AccountId;
+        transactionComponent.getAccount = function(){
+          return createdAccounts[accountRemappings[accountId]];
+        }
         return transactionComponent;
       });
       return Transaction.create(transaction, {include: [TransactionComponent]});
     }));
-  };
-  var processTransactionComponents = function(){
+  }).then(function(transactions){
+    createdTransactions = transactions;
+    return user.addTransactions(transactions);
+  }).then(function(){
     var promises = [];
     createdTransactions.forEach(function(transaction,i){
       createdTransactions[i].TransactionComponents.forEach(function(transactionComponent, j){
-        var accountIdSource = data.transactions[i].components[j].accountId;
-        var account = createdAccounts[accountRemappings[accountIdSource]];
+        var account = data.Transactions[i].TransactionComponents[j].getAccount();
         promises.push(transactionComponent.setAccount(account));
       });
     });
     return Promise.all(promises);
-  };
-
-  return processAccounts().then(function(accounts){
-    createdAccounts = accounts;
-    return user.addAccounts(accounts);
-  }).then(function(){
-    return processTransactions();
-  }).then(function(transactions){
-    createdTransactions = transactions;
-    return user.addTransactions(transactions);
-  }).then(processTransactionComponents);
+  });
 };
 
 var exportData = function(user){
