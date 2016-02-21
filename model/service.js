@@ -51,7 +51,7 @@ var Transaction = sequelize.define('Transaction', {
     set: function(value) {
       if(!Array.isArray(value))
         throw new Error("Tags must be an array");
-      this.setDataValue("tags", JSON.stringify(value));
+      this.setDataValue("tags", JSON.stringify(value.sort()));
     }
   },
   date: Sequelize.DATEONLY

@@ -768,7 +768,7 @@ describe('Model', function() {
 
             assert.equal(user.Transactions[4].type, "expenseincome");
             assert.equal(user.Transactions[4].description, "Stuff");
-            assert.deepEqual(user.Transactions[4].tags, ["Widgets","Gadgets"]);
+            assert.deepEqual(user.Transactions[4].tags, ["Gadgets","Widgets"]);
             assert.equal(user.Transactions[4].date, "2015-11-07");
             assert.equal(user.Transactions[4].TransactionComponents.length, 2);
             assert.equal(user.Transactions[4].TransactionComponents[0].amount, -10.0);
@@ -869,7 +869,7 @@ describe('Model', function() {
 
             assert.equal(user.Transactions[4].type, "expenseincome");
             assert.equal(user.Transactions[4].description, "Stuff");
-            assert.deepEqual(user.Transactions[4].tags, ["Widgets","Gadgets"]);
+            assert.deepEqual(user.Transactions[4].tags, ["Gadgets","Widgets"]);
             assert.equal(user.Transactions[4].date, "2015-11-07");
             assert.equal(user.Transactions[4].TransactionComponents.length, 2);
             assert.equal(user.Transactions[4].TransactionComponents[0].amount, -10.0);
@@ -947,7 +947,7 @@ describe('Model', function() {
             {id:2, name:"test account 2", balance:173, currency:"RUB", includeInTotal:true, showInList:true}
           ],
           Transactions:[
-            {id:1, type:"expenseincome", description:"test transaction 1", date:currentDate(), tags:["magic","awesome"], TransactionComponents:[{id:1 ,amount:42, AccountId:1}, {id:2, amount:160, AccountId:2}]},
+            {id:1, type:"expenseincome", description:"test transaction 1", date:currentDate(), tags:["awesome","magic"], TransactionComponents:[{id:1 ,amount:42, AccountId:1}, {id:2, amount:160, AccountId:2}]},
             {id:2, type:"expenseincome", description:"test transaction 2", date:currentDate(), tags:["magic"], TransactionComponents:[{id:3, amount:7, AccountId:1}, {id:4, amount:13, AccountId:2}]}]});
         done();
       }).catch(done);

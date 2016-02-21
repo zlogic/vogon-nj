@@ -30,7 +30,25 @@ router.get('/transactions', function(req, res, next) {
   var filterTags = req.query.filterTags;
   page = page !== undefined ? page : 0;
   var offset = page * pageSize;
-  dbService.Transaction.findAll({where: {UserUsername: req.user.username}, include: [dbService.TransactionComponent], offset: offset, limit: pageSize }).then(function(transactions){
+  var sortOrder = [
+    [sortColumn, sortDirection],
+    ['id', sortDirection]
+  ];
+  var where = {UserUsername: req.user.username};
+  if(filterDescription !== undefined && filterDescription.length > 0)
+    where.description = {$like: filterDescription};
+  if(filterDate !== undefined && filterDate.length > 0)
+    where.date = filterDate;
+  if(filterTags !== undefined && filterTags.length > 0)
+    filterTags = filterTags.split(",")
+  if(filterTags !== undefined && filterTags.length > 0)
+    where.$or = filterTags.map(function(tag){return {tags: {$like: '%' + tag + '%'}}});
+  dbService.Transaction.findAll({
+    where: where,
+    include: [dbService.TransactionComponent],
+    order: sortOrder,
+    offset: offset, limit: pageSize
+  }).then(function(transactions){
     res.send(transactions.map(function(transaction){
       delete transaction.UserUsername;
       return transaction;
@@ -68,7 +86,7 @@ router.get('/currencies', function(req, res, next) {
 /* GET tags. */
 router.get('/analytics/tags', function(req, res, next) {
   dbService.Transaction.findAll({where: {UserUsername: req.user.username}, attributes: ['tags']}).then(function(transactions){
-    var tagsSet = new Set();
+    var tagsSet = new Set([""]);
     transactions.forEach(function(transaction){
       transaction.tags.forEach(function(tag){
         tagsSet = tagsSet.add(tag);

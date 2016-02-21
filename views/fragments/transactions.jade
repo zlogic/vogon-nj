@@ -42,9 +42,7 @@ div(class="panel panel-default")
                   auto-complete(source="tagsService.autocompleteQuery($query)")
           div(class="col-md-1 col-sm-12 text-right")
             label
-              div(class="clickable", ng-click="transactionsService.applySort('amount')")
-                | #{__('Amount')} &nbsp;
-                span(ng-show="transactionsService.sortColumn === 'amount'", class="glyphicon", ng-class="{'glyphicon-sort-by-order': transactionsService.sortAsc, 'glyphicon-sort-by-order-alt': !transactionsService.sortAsc}")
+              | #{__('Amount')} &nbsp;
           div(class="col-md-1 col-sm-4")
             label
               | #{__('Account')}

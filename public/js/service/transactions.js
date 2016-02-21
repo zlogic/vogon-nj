@@ -30,7 +30,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
         that.loadingNextPage = true;
         var params = {
           page: that.currentPage,
-          sortColumn: that.sortColumn.toUpperCase(),
+          sortColumn: that.sortColumn,
           sortDirection: that.sortAsc ? "ASC" : "DESC"
         };
         if (that.filterDate !== undefined && that.filterDate !== null && that.filterDate !== "")
