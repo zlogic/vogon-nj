@@ -45,7 +45,7 @@ router.get('/analytics/tags', function(req, res, next) {
 router.post('/export', function(req, res, next) {
   dbService.exportData(req.user).then(function(exportedData){
     res.setHeader('Content-Disposition', 'attachment; filename=vogon-' + new Date().toJSON() + '.json');
-    res.send(exportedData);
+    res.send(JSON.stringify(exportedData, null, "\t"));
   });
 });
 
