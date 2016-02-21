@@ -2,6 +2,7 @@ var express = require('express');
 var dbService = require('../model/service');
 var passport = require('passport');
 var multer = require('multer');
+var currencies = require('country-data').currencies;
 var router = express.Router();
 
 /* Authentication */
@@ -28,7 +29,11 @@ router.get('/user', function(req, res, next) {
 
 /* GET currencies. */
 router.get('/currencies', function(req, res, next) {
-  res.send([]);
+  res.send(currencies.all.map(function(currency){
+    return { currencyCode: currency.code, displayName: currency.name };
+  }).sort(function(a, b){
+    return a.displayName.localeCompare(b.displayName);
+  }));
 });
 
 /* GET tags. */
