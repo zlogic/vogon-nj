@@ -52,8 +52,10 @@ router.post('/export', function(req, res, next) {
 /* POST import */
 router.post('/import', upload.single('file'), function(req, res, next) {
   var data = req.file.buffer.toString();
-  dbService.importData(req.user, JSON.parse(data)).then(function(){
-    res.send(true);
+  dbService.sequelize.transaction(function(transaction){
+    dbService.importData(req.user, JSON.parse(data)).then(function(){
+      res.send(true);
+    });
   });
 });
 

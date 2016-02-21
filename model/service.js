@@ -104,16 +104,22 @@ Account.hook('beforeCreate', function(account, options){
 TransactionComponent.hook('afterUpdate', function(transactionComponent, options){
   var previousAccount = transactionComponent.previous("AccountId");
   var previousAmount = transactionComponent.previous("amount");
+
   if(transactionComponent.AccountId === undefined && previousAccount === undefined)
     return sequelize.Promise.resolve();
+
+  if(options === undefined || options.transaction === undefined)
+    return sequelize.Promise.reject(new Error("TransactionComponent afterUpdate hook can only be run from a transaction"));
+  var transaction = options.transaction;
+
   var updatePreviousAccount = function(){
-    return Account.findById(previousAccount).then(function(account){
-      return account.decrement("balance", {by: previousAmount});
+    return Account.findById(previousAccount, {transaction: transaction}).then(function(account){
+      return account.decrement("balance", {by: previousAmount, transaction: transaction});
     });
   };
   var updateNewAccount = function(){
-    return Account.findById(transactionComponent.AccountId).then(function(account){
-      return account.increment("balance", {by: transactionComponent.getDataValue("amount")});
+    return Account.findById(transactionComponent.AccountId, {transaction: transaction}).then(function(account){
+      return account.increment("balance", {by: transactionComponent.getDataValue("amount"), transaction: transaction});
     });
   };
   if(previousAccount !== undefined && transactionComponent.AccountId !== undefined)
@@ -130,9 +136,14 @@ TransactionComponent.hook('afterDestroy', function(transactionComponent, options
   var previousAmount = transactionComponent.previous("amount");
   if(previousAccount === undefined)
     return sequelize.Promise.resolve();
+
+  if(options === undefined || options.transaction === undefined)
+    return sequelize.Promise.reject(new Error("TransactionComponent afterDestroy hook can only be run from a transaction"));
+
+  var transaction = options.transaction;
   var updatePreviousAccount = function(){
-    return Account.findById(previousAccount).then(function(account){
-      return account.decrement("balance", {by: previousAmount});
+    return Account.findById(previousAccount, {transaction: transaction}).then(function(account){
+      return account.decrement("balance", {by: previousAmount, transaction: transaction});
     });
   };
   return updatePreviousAccount();
@@ -141,10 +152,14 @@ TransactionComponent.hook('afterDestroy', function(transactionComponent, options
 /**
  * Helper tools
  */
-var importData = function(user, data){
+var importData = function(user, data, options){
   var accountRemappings = {};
   var createdAccounts = undefined;
   var createdTransactions = undefined;
+
+  if(options === undefined || options.transaction === undefined)
+    return sequelize.Promise.reject(new Error("Import can only be run from a transaction"));
+  var t = options.transaction;
 
   //Java version workarounds
   if(data.accounts !== undefined){
@@ -181,10 +196,10 @@ var importData = function(user, data){
   });
 
   return Promise.all(data.Accounts.map(function(account){
-    return Account.create(account);
+    return Account.create(account, {transaction: t});
   })).then(function(accounts){
     createdAccounts = accounts;
-    return user.addAccounts(accounts);
+    return user.addAccounts(accounts, {transaction: t});
   }).then(function(){
     return Promise.all(data.Transactions.map(function(transaction, i){
       transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent, j){
@@ -192,20 +207,20 @@ var importData = function(user, data){
         delete transactionComponent.AccountId;
         transactionComponent.getAccount = function(){
           return createdAccounts[accountRemappings[accountId]];
-        }
+        };
         return transactionComponent;
       });
-      return Transaction.create(transaction, {include: [TransactionComponent]});
+      return Transaction.create(transaction, {include: [TransactionComponent], transaction: t});
     }));
   }).then(function(transactions){
     createdTransactions = transactions;
-    return user.addTransactions(transactions);
+    return user.addTransactions(transactions, {transaction: t});
   }).then(function(){
     var promises = [];
     createdTransactions.forEach(function(transaction,i){
       createdTransactions[i].TransactionComponents.forEach(function(transactionComponent, j){
         var account = data.Transactions[i].TransactionComponents[j].getAccount();
-        promises.push(transactionComponent.setAccount(account));
+        promises.push(transactionComponent.setAccount(account, {transaction: t}));
       });
     });
     return Promise.all(promises);
@@ -213,13 +228,16 @@ var importData = function(user, data){
 };
 
 var exportData = function(user){
-  return user.reload({
-    include: [Account, {model: Transaction, include: [TransactionComponent]}],
-    order: [
-      [Account, "id", "ASC"],
-      [Transaction, "id", "ASC"],
-      [Transaction, TransactionComponent, "id", "ASC"]
-    ]
+  return sequelize.transaction(function(transaction){
+    return user.reload({
+      include: [Account, {model: Transaction, include: [TransactionComponent]}],
+      order: [
+        [Account, "id", "ASC"],
+        [Transaction, "id", "ASC"],
+        [Transaction, TransactionComponent, "id", "ASC"]
+      ],
+      transaction: transaction
+    });
   }).then(function(user){
     user = user.toJSON();
     delete user.password;

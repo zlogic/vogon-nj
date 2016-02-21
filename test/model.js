@@ -37,20 +37,22 @@ describe('Model', function() {
       var transactionComponent1 = dbService.TransactionComponent.build({
         amount: 100
       });
-      user1.save().then(function(){
-        return account1.save();
-      }).then(function(){
-        return user1.addAccount(account1);
-      }).then(function(){
-        return transaction1.save();
-      }).then(function(){
-        return user1.addTransaction(transaction1);
-      }).then(function(){
-        return transactionComponent1.save();
-      }).then(function(){
-        return transactionComponent1.setTransaction(transaction1);
-      }).then(function(){
-        return transactionComponent1.setAccount(account1);
+      dbService.sequelize.transaction(function(transaction){
+        return user1.save({transaction: transaction}).then(function(){
+          return account1.save({transaction: transaction});
+        }).then(function(){
+          return user1.addAccount(account1, {transaction: transaction});
+        }).then(function(){
+          return transaction1.save({transaction: transaction});
+        }).then(function(){
+          return user1.addTransaction(transaction1, {transaction: transaction});
+        }).then(function(){
+          return transactionComponent1.save({transaction: transaction});
+        }).then(function(){
+          return transactionComponent1.setTransaction(transaction1, {transaction: transaction});
+        }).then(function(){
+          return transactionComponent1.setAccount(account1, {transaction: transaction});
+        });
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -84,36 +86,38 @@ describe('Model', function() {
     });
     it('should be able to create related entities all at once', function (done) {
       var user = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            tags: ["hello", "world"],
-            amount: 3
-          }
-        ]
-      }, {include: [dbService.Account, dbService.Transaction]}).then(function(createdUser){
-        user = createdUser;
-        return dbService.TransactionComponent.create({
-          amount: 100
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              tags: ["hello", "world"],
+              amount: 3
+            }
+          ]
+        }, {include: [dbService.Account, dbService.Transaction], transaction: transaction}).then(function(createdUser){
+          user = createdUser;
+          return dbService.TransactionComponent.create({
+            amount: 100
+          }, {transaction: transaction});
+        }).then(function(transactionComponent){
+          return transactionComponent.setTransaction(user.Transactions[0], {transaction: transaction});
+        }).then(function(transactionComponent){
+          return transactionComponent.setAccount(user.Accounts[0], {transaction: transaction});
         });
-      }).then(function(transactionComponent){
-        return transactionComponent.setTransaction(user.Transactions[0]);
-      }).then(function(transactionComponent){
-        return transactionComponent.setAccount(user.Accounts[0]);
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -147,38 +151,40 @@ describe('Model', function() {
     it('should correctly handle adding a transaction', function (done) {
       var user = undefined;
       var account1 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-      }, {include: [dbService.Account]}).then(function(createdUser){
-        user = createdUser;
-        account1 = user.Accounts[0];
-        return dbService.Transaction.create({
-          description: "test transaction 1",
-          type: "expenseincome",
-          date: currentDate(),
-            TransactionComponents: [ { amount: 42 } ]
-        }, {include: [dbService.TransactionComponent]});
-      }).then(function(transaction){
-        return transaction.setUser(user);
-      }).then(function(transaction){
-        return transaction.TransactionComponents[0].setAccount(account1,{include: [dbService.Transaction]});
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+        }, {include: [dbService.Account], transaction: transaction}).then(function(createdUser){
+          user = createdUser;
+          account1 = user.Accounts[0];
+          return dbService.Transaction.create({
+            description: "test transaction 1",
+            type: "expenseincome",
+            date: currentDate(),
+              TransactionComponents: [ { amount: 42 } ]
+          }, {include: [dbService.TransactionComponent], transaction: transaction});
+        }).then(function(createdTransaction){
+          return createdTransaction.setUser(user, {transaction: transaction});
+        }).then(function(createdTransaction){
+          return createdTransaction.TransactionComponents[0].setAccount(account1, {include: [dbService.Transaction], transaction: transaction});
+        });
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -208,43 +214,45 @@ describe('Model', function() {
     });
     it('should correctly handle changing a transaction amount', function (done) {
       var transactionComponent1 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 42 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        var account1 = createdUser.Accounts[0];
-        var transaction1 = createdUser.Transactions[0];
-        transactionComponent1 = transaction1.TransactionComponents[0];
-        return transactionComponent1.setAccount(account1).then(function(){
-          return transaction1.setUser(createdUser);
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 42 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          var account1 = createdUser.Accounts[0];
+          var transaction1 = createdUser.Transactions[0];
+          transactionComponent1 = transaction1.TransactionComponents[0];
+          return transactionComponent1.setAccount(account1, {transaction: transaction}).then(function(){
+            return transaction1.setUser(createdUser, {transaction: transaction});
+          });
+        }).then(function(){
+          transactionComponent1.amount = 50;
+          return transactionComponent1.save({transaction: transaction});
         });
-      }).then(function(){
-        transactionComponent1.amount = 50;
-        return transactionComponent1.save();
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -272,44 +280,46 @@ describe('Model', function() {
     it('should correctly handle changing a transaction component account', function (done) {
       var transactionComponent2 = undefined;
       var account2 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        var account1 = createdUser.Accounts[0];
-        account2 = createdUser.Accounts[1];
-        var transaction1 = createdUser.Transactions[0];
-        var transactionComponent1 = transaction1.TransactionComponents[0];
-        transactionComponent2 = transaction1.TransactionComponents[1];
-        return transactionComponent1.setAccount(account1).then(function(){
-          return transactionComponent2.setAccount(account1);
-        }).then(function(){
-          return transaction1.setUser(createdUser);
-        })
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          var account1 = createdUser.Accounts[0];
+          account2 = createdUser.Accounts[1];
+          var transaction1 = createdUser.Transactions[0];
+          var transactionComponent1 = transaction1.TransactionComponents[0];
+          transactionComponent2 = transaction1.TransactionComponents[1];
+          return transactionComponent1.setAccount(account1, {transaction: transaction}).then(function(){
+            return transactionComponent2.setAccount(account1, {transaction: transaction});
+          }).then(function(){
+            return transaction1.setUser(createdUser, {transaction: transaction});
+          })
+        });
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -334,7 +344,9 @@ describe('Model', function() {
         assert.equal(component2.AccountId, account1.id);
         assert.equal(component2.TransactionId, transaction.id);
       }).then(function(){
-        return transactionComponent2.setAccount(account2);
+        return dbService.sequelize.transaction(function(transaction){
+          return transactionComponent2.setAccount(account2, {transaction: transaction});
+        });
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -366,48 +378,50 @@ describe('Model', function() {
     it('should correctly handle adding a transaction component to an existing transaction', function (done) {
       var transaction1 = undefined;
       var account1 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 42 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        account1 = createdUser.Accounts[0];
-        transaction1 = createdUser.Transactions[0];
-        var transactionComponent1 = transaction1.TransactionComponents[0];
-        return transactionComponent1.setAccount(account1).then(function(){
-          return transaction1.setUser(createdUser);
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 42 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          account1 = createdUser.Accounts[0];
+          transaction1 = createdUser.Transactions[0];
+          var transactionComponent1 = transaction1.TransactionComponents[0];
+          return transactionComponent1.setAccount(account1, {transaction: transaction}).then(function(){
+            return transaction1.setUser(createdUser);
+          });
+        }).then(function(){
+          return dbService.TransactionComponent.create({
+            amount: 160
+          }, {transaction: transaction});
+        }).then(function(transactionComponent){
+            return transactionComponent.setAccount(account1, {transaction: transaction});
+        }).then(function(transactionComponent){
+            return transactionComponent.setTransaction(transaction1, {transaction: transaction});
         });
-      }).then(function(){
-        return dbService.TransactionComponent.create({
-          amount: 160
-        });
-      }).then(function(transactionComponent){
-          return transactionComponent.setAccount(account1);
-      }).then(function(transactionComponent){
-          return transactionComponent.setTransaction(transaction1);
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -438,46 +452,47 @@ describe('Model', function() {
     });
     it('should correctly handle deleting a transaction component from an existing transaction', function (done) {
       var transactionComponent2 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        var account1 = createdUser.Accounts[0];
-        var account2 = createdUser.Accounts[1];
-        var transaction1 = createdUser.Transactions[0];
-        var transactionComponent1 = transaction1.TransactionComponents[0];
-        transactionComponent2 = transaction1.TransactionComponents[1];
-        return transactionComponent1.setAccount(account1).then(function(){
-          return transactionComponent2.setAccount(account1);
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          var account1 = createdUser.Accounts[0];
+          var transaction1 = createdUser.Transactions[0];
+          var transactionComponent1 = transaction1.TransactionComponents[0];
+          transactionComponent2 = transaction1.TransactionComponents[1];
+          return transactionComponent1.setAccount(account1, {transaction: transaction}).then(function(){
+            return transactionComponent2.setAccount(account1, {transaction: transaction});
+          }).then(function(){
+            return transaction1.setUser(createdUser, {transaction: transaction});
+          })
         }).then(function(){
-          return transaction1.setUser(createdUser);
-        })
-      }).then(function(){
-        return transactionComponent2.destroy();
+          return transactionComponent2.destroy({transaction: transaction});
+        });
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -504,56 +519,58 @@ describe('Model', function() {
     });
     it('should correctly handle deleting a transaction', function (done) {
       var transaction2 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
-          }, {
-            description: "test transaction 2",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        var account1 = createdUser.Accounts[0];
-        var account2 = createdUser.Accounts[1];
-        var transaction1 = createdUser.Transactions[0];
-        transaction2 = createdUser.Transactions[1];
-        return transaction1.TransactionComponents[0].setAccount(account1).then(function(){
-          return transaction1.TransactionComponents[1].setAccount(account2);
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }, {
+              description: "test transaction 2",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          var account1 = createdUser.Accounts[0];
+          var account2 = createdUser.Accounts[1];
+          var transaction1 = createdUser.Transactions[0];
+          transaction2 = createdUser.Transactions[1];
+          return transaction1.TransactionComponents[0].setAccount(account1, {transaction: transaction}).then(function(){
+            return transaction1.TransactionComponents[1].setAccount(account2, {transaction: transaction});
+          }).then(function(){
+            return transaction2.TransactionComponents[0].setAccount(account1, {transaction: transaction});
+          }).then(function(){
+            return transaction2.TransactionComponents[1].setAccount(account2, {transaction: transaction});
+          }).then(function(){
+            return transaction1.setUser(createdUser, {transaction: transaction});
+          }).then(function(){
+            return transaction2.setUser(createdUser, {transaction: transaction});
+          });
         }).then(function(){
-          return transaction2.TransactionComponents[0].setAccount(account1);
-        }).then(function(){
-          return transaction2.TransactionComponents[1].setAccount(account2);
-        }).then(function(){
-          return transaction1.setUser(createdUser);
-        }).then(function(){
-          return transaction2.setUser(createdUser);
+          return transaction2.destroy({transaction: transaction});
         });
-      }).then(function(){
-        return transaction2.destroy();
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -584,56 +601,58 @@ describe('Model', function() {
     });
     it('should correctly handle deleting an account', function (done) {
       var account2 = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
-          }, {
-            description: "test transaction 2",
-            type: "expenseincome",
-            date: currentDate(),
-            TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        var account1 = createdUser.Accounts[0];
-        account2 = createdUser.Accounts[1];
-        var transaction1 = createdUser.Transactions[0];
-        var transaction2 = createdUser.Transactions[1];
-        return transaction1.TransactionComponents[0].setAccount(account1).then(function(){
-          return transaction1.TransactionComponents[1].setAccount(account2);
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }, {
+              description: "test transaction 2",
+              type: "expenseincome",
+              date: currentDate(),
+              TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          var account1 = createdUser.Accounts[0];
+          account2 = createdUser.Accounts[1];
+          var transaction1 = createdUser.Transactions[0];
+          var transaction2 = createdUser.Transactions[1];
+          return transaction1.TransactionComponents[0].setAccount(account1, {transaction: transaction}).then(function(){
+            return transaction1.TransactionComponents[1].setAccount(account2, {transaction: transaction});
+          }).then(function(){
+            return transaction2.TransactionComponents[0].setAccount(account1, {transaction: transaction});
+          }).then(function(){
+            return transaction2.TransactionComponents[1].setAccount(account2, {transaction: transaction});
+          }).then(function(){
+            return transaction1.setUser(createdUser, {transaction: transaction});
+          }).then(function(){
+            return transaction2.setUser(createdUser, {transaction: transaction});
+          });
         }).then(function(){
-          return transaction2.TransactionComponents[0].setAccount(account1);
-        }).then(function(){
-          return transaction2.TransactionComponents[1].setAccount(account2);
-        }).then(function(){
-          return transaction1.setUser(createdUser);
-        }).then(function(){
-          return transaction2.setUser(createdUser);
+          return account2.destroy({transaction: transaction});
         });
-      }).then(function(){
-        return account2.destroy();
       }).then(function(){
         return dbService.User.findAll({
           include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]
@@ -669,7 +688,9 @@ describe('Model', function() {
         return fs.readFile("./test/data/vogon-java-export.json", function(error, data){
           if (error) done(error);
           data = JSON.parse(data);
-          dbService.importData(user, data).then(function(){
+          dbService.sequelize.transaction(function (transaction) {
+            return dbService.importData(user, data, {transaction: transaction});
+          }).then(function(){
             dbService.exportData(user).then(function(exportData){console.log(JSON.stringify(exportData))});
           }).then(function(){
             return dbService.User.findAll({
@@ -768,7 +789,9 @@ describe('Model', function() {
         return fs.readFile("./test/data/vogon-nodejs-export.json", function(error, data){
           if (error) done(error);
           data = JSON.parse(data);
-          dbService.importData(user, data).then(function(){
+          dbService.sequelize.transaction(function (transaction) {
+            return dbService.importData(user, data, {transaction: transaction});
+          }).then(function(){
             dbService.exportData(user).then(function(exportData){console.log(JSON.stringify(exportData))});
           }).then(function(){
             return dbService.User.findAll({
@@ -861,56 +884,58 @@ describe('Model', function() {
     });
     it('should correctly handle exporting data', function (done) {
       var user = undefined;
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword",
-        Accounts: [
-          {
-            name: "test account 1",
-            balance: 5,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          },
-          {
-            name: "test account 2",
-            balance: 15,
-            currency: "RUB",
-            includeInTotal: true,
-            showInList: true
-          }
-        ],
-        Transactions: [
-          {
-            description: "test transaction 1",
-            type: "expenseincome",
-            date: currentDate(),
-            tags: ["magic", "awesome"],
-            TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
-          }, {
-            description: "test transaction 2",
-            type: "expenseincome",
-            date: currentDate(),
-            tags: ["magic"],
-            TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
-          }
-        ],
-      }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}]}).then(function(createdUser){
-        user = createdUser;
-        var account1 = createdUser.Accounts[0];
-        var account2 = createdUser.Accounts[1];
-        var transaction1 = createdUser.Transactions[0];
-        var transaction2 = createdUser.Transactions[1];
-        return transaction1.TransactionComponents[0].setAccount(account1).then(function(){
-          return transaction1.TransactionComponents[1].setAccount(account2);
-        }).then(function(){
-          return transaction2.TransactionComponents[0].setAccount(account1);
-        }).then(function(){
-          return transaction2.TransactionComponents[1].setAccount(account2);
-        }).then(function(){
-          return transaction1.setUser(createdUser);
-        }).then(function(){
-          return transaction2.setUser(createdUser);
+      dbService.sequelize.transaction(function (transaction) {
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            },
+            {
+              name: "test account 2",
+              balance: 15,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          Transactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              tags: ["magic", "awesome"],
+              TransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }, {
+              description: "test transaction 2",
+              type: "expenseincome",
+              date: currentDate(),
+              tags: ["magic"],
+              TransactionComponents: [ { amount: 7 }, { amount: 13 } ]
+            }
+          ],
+        }, {include: [dbService.Account, {model: dbService.Transaction, include: [dbService.TransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          user = createdUser;
+          var account1 = createdUser.Accounts[0];
+          var account2 = createdUser.Accounts[1];
+          var transaction1 = createdUser.Transactions[0];
+          var transaction2 = createdUser.Transactions[1];
+          return transaction1.TransactionComponents[0].setAccount(account1, {transaction: transaction}).then(function(){
+            return transaction1.TransactionComponents[1].setAccount(account2, {transaction: transaction});
+          }).then(function(){
+            return transaction2.TransactionComponents[0].setAccount(account1, {transaction: transaction});
+          }).then(function(){
+            return transaction2.TransactionComponents[1].setAccount(account2, {transaction: transaction});
+          }).then(function(){
+            return transaction1.setUser(createdUser, {transaction: transaction});
+          }).then(function(){
+            return transaction2.setUser(createdUser, {transaction: transaction});
+          });
         });
       }).then(function(){
         return dbService.exportData(user);
@@ -922,8 +947,8 @@ describe('Model', function() {
             {id:2, name:"test account 2", balance:173, currency:"RUB", includeInTotal:true, showInList:true}
           ],
           Transactions:[
-            {id:1, type:"expenseincome", description:"test transaction 1", date:"2016-02-20", tags:["magic","awesome"], TransactionComponents:[{id:1 ,amount:42, AccountId:1}, {id:2, amount:160, AccountId:2}]},
-            {id:2, type:"expenseincome", description:"test transaction 2", date:"2016-02-20", tags:["magic"], TransactionComponents:[{id:3, amount:7, AccountId:1}, {id:4, amount:13, AccountId:2}]}]});
+            {id:1, type:"expenseincome", description:"test transaction 1", date:currentDate(), tags:["magic","awesome"], TransactionComponents:[{id:1 ,amount:42, AccountId:1}, {id:2, amount:160, AccountId:2}]},
+            {id:2, type:"expenseincome", description:"test transaction 2", date:currentDate(), tags:["magic"], TransactionComponents:[{id:3, amount:7, AccountId:1}, {id:4, amount:13, AccountId:2}]}]});
         done();
       }).catch(done);
     });
