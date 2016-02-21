@@ -19,10 +19,10 @@ app.controller("TransactionEditorController", function ($scope, AccountsService,
     $scope.calendar.opened = true;
   };
   $scope.addTransactionComponent = function () {
-    $scope.transaction.components.push({});
+    $scope.transaction.TransactionComponents.push({});
   };
   $scope.deleteTransactionComponent = function (component) {
-    transaction.components = transaction.components.filter(function (comp) {
+    transaction.TransactionComponents = transaction.TransactionComponents.filter(function (comp) {
       return comp !== component;
     });
   };
@@ -40,8 +40,8 @@ app.controller("TransactionEditorController", function ($scope, AccountsService,
     $scope.transaction.tags = tagsToJson($scope.tags);
   };
   $scope.isAccountVisible = function (account) {
-    return account.showInList || $scope.transaction.components.some(function (component) {
-      return component.accountId === account.id;
+    return account.showInList || $scope.transaction.TransactionComponents.some(function (component) {
+      return component.AccountId === account.id;
     });
   };
 });

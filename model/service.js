@@ -1,6 +1,7 @@
 var Sequelize = require('sequelize');
 var path = require('path');
 var os = require('os');
+var i18n = require('i18n');
 
 var sequelizeConfigurer = function(){
   if(process.env.DATABASE_URL !== undefined)
@@ -45,7 +46,7 @@ var Transaction = sequelize.define('Transaction', {
     get: function() {
       if(this.getDataValue("tags") === undefined)
         return undefined;
-      return JSON.parse(this.getDataValue("tags"));
+      return JSON.parse(this.getDataValue("tags")).filter(function(tag){ return tag !== undefined && tag.length>0; });
     },
     set: function(value) {
       if(!Array.isArray(value))
@@ -109,7 +110,7 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error("TransactionComponent afterUpdate hook can only be run from a transaction"));
+    return sequelize.Promise.reject(new Error(i18n.__("TransactionComponent afterUpdate hook can only be run from a transaction")));
   var transaction = options.transaction;
 
   var updatePreviousAccount = function(){
@@ -138,7 +139,7 @@ TransactionComponent.hook('afterDestroy', function(transactionComponent, options
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error("TransactionComponent afterDestroy hook can only be run from a transaction"));
+    return sequelize.Promise.reject(new Error(i18n.__("TransactionComponent afterDestroy hook can only be run from a transaction")));
 
   var transaction = options.transaction;
   var updatePreviousAccount = function(){
@@ -158,7 +159,9 @@ var importData = function(user, data, options){
   var createdTransactions = undefined;
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error("Import can only be run from a transaction"));
+    return sequelize.Promise.reject(new Error(i18n.__("Import can only be run from a transaction")));
+  if(user === undefined)
+    return sequelize.Promise.reject(new Error(i18n.__("Cannot import data for unknown user")));
   var t = options.transaction;
 
   //Java version workarounds
@@ -228,6 +231,8 @@ var importData = function(user, data, options){
 };
 
 var exportData = function(user){
+  if(user === undefined)
+    return sequelize.Promise.reject(new Error(i18n.__("Cannot export data for unknown user")));
   return sequelize.transaction(function(transaction){
     return user.reload({
       include: [Account, {model: Transaction, include: [TransactionComponent]}],

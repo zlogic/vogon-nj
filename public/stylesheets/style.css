@@ -6,6 +6,6 @@
 	font-style: italic;
 }
 
-.form-control-file {
+input[type=file].form-control-file {
 	display: inline-block;
 }

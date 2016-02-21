@@ -9,7 +9,7 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
   $scope.filterDirty = false;
   $scope.filterDateCalendar = {opened: false};
   $scope.addTransaction = function () {
-    var transaction = {components: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
+    var transaction = {TransactionComponents: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
     $scope.transactionsService.transactions.unshift(transaction);
     $scope.startEditing(transaction);
   };
@@ -29,7 +29,7 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
     newTransaction.version = undefined;
     newTransaction.date = TransactionsService.getDate();
     newTransaction.amount = undefined;
-    newTransaction.components.forEach(function (component) {
+    newTransaction.TransactionComponents.forEach(function (component) {
       component.id = undefined;
       component.version = undefined;
     });

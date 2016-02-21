@@ -9,15 +9,18 @@ form(name="analyticsForm", novalidate)
             div(class="form-group")
               button(ng-click="selectAllTags()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-check", aria-hidden="true")
+                | 
                 | #{__('Select all tags')}
+              | 
               button(ng-click="deselectAllTags()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-unchecked", aria-hidden="true")
+                | 
                 | #{__('Deselect all tags')}
             div(class="pre-scrollable")
               div(class="checkbox", ng-repeat="tag in tags | orderBy:'tag'")
                 label
                   input(type="checkbox", ng-model="tag.selected")
-                  | {{tag.tag.length)0?tag.tag:"&nbsp;"}}
+                  | {{tag.tag.length>0?tag.tag:"&nbsp;"}}
         div(class="col-md-6")
           div(class="form-group")
             label
@@ -25,9 +28,12 @@ form(name="analyticsForm", novalidate)
             div(class="form-group")
               button(ng-click="selectAllAccounts()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-check", aria-hidden="true")
+                | 
                 | #{__('Select all accounts')}
+              | 
               button(ng-click="deselectAllAccounts()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-unchecked", aria-hidden="true")
+                | 
                 | #{__('Deselect all accounts')}
             div(class="pre-scrollable")
               div(class="checkbox", ng-repeat="account in accountService.accounts")
@@ -39,7 +45,7 @@ form(name="analyticsForm", novalidate)
           label
             | #{__('Start date')}
           div(class="input-group", ng-class="{ 'has-error': analyticsForm.startDate.$invalid }")
-            input(type="text", class="form-control", uib-datepicker-popup ng-model="dateRange.start", name="startDate", is-open="startDateCalendar.opened")
+            input(type="text", class="form-control", uib-datepicker-popup="yyyy-MM-dd", ng-model="dateRange.start", name="startDate", is-open="startDateCalendar.opened")
             span(class="input-group-btn")
               button(type="button", class="btn btn-default", ng-click="openStartDateCalendar($event)")
                 span(class="glyphicon glyphicon-calendar")
@@ -47,7 +53,7 @@ form(name="analyticsForm", novalidate)
           label
             | #{__('End date')}
           div(class="input-group", ng-class="{ 'has-error': analyticsForm.endDate.$invalid }")
-            input(type="text", class="form-control", uib-datepicker-popup ng-model="dateRange.end", name="endDate", is-open="endDateCalendar.opened")
+            input(type="text", class="form-control", uib-datepicker-popup="yyyy-MM-dd", ng-model="dateRange.end", name="endDate", is-open="endDateCalendar.opened")
             span(class="input-group-btn")
               button(type="button", class="btn btn-default", ng-click="openEndDateCalendar($event)")
                 span(class="glyphicon glyphicon-calendar")
@@ -69,6 +75,7 @@ form(name="analyticsForm", novalidate)
         div(class="col-md-12")
           button(ng-click="buildReport()", class="btn btn-default btn-primary form-control", type="submit", ng-disabled="analyticsForm.$invalid")
             span(class="glyphicon glyphicon-ok", aria-hidden="true")
+            | 
             | #{__('Build report')}
       div(class="well well-sm form-control-static", ng-if="report")
         div(class="row")

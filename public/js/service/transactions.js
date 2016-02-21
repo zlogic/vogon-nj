@@ -1,7 +1,7 @@
 app.service("TransactionsService", function ($q, HTTPService, AuthorizationService, AccountsService) {
   var that = this;
   this.transactions = [];
-  this.transactionTypes = [{name: messages.EXPENSEINCOME, value: "EXPENSEINCOME"}, {name: messages.TRANSFER, value: "TRANSFER"}];
+  this.transactionTypes = [{name: messages.EXPENSEINCOME, value: "expenseincome"}, {name: messages.TRANSFER, value: "transfer"}];
   this.defaultTransactionType = this.transactionTypes[0];
   this.currentPage = 0;
   this.nextPageRequest = undefined;
@@ -120,9 +120,9 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
   };
   this.getAccounts = function (transaction, predicate) {
     var accounts = [];
-    transaction.components.forEach(
+    transaction.TransactionComponents.forEach(
         function (component) {
-          var account = AccountsService.getAccount(component.accountId);
+          var account = AccountsService.getAccount(component.AccountId);
           if (account !== undefined && predicate(component) && !accounts.some(function (checkAccount) {
             return checkAccount.id === account.id;
           }))
@@ -141,9 +141,9 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
   };
   var getTotalsByCurrency = function (transaction) {
     var totals = {};
-    transaction.components.forEach(
+    transaction.TransactionComponents.forEach(
         function (component) {
-          var account = AccountsService.getAccount(component.accountId);
+          var account = AccountsService.getAccount(component.AccountId);
           if (account === undefined)
             return;
           if (totals[account.currency] === undefined)

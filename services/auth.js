@@ -29,8 +29,10 @@ passport.use(new BearerStrategy(
 passport.use(new LocalStrategy(
   function(username, password, done) {
     dbService.User.findOne({ username: username }).then(function (user) {
-      if (!user) { return done(new Error(i18n.__("Bad credentials"))); }
-      if (!user.password === password) { return done(null, false); }
+      if (!user)
+        return done(new Error(i18n.__("Bad credentials")));
+      if (!user.password === password)
+        return done(null, false);//TODO: use salted hashes
       return done(null, user);
     }).catch(done);
   }
