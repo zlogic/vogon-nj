@@ -46,7 +46,7 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
 }));
 
 var allowRegistration= function(){
-  return JSON.parse(process.env.ALLOW_REGISTRATION);
+  return process.env.ALLOW_REGISTRATION !== undefined ? JSON.parse(process.env.ALLOW_REGISTRATION) : false;
 };
 
 var logout = function(token){
