@@ -111,7 +111,7 @@ var User = sequelize.define('User', {
     type: Sequelize.STRING,
     unique: true
   },
-  password: Sequelize.STRING
+  password: Sequelize.TEXT
 }, {
   timestamps: false,
   instanceMethods: {
