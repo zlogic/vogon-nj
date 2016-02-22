@@ -123,11 +123,11 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
       return account.increment("balance", {by: transactionComponent.getDataValue("amount"), transaction: transaction});
     });
   };
-  if(previousAccount !== undefined && transactionComponent.AccountId !== undefined)
+  if(previousAccount !== undefined && transactionComponent.AccountId !== undefined && previousAccount !== null && transactionComponent.AccountId !== null)
     return updatePreviousAccount().then(updateNewAccount());
-  if(previousAccount !== undefined && transactionComponent.AccountId === undefined)
+  if(previousAccount !== undefined && transactionComponent.AccountId === undefined && previousAccount !== null && transactionComponent.AccountId === null)
     return updatePreviousAccount();
-  if(previousAccount === undefined && transactionComponent.AccountId !== undefined)
+  if(previousAccount === undefined && transactionComponent.AccountId !== undefined && previousAccount === null && transactionComponent.AccountId !== null)
     return updateNewAccount();
   return sequelize.Promise.resolve();
 });
@@ -135,7 +135,7 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
 TransactionComponent.hook('afterDestroy', function(transactionComponent, options){
   var previousAccount = transactionComponent.previous("AccountId");
   var previousAmount = transactionComponent.previous("amount");
-  if(previousAccount === undefined)
+  if(previousAccount === undefined || previousAccount === null)
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
