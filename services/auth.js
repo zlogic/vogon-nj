@@ -28,9 +28,13 @@ passport.use(new LocalStrategy(
     dbService.User.findOne({where: {username: username}}).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
-      if (user.password !== password)
-        return done(new Error(i18n.__("Bad credentials")));//TODO: use salted hashes
-      return done(null, user);
+      user.validatePassword(password, function(err, passwordValid){
+        if(err)
+          return done(err);
+        if(!passwordValid)
+          return done(new Error(i18n.__("Bad credentials")));
+        done(null, user);
+      });
     }).catch(done);
   }
 ));
@@ -39,11 +43,15 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
   dbService.User.findOne({where: {username: username}}).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
-      if (user.password !== password)
-        return done(new Error(i18n.__("Bad credentials")));//TODO: use salted hashes
-      var accessToken = uid2(256);
-      tokens[accessToken] = user.id;
-      done(null, accessToken);
+      user.validatePassword(password, function(err, passwordValid){
+        if(err)
+          return done(err);
+        if(!passwordValid)
+          return done(new Error(i18n.__("Bad credentials")));
+        var accessToken = uid2(256);
+        tokens[accessToken] = user.id;
+        done(null, accessToken);
+      });
     }).catch(done);
 }));
 

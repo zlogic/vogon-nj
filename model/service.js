@@ -2,6 +2,7 @@ var Sequelize = require('sequelize');
 var path = require('path');
 var os = require('os');
 var i18n = require('i18n');
+var crypto = require('crypto');
 
 var sequelizeConfigurer = function(){
   if(process.env.DATABASE_URL !== undefined)
@@ -18,6 +19,38 @@ var convertAmountToFloat = function (amount){
 };
 var convertAmountToFixed = function (amount){
   return (amount * fixedPointMultiplier).toFixed();
+};
+
+var hashPassword = function(password, salt, options, done){
+  if(options === null || options === undefined)
+    options = {
+      iterations: 10000,
+      keylen: 512,
+      digest: 'sha512',
+      saltlen: 256
+    };
+  var pbkdf2 = function(salt){
+    crypto.pbkdf2(password, salt, options.iterations, options.keylen, options.digest, function(err, hash){
+      if(err)
+        return done(err);
+      hash = hash.toString('hex');
+      options =  {
+        iterations: options.iterations,
+        keylen: options.keylen,
+        digest: options.digest
+      }
+      done(null, JSON.stringify({salt: salt, hash:hash, options: options}));
+    });
+  };
+  if(salt === null || salt === undefined)
+    crypto.randomBytes(options.saltlen, function(err, salt){
+      if(err)
+        return done(err);
+      salt = salt.toString('hex');
+      pbkdf2(salt);
+    });
+  else
+    pbkdf2(salt);
 };
 
 /**
@@ -80,7 +113,17 @@ var User = sequelize.define('User', {
   },
   password: Sequelize.STRING
 }, {
-  timestamps: false
+  timestamps: false,
+  instanceMethods: {
+    validatePassword: function(password, done){
+      var storedUserPassword = JSON.parse(this.getDataValue('password'));
+      hashPassword(password, storedUserPassword.salt, storedUserPassword.options, function(err, result){
+        if(err)
+          return done(err);
+        done(null, JSON.parse(result).hash === storedUserPassword.hash);
+      });
+    }
+  },
 });
 
 /**
@@ -158,6 +201,19 @@ FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComp
   };
   return updatePreviousAccount();
 });
+
+var userPasswordHashingHook = function(user, options, done){
+  if (!user.changed('password'))
+    return done();
+  hashPassword(user.getDataValue('password'), null, null, function(err, result){
+    if(err)
+      return done(err);
+    user.setDataValue('password', result);
+    done();
+  });
+};
+User.hook('beforeCreate', userPasswordHashingHook);
+User.hook('beforeUpdate', userPasswordHashingHook);
 
 //TODO: move reusable components from controller/routes here and add tests
 
