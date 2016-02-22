@@ -16,8 +16,9 @@ router.post('/', function (req, res, next) {
         res.send({exception: i18n.__('User already exists')});
       }
     }).catch(function(err){
+      console.error(err);
       res.status(500);
-      res.send({exception: i18n.__('Cannot register user because of %s', err)});
+      res.send({exception: i18n.__('Cannot register user because of error: %s', err.name)});
     });
   } else {
     res.status(500);
