@@ -99,7 +99,7 @@ router.get('/analytics/tags', function(req, res, next) {
 /* GET export */
 router.post('/export', function(req, res, next) {
   dbService.exportData(req.user).then(function(exportedData){
-    res.setHeader('Content-Disposition', 'attachment; filename=vogon-' + new Date().toJSON() + '.json');
+    res.attachment('vogon-' + new Date().toJSON() + '.json');
     res.send(JSON.stringify(exportedData, null, "\t"));
   });
 });
