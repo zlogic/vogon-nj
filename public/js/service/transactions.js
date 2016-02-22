@@ -120,7 +120,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
   };
   this.getAccounts = function (transaction, predicate) {
     var accounts = [];
-    transaction.TransactionComponents.forEach(
+    transaction.FinanceTransactionComponents.forEach(
         function (component) {
           var account = AccountsService.getAccount(component.AccountId);
           if (account !== undefined && predicate(component) && !accounts.some(function (checkAccount) {
@@ -141,7 +141,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
   };
   var getTotalsByCurrency = function (transaction) {
     var totals = {};
-    transaction.TransactionComponents.forEach(
+    transaction.FinanceTransactionComponents.forEach(
         function (component) {
           var account = AccountsService.getAccount(component.AccountId);
           if (account === undefined)

@@ -29,13 +29,13 @@
 		"includeInTotal": false,
 		"showInList": false
 	}],
-	"Transactions": [{
+	"FinanceTransactions": [{
 		"tags": ["Widgets"],
 		"id": 1,
 		"type": "expenseincome",
 		"description": "Widgets",
 		"date": "2015-11-02",
-		"TransactionComponents": [{
+		"FinanceTransactionComponents": [{
 			"amount": -100,
 			"id": 1,
 			"AccountId": 2
@@ -46,7 +46,7 @@
 		"type": "expenseincome",
 		"description": "Salary",
 		"date": "2015-11-01",
-		"TransactionComponents": [{
+		"FinanceTransactionComponents": [{
 			"amount": 1000,
 			"id": 2,
 			"AccountId": 1
@@ -65,7 +65,7 @@
 		"type": "expenseincome",
 		"description": "Gadgets",
 		"date": "2015-11-03",
-		"TransactionComponents": [{
+		"FinanceTransactionComponents": [{
 			"amount": -100,
 			"id": 5,
 			"AccountId": 4
@@ -76,7 +76,7 @@
 		"type": "transfer",
 		"description": "Credit card payment",
 		"date": "2015-11-09",
-		"TransactionComponents": [{
+		"FinanceTransactionComponents": [{
 			"amount": -100,
 			"id": 6,
 			"AccountId": 3
@@ -91,7 +91,7 @@
 		"type": "expenseincome",
 		"description": "Stuff",
 		"date": "2015-11-07",
-		"TransactionComponents": [{
+		"FinanceTransactionComponents": [{
 			"amount": -10,
 			"id": 8,
 			"AccountId": 1

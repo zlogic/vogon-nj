@@ -43,23 +43,23 @@ router.get('/transactions', function(req, res, next) {
     filterTags = filterTags.split(",")
   if(filterTags !== undefined && filterTags.length > 0)
     where.$or = filterTags.map(function(tag){return {tags: {$like: '%' + tag + '%'}}});
-  dbService.Transaction.findAll({
+  dbService.FinanceTransaction.findAll({
     where: where,
-    include: [dbService.TransactionComponent],
+    include: [dbService.FinanceTransactionComponent],
     order: sortOrder,
     offset: offset, limit: pageSize
-  }).then(function(transactions){
-    res.send(transactions.map(function(transaction){
-      delete transaction.UserUsername;
-      return transaction;
+  }).then(function(financeTransactions){
+    res.send(financeTransactions.map(function(financeTransaction){
+      delete financeTransaction.UserUsername;
+      return financeTransaction;
     }));
   });
 });
 
 /* GET transaction. */
 router.get('/transactions/transaction/:id', function(req, res, next) {
-  dbService.Transaction.findOne({where: {id: req.params.id, UserUsername: req.user.username}, include: [dbService.TransactionComponent]}).then(function(transaction){
-    res.send(transaction.toJSON());
+  dbService.FinanceTransaction.findOne({where: {id: req.params.id, UserUsername: req.user.username}, include: [dbService.FinanceTransactionComponent]}).then(function(financeTransaction){
+    res.send(financeTransaction.toJSON());
   });
 });
 
@@ -85,10 +85,10 @@ router.get('/currencies', function(req, res, next) {
 
 /* GET tags. */
 router.get('/analytics/tags', function(req, res, next) {
-  dbService.Transaction.findAll({where: {UserUsername: req.user.username}, attributes: ['tags']}).then(function(transactions){
+  dbService.FinanceTransaction.findAll({where: {UserUsername: req.user.username}, attributes: ['tags']}).then(function(financeTransactions){
     var tagsSet = new Set([""]);
-    transactions.forEach(function(transaction){
-      transaction.tags.forEach(function(tag){
+    financeTransactions.forEach(function(financeTransaction){
+      financeTransaction.tags.forEach(function(tag){
         tagsSet = tagsSet.add(tag);
       });
     });

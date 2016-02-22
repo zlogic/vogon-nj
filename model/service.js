@@ -38,7 +38,7 @@ var Account = sequelize.define('Account', {
   timestamps: false
 });
 
-var Transaction = sequelize.define('Transaction', {
+var FinanceTransaction = sequelize.define('FinanceTransaction', {
   type: Sequelize.ENUM("expenseincome", "transfer"),
   description: Sequelize.STRING,
   tags: {
@@ -59,7 +59,7 @@ var Transaction = sequelize.define('Transaction', {
   timestamps: false
 });
 
-var TransactionComponent = sequelize.define('TransactionComponent', {
+var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent', {
   amount: {
     type: Sequelize.BIGINT,
     get: function(){
@@ -86,13 +86,13 @@ var User = sequelize.define('User', {
 /**
  * Associations
  */
-TransactionComponent.belongsTo(Transaction);
-TransactionComponent.belongsTo(Account);
-Transaction.hasMany(TransactionComponent, {onDelete: 'cascade', hooks:true});
-Transaction.belongsTo(User);
-User.hasMany(Transaction, {onDelete: 'cascade', hooks:true});
+FinanceTransactionComponent.belongsTo(FinanceTransaction);
+FinanceTransactionComponent.belongsTo(Account);
+FinanceTransaction.hasMany(FinanceTransactionComponent, {onDelete: 'cascade', hooks:true});
+FinanceTransaction.belongsTo(User);
+User.hasMany(FinanceTransaction, {onDelete: 'cascade', hooks:true});
 User.hasMany(Account, {onDelete: 'cascade', hooks:true});
-Account.hasMany(TransactionComponent, {onDelete: 'cascade', hooks:true});
+Account.hasMany(FinanceTransactionComponent, {onDelete: 'cascade', hooks:true});
 
 /**
  * Hooks
@@ -102,15 +102,15 @@ Account.hook('beforeCreate', function(account, options){
   account.balance = 0;
 });
 
-TransactionComponent.hook('afterUpdate', function(transactionComponent, options){
-  var previousAccount = transactionComponent.previous("AccountId");
-  var previousAmount = transactionComponent.previous("amount");
+FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionComponent, options){
+  var previousAccount = financeTransactionComponent.previous("AccountId");
+  var previousAmount = financeTransactionComponent.previous("amount");
 
-  if(transactionComponent.AccountId === undefined && previousAccount === undefined)
+  if(financeTransactionComponent.AccountId === undefined && previousAccount === undefined)
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error(i18n.__("TransactionComponent afterUpdate hook can only be run from a transaction")));
+    return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterUpdate hook can only be run from a transaction")));
   var transaction = options.transaction;
 
   var updatePreviousAccount = function(){
@@ -119,27 +119,27 @@ TransactionComponent.hook('afterUpdate', function(transactionComponent, options)
     });
   };
   var updateNewAccount = function(){
-    return Account.findById(transactionComponent.AccountId, {transaction: transaction}).then(function(account){
-      return account.increment("balance", {by: transactionComponent.getDataValue("amount"), transaction: transaction});
+    return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
+      return account.increment("balance", {by: financeTransactionComponent.getDataValue("amount"), transaction: transaction});
     });
   };
-  if(previousAccount !== undefined && transactionComponent.AccountId !== undefined && previousAccount !== null && transactionComponent.AccountId !== null)
+  if((previousAccount !== undefined && previousAccount !== null) && (financeTransactionComponent.AccountId !== undefined && financeTransactionComponent.AccountId !== null))
     return updatePreviousAccount().then(updateNewAccount());
-  if(previousAccount !== undefined && transactionComponent.AccountId === undefined && previousAccount !== null && transactionComponent.AccountId === null)
+  if((previousAccount !== undefined && previousAccount !== null) && (financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null))
     return updatePreviousAccount();
-  if(previousAccount === undefined && transactionComponent.AccountId !== undefined && previousAccount === null && transactionComponent.AccountId !== null)
+  if((previousAccount === undefined || previousAccount === null) && (financeTransactionComponent.AccountId !== undefined && financeTransactionComponent.AccountId !== null))
     return updateNewAccount();
   return sequelize.Promise.resolve();
 });
 
-TransactionComponent.hook('afterDestroy', function(transactionComponent, options){
-  var previousAccount = transactionComponent.previous("AccountId");
-  var previousAmount = transactionComponent.previous("amount");
+FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComponent, options){
+  var previousAccount = financeTransactionComponent.previous("AccountId");
+  var previousAmount = financeTransactionComponent.previous("amount");
   if(previousAccount === undefined || previousAccount === null)
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error(i18n.__("TransactionComponent afterDestroy hook can only be run from a transaction")));
+    return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction")));
 
   var transaction = options.transaction;
   var updatePreviousAccount = function(){
@@ -156,13 +156,13 @@ TransactionComponent.hook('afterDestroy', function(transactionComponent, options
 var importData = function(user, data, options){
   var accountRemappings = {};
   var createdAccounts = undefined;
-  var createdTransactions = undefined;
+  var createdFinanceTransactions = undefined;
 
   if(options === undefined || options.transaction === undefined)
     return sequelize.Promise.reject(new Error(i18n.__("Import can only be run from a transaction")));
   if(user === undefined)
     return sequelize.Promise.reject(new Error(i18n.__("Cannot import data for unknown user")));
-  var t = options.transaction;
+  var transaction = options.transaction;
 
   //Java version workarounds
   if(data.accounts !== undefined){
@@ -170,14 +170,14 @@ var importData = function(user, data, options){
     delete data.accounts;
   }
   if(data.transactions !== undefined){
-    data.Transactions = data.transactions.map(function(transaction){
-      transaction.TransactionComponents = transaction.components.map(function(transactionComponent){
-        transactionComponent.AccountId = transactionComponent.accountId;
-        delete transactionComponent.accountId;
-        return transactionComponent;
+    data.FinanceTransactions = data.transactions.map(function(financeTransaction){
+      financeTransaction.FinanceTransactionComponents = financeTransaction.components.map(function(financeTransactionComponent){
+        financeTransactionComponent.AccountId = financeTransactionComponent.accountId;
+        delete financeTransactionComponent.accountId;
+        return financeTransactionComponent;
       });
-      delete transaction.components;
-      return transaction;
+      delete financeTransaction.components;
+      return financeTransaction;
     });
     delete data.transactions;
   }
@@ -188,42 +188,42 @@ var importData = function(user, data, options){
       delete account.id;
       return account;
   });
-  data.Transactions = data.Transactions.map(function(transaction){
-    delete transaction.id;
-    transaction.type = transaction.type.toLowerCase();
-    transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent){
-      delete transactionComponent.id;
-      return transactionComponent;
+  data.FinanceTransactions = data.FinanceTransactions.map(function(financeTransaction){
+    delete financeTransaction.id;
+    financeTransaction.type = financeTransaction.type.toLowerCase();
+    financeTransaction.FinanceTransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent){
+      delete financeTransactionComponent.id;
+      return financeTransactionComponent;
     });
-    return transaction;
+    return financeTransaction;
   });
 
   return Promise.all(data.Accounts.map(function(account){
-    return Account.create(account, {transaction: t});
+    return Account.create(account, {transaction: transaction});
   })).then(function(accounts){
     createdAccounts = accounts;
-    return user.addAccounts(accounts, {transaction: t});
+    return user.addAccounts(accounts, {transaction: transaction});
   }).then(function(){
-    return Promise.all(data.Transactions.map(function(transaction, i){
-      transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent, j){
-        var accountId = transactionComponent.AccountId;
-        delete transactionComponent.AccountId;
-        transactionComponent.getAccount = function(){
+    return Promise.all(data.FinanceTransactions.map(function(financeTransaction, i){
+      financeTransaction.TransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent, j){
+        var accountId = financeTransactionComponent.AccountId;
+        delete financeTransactionComponent.AccountId;
+        financeTransactionComponent.getAccount = function(){
           return createdAccounts[accountRemappings[accountId]];
         };
-        return transactionComponent;
+        return financeTransactionComponent;
       });
-      return Transaction.create(transaction, {include: [TransactionComponent], transaction: t});
+      return FinanceTransaction.create(financeTransaction, {include: [FinanceTransactionComponent], transaction: transaction});
     }));
-  }).then(function(transactions){
-    createdTransactions = transactions;
-    return user.addTransactions(transactions, {transaction: t});
+  }).then(function(financeTransactions){
+    createdFinanceTransactions = financeTransactions;
+    return user.addFinanceTransactions(financeTransactions, {transaction: transaction});
   }).then(function(){
     var promises = [];
-    createdTransactions.forEach(function(transaction,i){
-      createdTransactions[i].TransactionComponents.forEach(function(transactionComponent, j){
-        var account = data.Transactions[i].TransactionComponents[j].getAccount();
-        promises.push(transactionComponent.setAccount(account, {transaction: t}));
+    createdFinanceTransactions.forEach(function(financeTransaction, i){
+      createdFinanceTransactions[i].FinanceTransactionComponents.forEach(function(financeTransactionComponent, j){
+        var account = data.FinanceTransactions[i].FinanceTransactionComponents[j].getAccount();
+        promises.push(financeTransactionComponent.setAccount(account, {transaction: transaction}));
       });
     });
     return Promise.all(promises);
@@ -235,11 +235,11 @@ var exportData = function(user){
     return sequelize.Promise.reject(new Error(i18n.__("Cannot export data for unknown user")));
   return sequelize.transaction(function(transaction){
     return user.reload({
-      include: [Account, {model: Transaction, include: [TransactionComponent]}],
+      include: [Account, {model: FinanceTransaction, include: [FinanceTransactionComponent]}],
       order: [
         [Account, "id", "ASC"],
-        [Transaction, "id", "ASC"],
-        [Transaction, TransactionComponent, "id", "ASC"]
+        [FinanceTransaction, "id", "ASC"],
+        [FinanceTransaction, FinanceTransactionComponent, "id", "ASC"]
       ],
       transaction: transaction
     });
@@ -250,15 +250,15 @@ var exportData = function(user){
       delete account.UserUsername;
       return account;
     });
-    user.Transactions = user.Transactions.map(function(transaction){
-      delete transaction.UserUsername;
-      return transaction;
-    }).map(function(transaction){
-      transaction.TransactionComponents = transaction.TransactionComponents.map(function(transactionComponent){
-        delete transactionComponent.TransactionId;
-        return transactionComponent;
+    user.FinanceTransactions = user.FinanceTransactions.map(function(financeTransaction){
+      delete financeTransaction.UserUsername;
+      return financeTransaction;
+    }).map(function(financeTransaction){
+      financeTransaction.FinanceTransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent){
+        delete financeTransactionComponent.FinanceTransactionId;
+        return financeTransactionComponent;
       });
-      return transaction;
+      return financeTransaction;
     });
     return user;
   });
@@ -269,6 +269,6 @@ exports.importData = importData;
 exports.exportData = exportData;
 
 exports.User = User;
-exports.Transaction = Transaction;
-exports.TransactionComponent = TransactionComponent;
+exports.FinanceTransaction = FinanceTransaction;
+exports.FinanceTransactionComponent = FinanceTransactionComponent;
 exports.Account = Account;

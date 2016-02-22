@@ -1,4 +1,4 @@
-app.controller("TransactionsController", function ($scope, $interval, TransactionsService, AuthorizationService, AccountsService, UserService, TagsService) {
+app.controller("TransactionsController", function ($scope, $interval, $route, TransactionsService, AuthorizationService, AccountsService, UserService, TagsService) {
   $scope.transactionsService = TransactionsService;
   $scope.authorizationService = AuthorizationService;
   $scope.accountsService = AccountsService;
@@ -8,8 +8,11 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
   $scope.filterTimer = undefined;
   $scope.filterDirty = false;
   $scope.filterDateCalendar = {opened: false};
+  $scope.viewVisible = function(){
+    return $route.current.controller !== "TransactionsController";
+  };
   $scope.addTransaction = function () {
-    var transaction = {TransactionComponents: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
+    var transaction = {FinanceTransactionComponents: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
     $scope.transactionsService.transactions.unshift(transaction);
     $scope.startEditing(transaction);
   };
@@ -29,7 +32,7 @@ app.controller("TransactionsController", function ($scope, $interval, Transactio
     newTransaction.version = undefined;
     newTransaction.date = TransactionsService.getDate();
     newTransaction.amount = undefined;
-    newTransaction.TransactionComponents.forEach(function (component) {
+    newTransaction.FinanceTransactionComponents.forEach(function (component) {
       component.id = undefined;
       component.version = undefined;
     });

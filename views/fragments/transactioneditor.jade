@@ -24,7 +24,7 @@ form(name="transactionEditorForm", novalidate)
 						span(class="glyphicon glyphicon-plus", aria-hidden="true")
 						| 
 						| #{__('Add component')}
-			div(class="row form-control-static", ng-repeat="component in transaction.TransactionComponents")
+			div(class="row form-control-static", ng-repeat="component in transaction.FinanceTransactionComponents")
 				div(class="form-inline col-md-12")
 					ng-form(name="transactionForm")
 						span(ng-class="{ 'has-error': transactionForm.amount.$invalid }")
