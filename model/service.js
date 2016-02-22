@@ -76,7 +76,7 @@ var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent'
 var User = sequelize.define('User', {
   username: {
     type: Sequelize.STRING,
-    primaryKey: true
+    unique: true
   },
   password: Sequelize.STRING
 }, {
@@ -93,6 +93,7 @@ FinanceTransaction.belongsTo(User);
 User.hasMany(FinanceTransaction, {onDelete: 'cascade', hooks:true});
 User.hasMany(Account, {onDelete: 'cascade', hooks:true});
 Account.hasMany(FinanceTransactionComponent, {onDelete: 'cascade', hooks:true});
+Account.belongsTo(User);
 
 /**
  * Hooks
@@ -104,9 +105,14 @@ Account.hook('beforeCreate', function(account, options){
 
 FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionComponent, options){
   var previousAccount = financeTransactionComponent.previous("AccountId");
+  var newAccount = financeTransactionComponent.AccountId;
   var previousAmount = financeTransactionComponent.previous("amount");
+  var newAmount = financeTransactionComponent.getDataValue("amount");
 
   if(financeTransactionComponent.AccountId === undefined && previousAccount === undefined)
+    return sequelize.Promise.resolve();
+
+  if(!financeTransactionComponent.changed("AccountId") && !financeTransactionComponent.changed("amount"))
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
@@ -114,22 +120,25 @@ FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionCompo
   var transaction = options.transaction;
 
   var updatePreviousAccount = function(){
+    if(previousAccount === undefined || previousAccount === null)
+      return sequelize.Promise.resolve();
+    if(!financeTransactionComponent.changed("AccountId"))
+      return sequelize.Promise.resolve();
     return Account.findById(previousAccount, {transaction: transaction}).then(function(account){
       return account.decrement("balance", {by: previousAmount, transaction: transaction});
     });
   };
   var updateNewAccount = function(){
-    return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
-      return account.increment("balance", {by: financeTransactionComponent.getDataValue("amount"), transaction: transaction});
+    if(newAccount === undefined || newAccount === null)
+      return sequelize.Promise.resolve();
+    var incrementAmount = newAmount;
+    if(!financeTransactionComponent.changed("AccountId") && financeTransactionComponent.changed("amount"))
+      incrementAmount = newAmount - previousAmount;
+    return Account.findById(newAccount, {transaction: transaction}).then(function(account){
+      return account.increment("balance", {by: incrementAmount, transaction: transaction});
     });
   };
-  if((previousAccount !== undefined && previousAccount !== null) && (financeTransactionComponent.AccountId !== undefined && financeTransactionComponent.AccountId !== null))
-    return updatePreviousAccount().then(updateNewAccount());
-  if((previousAccount !== undefined && previousAccount !== null) && (financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null))
-    return updatePreviousAccount();
-  if((previousAccount === undefined || previousAccount === null) && (financeTransactionComponent.AccountId !== undefined && financeTransactionComponent.AccountId !== null))
-    return updateNewAccount();
-  return sequelize.Promise.resolve();
+  return updatePreviousAccount().then(updateNewAccount);
 });
 
 FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComponent, options){
@@ -149,6 +158,8 @@ FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComp
   };
   return updatePreviousAccount();
 });
+
+//TODO: move reusable components from controller/routes here and add tests
 
 /**
  * Helper tools
@@ -247,11 +258,11 @@ var exportData = function(user){
     user = user.toJSON();
     delete user.password;
     user.Accounts = user.Accounts.map(function(account){
-      delete account.UserUsername;
+      delete account.UserId;
       return account;
     });
     user.FinanceTransactions = user.FinanceTransactions.map(function(financeTransaction){
-      delete financeTransaction.UserUsername;
+      delete financeTransaction.UserId;
       return financeTransaction;
     }).map(function(financeTransaction){
       financeTransaction.FinanceTransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent){

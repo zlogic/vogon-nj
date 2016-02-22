@@ -14,8 +14,61 @@ var upload = multer({ storage: storage });
 
 /* GET accounts. */
 router.get('/accounts', function(req, res, next) {
-  dbService.Account.findAll({where: {UserUsername: req.user.username} }).then(function(accounts){
+  dbService.Account.findAll({where: {UserId: req.user.id} }).then(function(accounts){
     res.send(accounts);
+  });
+});
+
+/* POST accounts. */
+router.post('/accounts', function(req, res, next) {
+  var reqAccounts = req.body;
+  var reqAccountsIds = {};
+  reqAccounts.forEach(function(account){
+    return reqAccountsIds[account.id] = account;
+  })
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction}).then(function(dbAccounts){
+      var existingAccountIds = {};
+      dbAccounts.forEach(function(account){
+        existingAccountIds[account.id] = account;
+      })
+      var newAccounts = reqAccounts.filter(function(account){
+        return existingAccountIds[account.id] === undefined;
+      }).map(function(account){
+        delete account.id;
+        return account;
+      });
+      var deletedAccounts = dbAccounts.filter(function(account){
+        return reqAccountsIds[account.id] === undefined;
+      });
+      var updatedAccounts = reqAccounts.filter(function(account){
+        return existingAccountIds[account.id] !== undefined;
+      }).map(function(account){
+        delete account.balance;
+        return account;
+      });
+      return dbService.sequelize.Promise.all(
+        deletedAccounts.map(function(account){
+          return account.destroy({transaction: transaction});
+        })
+      ).then(function(){
+        return dbService.sequelize.Promise.all(newAccounts.map(function(account){
+          return dbService.Account.create(account, {transaction: transaction}).then(function(newAccount){
+            return newAccount.setUser(req.user, {transaction: transaction});
+          });
+        }));
+      }).then(function(){
+        return dbService.sequelize.Promise.all(updatedAccounts.map(function(account){
+          return existingAccountIds[account.id].update(account, {transaction: transaction});
+        }));
+      }).then(function(){
+        return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction});
+      }).then(function(accounts){
+        res.send(accounts.map(function(account){
+          return account.toJSON();
+        }));
+      });
+    });
   });
 });
 
@@ -34,7 +87,7 @@ router.get('/transactions', function(req, res, next) {
     [sortColumn, sortDirection],
     ['id', sortDirection]
   ];
-  var where = {UserUsername: req.user.username};
+  var where = {UserId: req.user.id};
   if(filterDescription !== undefined && filterDescription.length > 0)
     where.description = {$like: filterDescription};
   if(filterDate !== undefined && filterDate.length > 0)
@@ -50,7 +103,7 @@ router.get('/transactions', function(req, res, next) {
     offset: offset, limit: pageSize
   }).then(function(financeTransactions){
     res.send(financeTransactions.map(function(financeTransaction){
-      delete financeTransaction.UserUsername;
+      delete financeTransaction.UserId;
       return financeTransaction;
     }));
   });
@@ -58,8 +111,88 @@ router.get('/transactions', function(req, res, next) {
 
 /* GET transaction. */
 router.get('/transactions/transaction/:id', function(req, res, next) {
-  dbService.FinanceTransaction.findOne({where: {id: req.params.id, UserUsername: req.user.username}, include: [dbService.FinanceTransactionComponent]}).then(function(financeTransaction){
+  dbService.FinanceTransaction.findOne({where: {id: req.params.id, UserId: req.user.id}, include: [dbService.FinanceTransactionComponent]}).then(function(financeTransaction){
     res.send(financeTransaction.toJSON());
+  });
+});
+
+/* POST transactions. */
+router.post('/transactions', function(req, res, next) {
+  var reqFinanceTransaction = req.body;
+  var reqFinanceTransactionComponents = reqFinanceTransaction.FinanceTransactionComponents !== undefined ? reqFinanceTransaction.FinanceTransactionComponents : [];
+  delete reqFinanceTransaction.FinanceTransactionComponents;
+  var reqFinanceTransactionComponentIds = {};
+  reqFinanceTransactionComponents.forEach(function(financeTransactionComponent){
+    reqFinanceTransactionComponentIds[financeTransactionComponent.id] = financeTransactionComponent;
+  });
+  var dbFinanceTransaction = undefined;
+  var dbFinanceTransactionComponents = undefined;
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
+      if(financeTransaction == null){
+        return dbService.FinanceTransaction.create(reqFinanceTransaction, {transaction: transaction}).then(function(createdTransaction){
+          dbFinanceTransaction = createdTransaction;
+          dbFinanceTransactionComponents = [];
+          return createdTransaction.setUser(req.user, {transaction: transaction});
+        });
+      } else {
+        dbFinanceTransaction = financeTransaction;
+        dbFinanceTransactionComponents = financeTransaction.FinanceTransactionComponents;
+        return dbFinanceTransaction.update(reqFinanceTransaction, {transaction: transaction});
+      }
+    }).then(function(){
+      var existingFinanceTransactionComponentIds = {};
+      dbFinanceTransactionComponents.forEach(function(financeTransactionComponent){
+        existingFinanceTransactionComponentIds[financeTransactionComponent.id] = financeTransactionComponent;
+      });
+      var newFinanceTransactionComponents = reqFinanceTransactionComponents.filter(function(financeTransactionComponent){
+        return existingFinanceTransactionComponentIds[financeTransactionComponent.id] === undefined;
+      }).map(function(financeTransactionComponent){
+        delete financeTransactionComponent.id;
+        return financeTransactionComponent;
+      });
+      var deletedFinanceTransactionComponents = dbFinanceTransactionComponents.filter(function(financeTransactionComponent){
+        return reqFinanceTransactionComponentIds[financeTransactionComponent.id] === undefined;
+      });
+      var updatedFinanceTransactionComponents = reqFinanceTransactionComponents.filter(function(financeTransactionComponent){
+        return existingFinanceTransactionComponentIds[financeTransactionComponent.id] !== undefined;
+      }).map(function(financeTransactionComponent){
+        delete financeTransactionComponent.balance;
+        return financeTransactionComponent;
+      });
+      return dbService.sequelize.Promise.all(
+        deletedFinanceTransactionComponents.map(function(financeTransactionComponent){
+          return financeTransactionComponent.destroy({transaction: transaction});
+        })
+      ).then(function(){
+        return dbService.sequelize.Promise.all(newFinanceTransactionComponents.map(function(financeTransactionComponent){
+          return dbService.FinanceTransactionComponent.create(financeTransactionComponent, {transaction: transaction}).then(function(financeTransactionComponent){
+            return financeTransactionComponent.setFinanceTransaction(dbFinanceTransaction, {transaction: transaction});
+          });
+        }));
+      }).then(function(){
+        return dbService.sequelize.Promise.all(updatedFinanceTransactionComponents.map(function(financeTransactionComponent){
+          return existingFinanceTransactionComponentIds[financeTransactionComponent.id].update(financeTransactionComponent, {transaction: transaction});
+        }));
+      }).then(function(){
+        return dbFinanceTransaction.reload({transaction: transaction});
+      }).then(function(financeTransactionComponent){
+        res.send(financeTransactionComponent.toJSON());
+      });
+    });
+  });
+});
+
+/* POST transactions. */
+router.delete('/transactions/transaction/:id', function(req, res, next) {
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: req.params.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
+      if(financeTransaction != null)
+        return financeTransaction.destroy({transaction: transaction}).then(function(){
+          res.send(financeTransaction.toJSON());
+        })
+      res.send("Error");
+    });
   });
 });
 
@@ -68,6 +201,19 @@ router.get('/user', function(req, res, next) {
   var user = req.user.toJSON();
   delete user.password;
   res.send(user);
+});
+
+/* POST user. */
+router.post('/user', function(req, res, next) {
+  var reqUser = req.body;
+  delete reqUser.id;
+  dbService.sequelize.transaction(function(transaction){
+    return req.user.update(reqUser).then(function(user){
+      user = user.toJSON();
+      delete user.password;
+      res.send(user);
+    });
+  });
 });
 
 /* GET currencies. */
@@ -85,7 +231,7 @@ router.get('/currencies', function(req, res, next) {
 
 /* GET tags. */
 router.get('/analytics/tags', function(req, res, next) {
-  dbService.FinanceTransaction.findAll({where: {UserUsername: req.user.username}, attributes: ['tags']}).then(function(financeTransactions){
+  dbService.FinanceTransaction.findAll({where: {UserId: req.user.id}, attributes: ['tags']}).then(function(financeTransactions){
     var tagsSet = new Set([""]);
     financeTransactions.forEach(function(financeTransaction){
       financeTransaction.tags.forEach(function(tag){

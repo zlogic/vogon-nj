@@ -691,8 +691,6 @@ describe('Model', function() {
           dbService.sequelize.transaction(function (transaction) {
             return dbService.importData(user, data, {transaction: transaction});
           }).then(function(){
-            dbService.exportData(user).then(function(exportData){console.log(JSON.stringify(exportData))});
-          }).then(function(){
             return dbService.User.findAll({
               include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}],
               order: [
@@ -791,8 +789,6 @@ describe('Model', function() {
           data = JSON.parse(data);
           dbService.sequelize.transaction(function (transaction) {
             return dbService.importData(user, data, {transaction: transaction});
-          }).then(function(){
-            dbService.exportData(user).then(function(exportData){console.log(JSON.stringify(exportData))});
           }).then(function(){
             return dbService.User.findAll({
               include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}],
@@ -941,6 +937,7 @@ describe('Model', function() {
         return dbService.exportData(user);
       }).then(function(exportData){
         assert.deepEqual(exportData, {
+          id:1,
           username:"user01",
           Accounts:[
             {id:1, name:"test account 1", balance:49, currency:"RUB", includeInTotal:true, showInList:true},

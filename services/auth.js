@@ -9,7 +9,6 @@ var LocalStrategy = require('passport-local').Strategy;
 var server = oauth2orize.createServer();
 
 // TODO: keep this in database?
-// TODO: tokens are insecure in case a user changes their username
 // TODO: expire tokens
 var tokens = {};
 
@@ -26,7 +25,7 @@ passport.use(new BearerStrategy(
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    dbService.User.findById(username).then(function (user) {
+    dbService.User.findOne({where: {username: username}}).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
       if (user.password !== password)
@@ -37,9 +36,15 @@ passport.use(new LocalStrategy(
 ));
 
 server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
-  var accessToken = uid2(256);
-  tokens[accessToken] = username;
-  done(null, accessToken);
+  dbService.User.findOne({where: {username: username}}).then(function (user) {
+      if (!user)
+        return done(new Error(i18n.__("Bad credentials")));
+      if (user.password !== password)
+        return done(new Error(i18n.__("Bad credentials")));//TODO: use salted hashes
+      var accessToken = uid2(256);
+      tokens[accessToken] = user.id;
+      done(null, accessToken);
+    }).catch(done);
 }));
 
 var allowRegistration= function(){
