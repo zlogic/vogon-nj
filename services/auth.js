@@ -29,8 +29,8 @@ passport.use(new LocalStrategy(
     dbService.User.findById(username).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
-      if (!user.password === password)
-        return done(null, false);//TODO: use salted hashes
+      if (user.password !== password)
+        return done(new Error(i18n.__("Bad credentials")));//TODO: use salted hashes
       return done(null, user);
     }).catch(done);
   }
