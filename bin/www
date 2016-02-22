@@ -23,7 +23,7 @@ app.set('port', port);
 var server = http.createServer(app);
 
 /**
- * Init Sequelize, thenl listen on provided port, on all network interfaces.
+ * Init Sequelize, then listen on provided port, on all network interfaces.
  */
 
 model.sequelize.sync().then(function () {
