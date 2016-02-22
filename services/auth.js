@@ -18,17 +18,15 @@ passport.use(new BearerStrategy(
     if(tokens[token] === undefined){
       cb(null, false);
     } else {
-      dbService.User.findOne({ username: tokens[token] }).then(function(user) {
+      dbService.User.findById(tokens[token]).then(function(user) {
         cb(null, user);
-      }).catch(function(err){
-        cb(err);
-      });
+      }).catch(cb);
     }
   }));
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    dbService.User.findOne({ username: username }).then(function (user) {
+    dbService.User.findById(username).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
       if (!user.password === password)
@@ -40,9 +38,7 @@ passport.use(new LocalStrategy(
 
 server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
   var accessToken = uid2(256);
-  if(tokens[accessToken] === undefined)
-    tokens[accessToken] = [];
-  tokens[accessToken].push(username);
+  tokens[accessToken] = username;
   done(null, accessToken);
 }));
 
