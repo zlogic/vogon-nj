@@ -1,8 +1,10 @@
 var express = require('express');
 var dbService = require('../model/service');
+var analyticsService = require('../services/analytics');
 var passport = require('passport');
 var multer = require('multer');
 var currencies = require('country-data').currencies;
+var i18n = require('i18n');
 var router = express.Router();
 
 /* Authentication */
@@ -25,13 +27,13 @@ router.post('/accounts', function(req, res, next) {
   var reqAccountsIds = {};
   reqAccounts.forEach(function(account){
     return reqAccountsIds[account.id] = account;
-  })
+  });
   dbService.sequelize.transaction(function(transaction){
     return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction}).then(function(dbAccounts){
       var existingAccountIds = {};
       dbAccounts.forEach(function(account){
         existingAccountIds[account.id] = account;
-      })
+      });
       var newAccounts = reqAccounts.filter(function(account){
         return existingAccountIds[account.id] === undefined;
       }).map(function(account){
@@ -93,9 +95,9 @@ router.get('/transactions', function(req, res, next) {
   if(filterDate !== undefined && filterDate.length > 0)
     where.date = filterDate;
   if(filterTags !== undefined && filterTags.length > 0)
-    filterTags = filterTags.split(",")
+    filterTags = filterTags.split(",");
   if(filterTags !== undefined && filterTags.length > 0)
-    where.$or = filterTags.map(function(tag){return {tags: {$like: '%' + tag + '%'}}});
+    where.$or = filterTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}});
   dbService.FinanceTransaction.findAll({
     where: where,
     include: [dbService.FinanceTransactionComponent],
@@ -190,7 +192,7 @@ router.delete('/transactions/transaction/:id', function(req, res, next) {
       if(financeTransaction != null)
         return financeTransaction.destroy({transaction: transaction}).then(function(){
           res.send(financeTransaction.toJSON());
-        })
+        });
       res.send("Error");
     });
   }).catch(next);
@@ -229,7 +231,7 @@ router.get('/currencies', function(req, res, next) {
   }));
 });
 
-/* GET tags. */
+/* GET analytics tags. */
 router.get('/analytics/tags', function(req, res, next) {
   dbService.FinanceTransaction.findAll({where: {UserId: req.user.id}, attributes: ['tags']}).then(function(financeTransactions){
     var tagsSet = new Set([""]);
@@ -239,6 +241,13 @@ router.get('/analytics/tags', function(req, res, next) {
       });
     });
     res.send(Array.from(tagsSet));
+  }).catch(next);
+});
+
+/* POST analytics. */
+router.post('/analytics', function(req, res, next) {
+  analyticsService.buildReport(req.user, req.body).then(function(report){
+    res.send(report);
   }).catch(next);
 });
 
@@ -262,7 +271,7 @@ router.post('/import', upload.single('file'), function(req, res, next) {
 
 /* Error handler */
 router.use(function(err, req, res, next) {
-  console.error(err);
+  console.error(i18n.__("An error has occurred: %s, stack trace:\n%s"), err, err.stack);
   res.status(err.status || 500);
   res.send(err.message);
 });

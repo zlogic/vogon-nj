@@ -58,7 +58,7 @@ app.use(passport.initialize());
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
-    console.error(err);
+    console.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -70,7 +70,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function(err, req, res, next) {
-  console.error(err);
+  console.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,

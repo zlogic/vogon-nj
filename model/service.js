@@ -38,7 +38,7 @@ var hashPassword = function(password, salt, options, done){
         iterations: options.iterations,
         keylen: options.keylen,
         digest: options.digest
-      }
+      };
       done(null, JSON.stringify({salt: salt, hash:hash, options: options}));
     });
   };
@@ -79,15 +79,21 @@ var FinanceTransaction = sequelize.define('FinanceTransaction', {
     get: function() {
       if(this.getDataValue("tags") === undefined)
         return undefined;
-      return JSON.parse(this.getDataValue("tags")).filter(function(tag){ return tag !== undefined && tag.length>0; });
+      return JSON.parse(this.getDataValue("tags")).filter(function(tag){
+        return tag !== undefined && tag.length > 0;
+      });
     },
     set: function(value) {
       if(!Array.isArray(value))
         throw new Error("Tags must be an array");
-      this.setDataValue("tags", JSON.stringify(value.sort()));
+      this.setDataValue("tags", JSON.stringify(value.filter(function(tag){
+        return tag !== undefined && tag.length > 0;
+      }).sort()));
     }
   },
-  date: Sequelize.DATEONLY
+  date:{
+    type: Sequelize.DATEONLY
+  }
 }, {
   timestamps: false
 });
@@ -103,7 +109,12 @@ var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent'
     }
   }
 }, {
-  timestamps: false
+  timestamps: false,
+  instanceMethods: {
+    getRawAmount: function(){
+      return parseInt(this.getDataValue('amount'), 10);
+    }
+  }
 });
 
 var User = sequelize.define('User', {
@@ -123,7 +134,7 @@ var User = sequelize.define('User', {
         done(null, JSON.parse(result).hash === storedUserPassword.hash);
       });
     }
-  },
+  }
 });
 
 /**
@@ -334,6 +345,9 @@ var exportData = function(user){
 exports.sequelize = sequelize;
 exports.importData = importData;
 exports.exportData = exportData;
+
+exports.convertAmountToFixed = convertAmountToFixed;
+exports.convertAmountToFloat = convertAmountToFloat;
 
 exports.User = User;
 exports.FinanceTransaction = FinanceTransaction;

@@ -78,6 +78,12 @@ form(name="analyticsForm", novalidate)
             | 
             | #{__('Build report')}
       div(class="well well-sm form-control-static", ng-if="report")
+        div(class="row form-control-static")
+          div(class="col-md-12 form-inline")
+            label
+              | #{__('Select currency:')}
+            | 
+            select(ng-model="report.selectedCurrency", ng-change="currencyChanged()", ng-options="currency.currencyCode as currency.displayName for currency in currencyService.currencies|filter:filterCurrency", class="form-control")
         div(class="row")
           div(class="col-md-6")
             label(class="form-control-static")
@@ -94,15 +100,14 @@ form(name="analyticsForm", novalidate)
                   div(class="col-md-3")
                     label
                       | #{__('Date')}
-                div(class="row", ng-repeat="transaction in report.transactions")
+                div(class="row", ng-repeat="transaction in report.financeTransactions")
                   hr
                   div(class="col-md-6")
                     | {{transaction.description}}
                   div(class="col-md-3 text-right")
-                    div(ng-repeat="(currencyCode, total) in totals = (transactionsService.totalsByCurrency(transaction))")
-                      span(ng-show="transactionsService.isTransferTransaction(transaction)")
-                        | &sum;
-                      | {{total| number:2}} {{currencyCode}}
+                    span(ng-show="transactionsService.isTransferTransaction(transaction)")
+                      | &sum;
+                    | {{transaction.amount | number:2}} {{report.selectedCurrency}}
                   div(class="col-md-3")
                     | {{transaction.date| date}}
           div(class="col-md-6 form-group")
@@ -122,13 +127,7 @@ form(name="analyticsForm", novalidate)
                   div(class="col-md-9")
                     | {{tagExpense.tag}}
                   div(class="col-md-3 text-right")
-                    div(ng-repeat="(currencyCode, total) in tagExpense.amounts")
-                      | {{total| number:2}} {{currencyCode}}
-        div(class="row form-control-static")
-          div(class="col-md-12 form-inline")
-            label
-              | #{__('Select charts currency:')}
-            select(ng-model="report.selectedCurrency", ng-change="currencyChanged()", ng-options="currency.currencyCode as currency.displayName for currency in currencyService.currencies|filter:filterCurrency", class="form-control")
+                    | {{tagExpense.amount | number:2}} {{report.selectedCurrency}}
         div(class="row form-control-static")
           div(class="col-md-12")
             label
