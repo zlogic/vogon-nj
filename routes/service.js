@@ -16,7 +16,7 @@ var upload = multer({ storage: storage });
 router.get('/accounts', function(req, res, next) {
   dbService.Account.findAll({where: {UserId: req.user.id} }).then(function(accounts){
     res.send(accounts);
-  });
+  }).catch(next);
 });
 
 /* POST accounts. */
@@ -69,7 +69,7 @@ router.post('/accounts', function(req, res, next) {
         }));
       });
     });
-  });
+  }).catch(next);
 });
 
 /* GET transactions. */
@@ -106,7 +106,7 @@ router.get('/transactions', function(req, res, next) {
       delete financeTransaction.UserId;
       return financeTransaction;
     }));
-  });
+  }).catch(next);
 });
 
 /* GET transaction. */
@@ -180,7 +180,7 @@ router.post('/transactions', function(req, res, next) {
         res.send(financeTransactionComponent.toJSON());
       });
     });
-  });
+  }).catch(next);
 });
 
 /* POST transactions. */
@@ -193,7 +193,7 @@ router.delete('/transactions/transaction/:id', function(req, res, next) {
         })
       res.send("Error");
     });
-  });
+  }).catch(next);
 });
 
 /* GET user. */
@@ -213,7 +213,7 @@ router.post('/user', function(req, res, next) {
       delete user.password;
       res.send(user);
     });
-  });
+  }).catch(next);
 });
 
 /* GET currencies. */
@@ -239,7 +239,7 @@ router.get('/analytics/tags', function(req, res, next) {
       });
     });
     res.send(Array.from(tagsSet));
-  });
+  }).catch(next);
 });
 
 /* GET export */
@@ -247,7 +247,7 @@ router.post('/export', function(req, res, next) {
   dbService.exportData(req.user).then(function(exportedData){
     res.attachment('vogon-' + new Date().toJSON() + '.json');
     res.send(JSON.stringify(exportedData, null, "\t"));
-  });
+  }).catch(next);
 });
 
 /* POST import */
@@ -257,7 +257,14 @@ router.post('/import', upload.single('file'), function(req, res, next) {
     return dbService.importData(req.user, JSON.parse(data), {transaction: transaction}).then(function(){
       res.send(true);
     });
-  });
+  }).catch(next);
+});
+
+/* Error handler */
+router.use(function(err, req, res, next) {
+  console.error(err);
+  res.status(err.status || 500);
+  res.send(err.message);
 });
 
 module.exports = router;
