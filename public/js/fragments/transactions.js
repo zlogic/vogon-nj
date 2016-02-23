@@ -8,9 +8,6 @@ app.controller("TransactionsController", function ($scope, $interval, $route, Tr
   $scope.filterTimer = undefined;
   $scope.filterDirty = false;
   $scope.filterDateCalendar = {opened: false};
-  $scope.viewVisible = function(){
-    return $route.current.controller !== "TransactionsController";
-  };
   $scope.addTransaction = function () {
     var transaction = {FinanceTransactionComponents: [], date: TransactionsService.getDate(), tags: [], type: TransactionsService.defaultTransactionType.value};
     $scope.transactionsService.transactions.unshift(transaction);
