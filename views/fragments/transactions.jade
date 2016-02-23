@@ -4,7 +4,7 @@ div(class="panel panel-default")
       span(class="glyphicon glyphicon-plus", aria-hidden="true")
       | 
       | #{__('Add transaction')}
-    div(infinite-scroll="transactionsService.nextPage()", infinite-scroll-disabled="transactionsService.loadingNextPage")
+    div(infinite-scroll="transactionsService.nextPage()", infinite-scroll-disabled="transactionsService.loadingNextPage || transactionsService.lastPage")
       div(class="container-fluid")
         div(class="row", id="transactionsTable")
           hr
