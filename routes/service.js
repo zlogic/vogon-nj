@@ -158,9 +158,6 @@ router.post('/transactions', function(req, res, next) {
       });
       var updatedFinanceTransactionComponents = reqFinanceTransactionComponents.filter(function(financeTransactionComponent){
         return existingFinanceTransactionComponentIds[financeTransactionComponent.id] !== undefined;
-      }).map(function(financeTransactionComponent){
-        delete financeTransactionComponent.balance;
-        return financeTransactionComponent;
       });
       return dbService.sequelize.Promise.all(
         deletedFinanceTransactionComponents.map(function(financeTransactionComponent){
@@ -168,8 +165,14 @@ router.post('/transactions', function(req, res, next) {
         })
       ).then(function(){
         return dbService.sequelize.Promise.all(newFinanceTransactionComponents.map(function(financeTransactionComponent){
+          var accountId = financeTransactionComponent.AccountId;
+          delete financeTransactionComponent.AccountId;
           return dbService.FinanceTransactionComponent.create(financeTransactionComponent, {transaction: transaction}).then(function(financeTransactionComponent){
-            return financeTransactionComponent.setFinanceTransaction(dbFinanceTransaction, {transaction: transaction});
+            return financeTransactionComponent.setFinanceTransaction(dbFinanceTransaction, {transaction: transaction}).then(function(){
+              return dbService.Account.findOne({where: {UserId: req.user.id, id: accountId}, transaction: transaction}).then(function(account){
+                return financeTransactionComponent.setAccount(account, {transaction: transaction});
+              });
+            });
           });
         }));
       }).then(function(){
