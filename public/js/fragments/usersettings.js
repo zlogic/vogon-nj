@@ -1,4 +1,4 @@
-app.controller("UserSettingsController", function ($scope, AuthorizationService, UserService, CurrencyService, HTTPService) {
+app.controller("UserSettingsController", function ($scope, AuthorizationService, UserService, CurrencyService, TagsService, HTTPService) {
   $scope.userService = UserService;
   $scope.currencies = CurrencyService;
   $scope.file = undefined;
@@ -25,6 +25,7 @@ app.controller("UserSettingsController", function ($scope, AuthorizationService,
     formData.append("file", $scope.file);
     return HTTPService.post("service/import", formData, importPostHeaders, undefined, angular.identity).then(function () {
       HTTPService.updateAllData();
+      TagsService.update();
     });
   };
   $scope.exportData = function () {
