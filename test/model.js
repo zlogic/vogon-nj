@@ -952,8 +952,8 @@ describe('Model', function() {
             {id:2, name:"test account 2", balance:173, currency:"RUB", includeInTotal:true, showInList:true}
           ],
           FinanceTransactions:[
-            {id:1, type:"expenseincome", description:"test transaction 1", date:currentDate(), tags:["awesome","magic"], FinanceTransactionComponents:[{id:1 ,amount:42, AccountId:1}, {id:2, amount:160, AccountId:2}]},
-            {id:2, type:"expenseincome", description:"test transaction 2", date:currentDate(), tags:["magic"], FinanceTransactionComponents:[{id:3, amount:7, AccountId:1}, {id:4, amount:13, AccountId:2}]}]});
+            {type:"expenseincome", description:"test transaction 1", date:currentDate(), tags:["awesome","magic"], FinanceTransactionComponents:[{amount:42, AccountId:1}, {amount:160, AccountId:2}]},
+            {type:"expenseincome", description:"test transaction 2", date:currentDate(), tags:["magic"], FinanceTransactionComponents:[{amount:7, AccountId:1}, {amount:13, AccountId:2}]}]});
         done();
       }).catch(done);
     });

@@ -313,7 +313,7 @@ var exportData = function(user){
     return sequelize.Promise.reject(new Error(i18n.__("Cannot export data for unknown user")));
   return sequelize.transaction(function(transaction){
     return user.reload({
-      include: [Account, {model: FinanceTransaction, include: [FinanceTransactionComponent]}],
+      include: [Account, {model: FinanceTransaction, include: [{model: FinanceTransactionComponent, attributes: ['amount', 'AccountId']}]}],
       order: [
         [Account, "id", "ASC"],
         [FinanceTransaction, "id", "ASC"],
@@ -332,10 +332,7 @@ var exportData = function(user){
       delete financeTransaction.UserId;
       return financeTransaction;
     }).map(function(financeTransaction){
-      financeTransaction.FinanceTransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent){
-        delete financeTransactionComponent.FinanceTransactionId;
-        return financeTransactionComponent;
-      });
+      delete financeTransaction.id;
       return financeTransaction;
     });
     return user;
