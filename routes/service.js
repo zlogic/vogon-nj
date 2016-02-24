@@ -89,17 +89,17 @@ router.get('/transactions', function(req, res, next) {
     [sortColumn, sortDirection],
     ['id', sortDirection]
   ];
-  var where = {UserId: req.user.id};
+  var where = [{UserId: req.user.id}];
   if(filterDescription !== undefined && filterDescription.length > 0)
-    where.description = {$like: filterDescription};
+    where.push(dbService.sequelize.where(dbService.sequelize.fn('lower', dbService.sequelize.col('description')), 'LIKE', filterDescription.toLowerCase()));
   if(filterDate !== undefined && filterDate.length > 0)
-    where.date = filterDate;
+    where.push({date: filterDate});
   if(filterTags !== undefined && filterTags.length > 0)
-    filterTags = filterTags.split(",");
+    filterTags = JSON.parse(filterTags);
   if(filterTags !== undefined && filterTags.length > 0)
-    where.$or = filterTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}});
+    where.push({$or: filterTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}})});
   dbService.FinanceTransaction.findAll({
-    where: where,
+    where: {$and: where},
     include: [dbService.FinanceTransactionComponent],
     order: sortOrder,
     offset: offset, limit: pageSize

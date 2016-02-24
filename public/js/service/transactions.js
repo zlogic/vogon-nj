@@ -40,7 +40,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
         if (that.filterTags !== undefined) {
           var tags = tagsToJson(that.filterTags);
           if (tags.length > 0)
-            params.filterTags = tags;
+            params.filterTags = JSON.stringify(tags);
         }
         return that.nextPageRequest = HTTPService.get("service/transactions/?" + encodeForm(params), undefined, HTTPService.buildRequestParams(false))
             .then(function (data) {
