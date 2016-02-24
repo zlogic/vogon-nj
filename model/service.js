@@ -196,21 +196,16 @@ FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionCompo
 });
 
 FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComponent, options){
-  var previousAccount = financeTransactionComponent.previous("AccountId");
-  var previousAmount = financeTransactionComponent.previous("amount");
-  if(previousAccount === undefined || previousAccount === null)
+  if(financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null)
     return sequelize.Promise.resolve();
 
   if(options === undefined || options.transaction === undefined)
     return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction")));
 
   var transaction = options.transaction;
-  var updatePreviousAccount = function(){
-    return Account.findById(previousAccount, {transaction: transaction}).then(function(account){
-      return account.decrement("balance", {by: previousAmount, transaction: transaction});
-    });
-  };
-  return updatePreviousAccount();
+  return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
+    return account.decrement("balance", {by: financeTransactionComponent.getDataValue("amount"), transaction: transaction});
+  });
 });
 
 var userPasswordHashingHook = function(user, options, done){
@@ -324,15 +319,21 @@ var exportData = function(user){
   }).then(function(user){
     user = user.toJSON();
     delete user.password;
-    user.Accounts = user.Accounts.map(function(account){
+    var accountRemappings = {};
+    user.Accounts = user.Accounts.map(function(account, i){
+      var newAccountId = i+1;
+      accountRemappings[account.id] = newAccountId;
+      account.id = newAccountId;
       delete account.UserId;
       return account;
     });
     user.FinanceTransactions = user.FinanceTransactions.map(function(financeTransaction){
-      delete financeTransaction.UserId;
-      return financeTransaction;
-    }).map(function(financeTransaction){
       delete financeTransaction.id;
+      delete financeTransaction.UserId;
+      financeTransaction.FinanceTransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent){
+        financeTransactionComponent.AccountId = accountRemappings[financeTransactionComponent.AccountId];
+        return financeTransactionComponent;
+      })
       return financeTransaction;
     });
     return user;

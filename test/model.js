@@ -894,6 +894,7 @@ describe('Model', function() {
           password: "mypassword",
           Accounts: [
             {
+              id: 1,
               name: "test account 1",
               balance: 5,
               currency: "RUB",
@@ -901,6 +902,7 @@ describe('Model', function() {
               showInList: true
             },
             {
+              id:3,
               name: "test account 2",
               balance: 15,
               currency: "RUB",
@@ -929,6 +931,8 @@ describe('Model', function() {
           var account2 = createdUser.Accounts[1];
           var transaction1 = createdUser.FinanceTransactions[0];
           var transaction2 = createdUser.FinanceTransactions[1];
+          assert.deepEqual(account1.id, 1);
+          assert.deepEqual(account2.id, 3);
           return transaction1.FinanceTransactionComponents[0].setAccount(account1, {transaction: transaction}).then(function(){
             return transaction1.FinanceTransactionComponents[1].setAccount(account2, {transaction: transaction});
           }).then(function(){
