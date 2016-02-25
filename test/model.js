@@ -419,7 +419,7 @@ describe('Model', function() {
           transaction1 = createdUser.FinanceTransactions[0];
           var transactionComponent1 = transaction1.FinanceTransactionComponents[0];
           return transactionComponent1.setAccount(account1, {transaction: transaction}).then(function(){
-            return transaction1.setUser(createdUser);
+            return transaction1.setUser(createdUser, {transaction: transaction});
           });
         }).then(function(){
           return dbService.FinanceTransactionComponent.create({

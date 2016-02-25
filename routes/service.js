@@ -213,7 +213,7 @@ router.post('/user', function(req, res, next) {
   var reqUser = req.body;
   delete reqUser.id;
   dbService.sequelize.transaction(function(transaction){
-    return req.user.update(reqUser).then(function(user){
+    return req.user.update(reqUser, {transaction: transaction}).then(function(user){
       user = user.toJSON();
       delete user.password;
       res.send(user);

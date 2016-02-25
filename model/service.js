@@ -56,6 +56,10 @@ var hashPassword = function(password, salt, options, done){
 /**
  * Model
  */
+var Version = {
+  type: Sequelize.INTEGER,
+  defaultValue: 0
+};
 var Account = sequelize.define('Account', {
   name: Sequelize.STRING,
   balance: {
@@ -66,7 +70,8 @@ var Account = sequelize.define('Account', {
   },
   currency: Sequelize.STRING,
   includeInTotal: Sequelize.BOOLEAN,
-  showInList: Sequelize.BOOLEAN
+  showInList: Sequelize.BOOLEAN,
+  version: Version
 }, {
   timestamps: false
 });
@@ -93,9 +98,10 @@ var FinanceTransaction = sequelize.define('FinanceTransaction', {
   },
   date:{
     type: Sequelize.DATEONLY
-  }
+  },
+  version: Version
 }, {
-  createdAt: false,
+  timestamps: false
 });
 
 var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent', {
@@ -107,9 +113,10 @@ var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent'
     set: function(val){
       this.setDataValue("amount", convertAmountToFixed(val));
     }
-  }
+  },
+  version: Version
 }, {
-  createdAt: false,
+  timestamps: false,
   instanceMethods: {
     getRawAmount: function(){
       return parseInt(this.getDataValue('amount'), 10);
@@ -122,9 +129,10 @@ var User = sequelize.define('User', {
     type: Sequelize.STRING,
     unique: true
   },
-  password: Sequelize.TEXT
+  password: Sequelize.TEXT,
+  version: Version
 }, {
-  createdAt: false,
+  timestamps: false,
   instanceMethods: {
     validatePassword: function(password, done){
       var storedUserPassword = JSON.parse(this.getDataValue('password'));
@@ -164,13 +172,13 @@ FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionCompo
   var newAmount = financeTransactionComponent.getDataValue("amount");
 
   if(financeTransactionComponent.AccountId === undefined && previousAccount === undefined)
-    return sequelize.Promise.resolve();
+    return;
 
   if(!financeTransactionComponent.changed("AccountId") && !financeTransactionComponent.changed("amount"))
-    return sequelize.Promise.resolve();
+    return;
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterUpdate hook can only be run from a transaction")));
+    throw new Error(i18n.__("FinanceTransactionComponent afterUpdate hook can only be run from a transaction"));
   var transaction = options.transaction;
 
   var updatePreviousAccount = function(){
@@ -197,10 +205,10 @@ FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionCompo
 
 FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComponent, options){
   if(financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null)
-    return sequelize.Promise.resolve();
+    return;
 
   if(options === undefined || options.transaction === undefined)
-    return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction")));
+    throw new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction"));
 
   var transaction = options.transaction;
   return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
@@ -220,6 +228,23 @@ var userPasswordHashingHook = function(user, options, done){
 };
 User.hook('beforeCreate', userPasswordHashingHook);
 User.hook('beforeUpdate', userPasswordHashingHook);
+
+var conflictResolutionHook = function(instance, options){
+  if(options === undefined || options.transaction === undefined)
+    throw new Error(i18n.__("conflictResolutionHook hook can only be run from a transaction"));
+  var transaction = options.transaction;
+  return instance.Model.findOne({where: {id: instance.id}, transaction: transaction}).then(function(dbInstance){
+    if(dbInstance.version !== instance.version){
+      throw new Error(i18n.__("Data was already updated from another session"));
+    } else if(!instance.changed('version')){
+      return dbInstance.increment('version', {transaction: transaction});
+    }
+  });
+};
+Account.hook('beforeUpdate', conflictResolutionHook);
+FinanceTransaction.hook('beforeUpdate', conflictResolutionHook);
+FinanceTransactionComponent.hook('beforeUpdate', conflictResolutionHook);
+User.hook('beforeUpdate', conflictResolutionHook);
 
 //TODO: move reusable components from controller/routes here and add tests
 
@@ -310,9 +335,9 @@ var exportData = function(user){
     return User.findOne({
       where: {id: user.id},
       include: [
-        {model: Account, attributes: {exclude: ['UserId', 'updatedAt']}},
-        {model: FinanceTransaction, attributes: {exclude: ['UserId', 'id', 'updatedAt']}, include: [
-          {model: FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId', 'UserId', 'id', 'updatedAt']}}
+        {model: Account, attributes: {exclude: ['UserId', 'version']}},
+        {model: FinanceTransaction, attributes: {exclude: ['UserId', 'id', 'version']}, include: [
+          {model: FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId', 'UserId', 'id', 'version']}}
         ]
       }],
       order: [
@@ -320,7 +345,7 @@ var exportData = function(user){
         [FinanceTransaction, "id", "ASC"],
         [FinanceTransaction, FinanceTransactionComponent, "id", "ASC"]
       ],
-      attributes: {exclude: ['updatedAt', 'password']},
+      attributes: {exclude: ['version', 'password']},
       transaction: transaction
     });
   }).then(function(user){
