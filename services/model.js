@@ -237,6 +237,7 @@ var conflictResolutionHook = function(instance, options){
     if(dbInstance.version !== instance.version){
       throw new Error(i18n.__("Data was already updated from another session"));
     } else if(!instance.changed('version')){
+      instance.version++;
       return dbInstance.increment('version', {transaction: transaction});
     }
   });

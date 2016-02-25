@@ -1,6 +1,6 @@
 var passport = require('passport');
 var i18n = require('i18n');
-var dbService = require('../model/service');
+var dbService = require('./model');
 var oauth2orize = require('oauth2orize');
 var uid2 = require('uid2');
 var BearerStrategy = require('passport-http-bearer').Strategy;

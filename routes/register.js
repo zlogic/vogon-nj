@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var dbService = require('../model/service');
+var dbService = require('../services/model');
 var auth = require('../services/auth');
 var i18n = require('i18n');
 

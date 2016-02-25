@@ -1,5 +1,5 @@
 var assert = require('assert');
-var dbService = require('../model/service');
+var dbService = require('../services/model');
 var fs = require('fs');
 
 var currentDate = function(){

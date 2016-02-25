@@ -1,5 +1,5 @@
 var express = require('express');
-var dbService = require('../model/service');
+var dbService = require('../services/model');
 var analyticsService = require('../services/analytics');
 var passport = require('passport');
 var multer = require('multer');

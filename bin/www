@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('vogon-nj:server');
 var http = require('http');
-var model = require("../model/service");
+var model = require('../services/model');
 
 /**
  * Get port from environment and store in Express.
