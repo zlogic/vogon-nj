@@ -95,7 +95,7 @@ var FinanceTransaction = sequelize.define('FinanceTransaction', {
     type: Sequelize.DATEONLY
   }
 }, {
-  timestamps: false
+  createdAt: false,
 });
 
 var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent', {
@@ -109,7 +109,7 @@ var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent'
     }
   }
 }, {
-  timestamps: false,
+  createdAt: false,
   instanceMethods: {
     getRawAmount: function(){
       return parseInt(this.getDataValue('amount'), 10);
@@ -124,7 +124,7 @@ var User = sequelize.define('User', {
   },
   password: Sequelize.TEXT
 }, {
-  timestamps: false,
+  createdAt: false,
   instanceMethods: {
     validatePassword: function(password, done){
       var storedUserPassword = JSON.parse(this.getDataValue('password'));
@@ -307,34 +307,35 @@ var exportData = function(user){
   if(user === undefined)
     return sequelize.Promise.reject(new Error(i18n.__("Cannot export data for unknown user")));
   return sequelize.transaction(function(transaction){
-    return user.reload({
-      include: [Account, {model: FinanceTransaction, include: [{model: FinanceTransactionComponent, attributes: ['amount', 'AccountId']}]}],
+    return User.findOne({
+      where: {id: user.id},
+      include: [
+        {model: Account, attributes: {exclude: ['UserId', 'updatedAt']}},
+        {model: FinanceTransaction, attributes: {exclude: ['UserId', 'id', 'updatedAt']}, include: [
+          {model: FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId', 'UserId', 'id', 'updatedAt']}}
+        ]
+      }],
       order: [
         [Account, "id", "ASC"],
         [FinanceTransaction, "id", "ASC"],
         [FinanceTransaction, FinanceTransactionComponent, "id", "ASC"]
       ],
+      attributes: {exclude: ['updatedAt', 'password']},
       transaction: transaction
     });
   }).then(function(user){
     user = user.toJSON();
-    delete user.password;
     var accountRemappings = {};
     user.Accounts = user.Accounts.map(function(account, i){
       var newAccountId = i+1;
       accountRemappings[account.id] = newAccountId;
       account.id = newAccountId;
-      delete account.UserId;
       return account;
     });
-    user.FinanceTransactions = user.FinanceTransactions.map(function(financeTransaction){
-      delete financeTransaction.id;
-      delete financeTransaction.UserId;
-      financeTransaction.FinanceTransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent){
+    user.FinanceTransactions.forEach(function(financeTransaction){
+      financeTransaction.FinanceTransactionComponents.forEach(function(financeTransactionComponent){
         financeTransactionComponent.AccountId = accountRemappings[financeTransactionComponent.AccountId];
-        return financeTransactionComponent;
-      })
-      return financeTransaction;
+      });
     });
     return user;
   });
