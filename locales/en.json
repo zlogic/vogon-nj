@@ -11,6 +11,7 @@
 	"An error has occurred: %s, status %s, stack trace:\n%s": "An error has occurred: %s, status %s, stack trace:\n%s",
 	"Analytics": "Analytics",
 	"Apply": "Apply",
+	"Bad credentials": "Bad credentials",
 	"Balance chart": "Balance chart",
 	"Balance": "Balance",
 	"Build report": "Build report",

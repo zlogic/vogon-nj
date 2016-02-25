@@ -9,13 +9,11 @@ form(name="analyticsForm", novalidate)
             div(class="form-group")
               button(ng-click="selectAllTags()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-check", aria-hidden="true")
-                | 
-                | #{__('Select all tags')}
-              | 
+                |  #{__('Select all tags')}
+              =' '
               button(ng-click="deselectAllTags()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-unchecked", aria-hidden="true")
-                | 
-                | #{__('Deselect all tags')}
+                |  #{__('Deselect all tags')}
             div(class="pre-scrollable")
               div(class="checkbox", ng-repeat="tag in tags | orderBy:'tag'")
                 label
@@ -28,13 +26,11 @@ form(name="analyticsForm", novalidate)
             div(class="form-group")
               button(ng-click="selectAllAccounts()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-check", aria-hidden="true")
-                | 
-                | #{__('Select all accounts')}
-              | 
+                |  #{__('Select all accounts')}
+              =' '
               button(ng-click="deselectAllAccounts()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-unchecked", aria-hidden="true")
-                | 
-                | #{__('Deselect all accounts')}
+                |  #{__('Deselect all accounts')}
             div(class="pre-scrollable")
               div(class="checkbox", ng-repeat="account in accountService.accounts")
                 label
@@ -75,14 +71,13 @@ form(name="analyticsForm", novalidate)
         div(class="col-md-12")
           button(ng-click="buildReport()", class="btn btn-default btn-primary form-control", type="submit", ng-disabled="analyticsForm.$invalid")
             span(class="glyphicon glyphicon-ok", aria-hidden="true")
-            | 
-            | #{__('Build report')}
+            |  #{__('Build report')}
       div(class="well well-sm form-control-static", ng-if="report")
         div(class="row form-control-static")
           div(class="col-md-12 form-inline")
             label
               | #{__('Select currency:')}
-            | 
+            =' '
             select(ng-model="report.selectedCurrency", ng-change="currencyChanged()", ng-options="currency.currencyCode as currency.displayName for currency in currencyService.currencies|filter:filterCurrency", class="form-control")
         div(class="row")
           div(class="col-md-6")

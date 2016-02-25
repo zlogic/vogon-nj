@@ -6,26 +6,22 @@ form(name="accountEditorForm", novalidate)
           div(class="col-md-12")
             button(ng-click="editAccounts()", class="btn btn-primary")
               span(class="glyphicon glyphicon-pencil", aria-hidden="true")
-              | 
-              | #{__('Edit accounts')}
+              |  #{__('Edit accounts')}
         div(ng-show="editingAccounts")
           div(class="row form-control-static")
             div(class="col-md-12")
               button(ng-click="cancelEditing()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-remove", aria-hidden="true")
-                |  
-                | #{__('Cancel')}
-              | 
+                |  #{__('Cancel')}
+              =' '
               button(ng-click="submitEditing()", class="btn btn-primary", type="submit", ng-disabled="accountEditorForm.$invalid")
                 span(class="glyphicon glyphicon-ok", aria-hidden="true")
-                |  
-                | #{__('Apply')}
+                |  #{__('Apply')}
           div(class="row form-control-static")
             div(class="col-md-12")
               button(ng-click="addAccount()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-plus", aria-hidden="true")
-                | 
-                | #{__('Add account')}
+                |  #{__('Add account')}
           div(class="row")
             hr
             div(class="col-md-3 col-sm-4")
@@ -55,21 +51,18 @@ form(name="accountEditorForm", novalidate)
                 div(class="checkbox")
                   label
                     input(type="checkbox", ng-model="account.includeInTotal")
-                    | 
-                    | #{__('Include in total')}
+                    |  #{__('Include in total')}
                 div(class="checkbox")
                   label
                     input(type="checkbox", ng-model="account.showInList")
-                    | 
-                    | #{__('Show in accounts list')}
+                    |  #{__('Show in accounts list')}
               div(class="form-inline col-md-3 col-sm-4")
                 span(ng-class="{ 'has-error': accountForm.accountCurrency.$invalid }")
                   select(ng-model="account.currency", ng-options="currency.currencyCode as currency.displayName for currency in currencies.currencies", class="form-control", name="accountCurrency", required)
               div(class="form-inline col-md-1 col-sm-1 text-right")
                 button(ng-click="deleteAccount(account)", class="btn btn-default", type="button")
                   span(class="glyphicon glyphicon-trash", aria-hidden="true")
-                  | 
-                  | #{__('Delete')}
+                  |  #{__('Delete')}
         div(class="row total-amount", ng-repeat="(currency,data) in accountService.totalsForCurrency")
           hr
           div(class="col-md-3 col-xs-4")
