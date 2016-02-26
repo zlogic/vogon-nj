@@ -8,6 +8,7 @@
 	"Add tags": "Add tags",
 	"Add transaction": "Add transaction",
 	"Amount": "Amount",
+	"An error has occurred: %s, stack trace:\n%s": "An error has occurred: %s, stack trace:\n%s"
 	"An error has occurred: %s, status %s, stack trace:\n%s": "An error has occurred: %s, status %s, stack trace:\n%s",
 	"Analytics": "Analytics",
 	"Apply": "Apply",
@@ -70,6 +71,7 @@
 	"Transaction": "Transaction",
 	"Transactions": "Transactions",
 	"Transfer transactions": "Transfer transactions",
+	"User already exists": "User already exists",
 	"User settings": "User settings",
 	"Username": "Username",
 	"Vogon authorization": "Vogon authorization",
