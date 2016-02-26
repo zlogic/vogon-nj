@@ -5,7 +5,7 @@ div(class="panel panel-default")
       |  #{__('Add transaction')}
     div(infinite-scroll="transactionsService.nextPage()", infinite-scroll-disabled="transactionsService.loadingNextPage || transactionsService.lastPage")
       div(class="container-fluid")
-        div(class="row", id="transactionsTable")
+        div(class="row")
           hr
           div(class="col-md-5 col-sm-12")
             label
@@ -45,6 +45,7 @@ div(class="panel panel-default")
           div(class="col-md-1 col-sm-4")
             label
               | #{__('Account')}
+        div(id="transactionsTableStart")
         div(class="row", ng-repeat="transaction in transactionsService.transactions", ng-switch="editingTransaction == transaction")
           hr
           div(class="row", ng-class="{'bg-danger':!transactionsService.isAmountOk(transaction)}", ng-switch-when="false")

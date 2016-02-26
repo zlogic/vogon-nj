@@ -16,11 +16,11 @@ app.controller("TransactionsController", function ($scope, $interval, $route, Tr
   $scope.startEditing = function (transaction) {
     $scope.editingTransaction = transaction;
     if (transaction.id === undefined) {
-      var transactionsTable = $("div[id='transactionsTable']");
+      var transactionsTableStart = $("div[id='transactionsTableStart']");
       var docViewTop = $(window).scrollTop();
       var docViewBottom = docViewTop + $(window).height();
-      if (transactionsTable.position().top < docViewTop || transactionsTable.position().top > docViewBottom)
-        $('html, body').animate({scrollTop: transactionsTable.position().top}, "slow");
+      if (transactionsTableStart.position().top < docViewTop || transactionsTableStart.position().top > docViewBottom)
+        $('html, body').animate({scrollTop: transactionsTableStart.position().top}, "slow");
     }
   };
   $scope.duplicateTransaction = function (transaction) {

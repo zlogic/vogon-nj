@@ -34,104 +34,105 @@ html
     link(rel='stylesheet', type='text/css', href='stylesheets/style.css')
     link(rel='stylesheet', type='text/css', href='stylesheets/tags-bootstrap.css')
     link(rel='icon', type='image/png', href='images/vogon-favicon.png')
-    body(ng-app="vogon")
-      div(ng-controller="NotificationController")
-        div(class="navbar-fixed-top")
-          div(class="alert alert-warning", role="alert", ng-show="alertService.isLoading")
-            span(class="glyphicon glyphicon-refresh", aria-hidden="true")
-            |  #{__('Loading...')}
-          uib-alert(ng-show="alertService.enabled()", ng-repeat="alert in alertService.alerts", type="{{alert.type}}", close="alertService.closeAlert($index)")
-            span(class="glyphicon glyphicon-exclamation-sign", aria-hidden="true")
-            |  {{alert.msg}}
-      div(ng-controller="UserController")
-        nav(class="navbar navbar-default", ng-show="authorizationService.authorized")
-          div(class="container-fluid")
-            // Brand and toggle get grouped for better mobile display
-            div(class="navbar-header")
-              button(type="button", class="navbar-toggle collapsed", data-toggle="collapse", data-target="#navbarMain", aria-expanded="false")
-                span class="sr-only"
-                  | #{__('Toggle navigation')}
-                span(class="icon-bar")
-                span(class="icon-bar")
-                span(class="icon-bar")
-              div(class="navbar-brand")
-                | #{__('Vogon')}
-            div(class="collapse navbar-collapse", id="navbarMain")
-              ul(class="nav navbar-nav")
-                li(ng-class="{active: isActivePath('transactions')}")
-                  a(href="#/transactions")
-                    span(class="glyphicon glyphicon-list", aria-hidden="true")
-                    |  #{__('Transactions')}
-                li(ng-class="{active: isActivePath('accounts')}")
-                  a(href="#/accounts")
-                    span(class="glyphicon glyphicon-piggy-bank", aria-hidden="true")
-                    |  #{__('Accounts')}
-                li(ng-class="{active: isActivePath('analytics')}")
-                  a(href="#/analytics")
-                    span(class="glyphicon glyphicon-list", aria-hidden="true")
-                    |  #{__('Analytics')}
-                li(ng-class="{active: isActivePath('usersettings')}")
-                  a(href="#/usersettings")
-                    span(class="glyphicon glyphicon-edit", aria-hidden="true")
-                    |  #{__('User settings')}
-              ul(class="nav navbar-nav navbar-right")
-                li
-                  p(class="navbar-text")
-                    | #{__("Signed in as %s", "{{userService.userData.username}}")}
-                li
-                  button(ng-click="logout()", ng-disabled="$eval(logoutLocked)", class="btn btn-default navbar-btn")
-                    span(class="glyphicon glyphicon-log-out", aria-hidden="true")
-                    |  #{__('Logout')}
-      div(ng-controller="LoginController")
-        div(class="container-fluid form-control-static", ng-hide="authorizationService.authorized", ng-init="selectedTab = 'login'")
-          div(class="row")
-            div(class="col-md-12")
-              form
-                div(class="panel panel-default")
-                  div(class="panel-heading")
-                    h3
-                      | #{__('Vogon authorization')}
-                  div(class="panel-body")
-                    if allowRegistration
-                      ul(class="nav nav-pills", role="tablist")
-                        li(ng-class="{active:selectedTab === 'login'}")
-                          a(href ng-click="selectedTab = 'login'")
-                            | #{__('Login')}
-                        li(ng-class="{active:selectedTab === 'register'}")
-                          a(href ng-click="selectedTab = 'register'")
-                            | #{__('Register')}
-                    div(class="media")
-                      div(class="form-inline")
-                        div(class="form-group")
-                          input(type="text", class="form-control", ng-model="authorizationService.username", ng-disabled="$eval(loginLocked)", placeholder=__('Enter username'))
-                        =' '
-                        div(class="form-group")
-                          input(type="password", class="form-control", ng-model="authorizationService.password", ng-disabled="$eval(loginLocked)", placeholder=__('Enter password'))
-                        =' '
-                        div(class="form-group")
-                          div(class="checkbox")
-                            label
-                              input(type="checkbox", ng-model="authorizationService.rememberToken")
-                              |  #{__('Remember me')}
-                  div(class="panel-body", ng-show="loginError || registrationError")
-                    uib-alert(type="danger", ng-show="loginError")
-                      | #{__('Login failed')}: {{loginError}}
-                    uib-alert(type="danger", ng-show="registrationError")
-                      | #{__('Registration failed')}: {{registrationError}}
-                  div(class="panel-footer")
-                    div(class="text-right")
-                      button(class="btn btn-default", type="button", data-toggle="collapse", data-target="#collapseIntro", aria-expanded="false", aria-controls="collapseIntro")
-                        span(class="glyphicon glyphicon-question-sign", aria-hidden="true")
-                        |  #{__('Help/Info')}
-                      =' '
-                      button(ng-click="doSelectedAction(selectedTab)", ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password", class="btn btn-primary", type="submit")
-                        span(class="glyphicon", ng-class="{'glyphicon-log-in':selectedTab === 'login', 'glyphicon-send':selectedTab === 'register'}", aria-hidden="true")
-                        =' '
-                        span(ng-show="selectedTab === 'login'")
+    meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
+  body(ng-app="vogon")
+    div(ng-controller="NotificationController")
+      div(class="navbar-fixed-top")
+        div(class="alert alert-warning", role="alert", ng-show="alertService.isLoading")
+          span(class="glyphicon glyphicon-refresh", aria-hidden="true")
+          |  #{__('Loading...')}
+        uib-alert(ng-show="alertService.enabled()", ng-repeat="alert in alertService.alerts", type="{{alert.type}}", close="alertService.closeAlert($index)")
+          span(class="glyphicon glyphicon-exclamation-sign", aria-hidden="true")
+          |  {{alert.msg}}
+    div(ng-controller="UserController")
+      nav(class="navbar navbar-default", ng-show="authorizationService.authorized")
+        div(class="container-fluid")
+          // Brand and toggle get grouped for better mobile display
+          div(class="navbar-header")
+            button(type="button", class="navbar-toggle collapsed", data-toggle="collapse", data-target="#navbarMain", aria-expanded="false")
+              span(class="sr-only")
+                | #{__('Toggle navigation')}
+              span(class="icon-bar")
+              span(class="icon-bar")
+              span(class="icon-bar")
+            div(class="navbar-brand")
+              | #{__('Vogon')}
+          div(class="collapse navbar-collapse", id="navbarMain")
+            ul(class="nav navbar-nav")
+              li(ng-class="{active: isActivePath('transactions')}")
+                a(href="#/transactions")
+                  span(class="glyphicon glyphicon-list", aria-hidden="true")
+                  |  #{__('Transactions')}
+              li(ng-class="{active: isActivePath('accounts')}")
+                a(href="#/accounts")
+                  span(class="glyphicon glyphicon-piggy-bank", aria-hidden="true")
+                  |  #{__('Accounts')}
+              li(ng-class="{active: isActivePath('analytics')}")
+                a(href="#/analytics")
+                  span(class="glyphicon glyphicon-list", aria-hidden="true")
+                  |  #{__('Analytics')}
+              li(ng-class="{active: isActivePath('usersettings')}")
+                a(href="#/usersettings")
+                  span(class="glyphicon glyphicon-edit", aria-hidden="true")
+                  |  #{__('User settings')}
+            ul(class="nav navbar-nav navbar-right")
+              li
+                p(class="navbar-text")
+                  | #{__("Signed in as %s", "{{userService.userData.username}}")}
+              li
+                button(ng-click="logout()", ng-disabled="$eval(logoutLocked)", class="btn btn-default navbar-btn")
+                  span(class="glyphicon glyphicon-log-out", aria-hidden="true")
+                  |  #{__('Logout')}
+    div(ng-controller="LoginController")
+      div(class="container-fluid form-control-static", ng-hide="authorizationService.authorized", ng-init="selectedTab = 'login'")
+        div(class="row")
+          div(class="col-md-12")
+            form
+              div(class="panel panel-default")
+                div(class="panel-heading")
+                  h3
+                    | #{__('Vogon authorization')}
+                div(class="panel-body")
+                  if allowRegistration
+                    ul(class="nav nav-pills", role="tablist")
+                      li(ng-class="{active:selectedTab === 'login'}")
+                        a(href ng-click="selectedTab = 'login'")
                           | #{__('Login')}
-                        span(ng-show="selectedTab === 'register'")
+                      li(ng-class="{active:selectedTab === 'register'}")
+                        a(href ng-click="selectedTab = 'register'")
                           | #{__('Register')}
-                    div(class="collapse", id="collapseIntro", ng-include="'fragments/intro.fragment'")
-      div(ng-controller="ContentController")
-        div(ng-show="authorizationService.authorized")
-          div(ng-view)
+                  div(class="media")
+                    div(class="form-inline")
+                      div(class="form-group")
+                        input(type="text", class="form-control", ng-model="authorizationService.username", ng-disabled="$eval(loginLocked)", placeholder=__('Enter username'))
+                      =' '
+                      div(class="form-group")
+                        input(type="password", class="form-control", ng-model="authorizationService.password", ng-disabled="$eval(loginLocked)", placeholder=__('Enter password'))
+                      =' '
+                      div(class="form-group")
+                        div(class="checkbox")
+                          label
+                            input(type="checkbox", ng-model="authorizationService.rememberToken")
+                            |  #{__('Remember me')}
+                div(class="panel-body", ng-show="loginError || registrationError")
+                  uib-alert(type="danger", ng-show="loginError")
+                    | #{__('Login failed')}: {{loginError}}
+                  uib-alert(type="danger", ng-show="registrationError")
+                    | #{__('Registration failed')}: {{registrationError}}
+                div(class="panel-footer")
+                  div(class="text-right")
+                    button(class="btn btn-default", type="button", data-toggle="collapse", data-target="#collapseIntro", aria-expanded="false", aria-controls="collapseIntro")
+                      span(class="glyphicon glyphicon-question-sign", aria-hidden="true")
+                      |  #{__('Help/Info')}
+                    =' '
+                    button(ng-click="doSelectedAction(selectedTab)", ng-disabled="$eval(loginLocked) || !authorizationService.username || !authorizationService.password", class="btn btn-primary", type="submit")
+                      span(class="glyphicon", ng-class="{'glyphicon-log-in':selectedTab === 'login', 'glyphicon-send':selectedTab === 'register'}", aria-hidden="true")
+                      =' '
+                      span(ng-show="selectedTab === 'login'")
+                        | #{__('Login')}
+                      span(ng-show="selectedTab === 'register'")
+                        | #{__('Register')}
+                  div(class="collapse", id="collapseIntro", ng-include="'fragments/intro.fragment'")
+    div(ng-controller="ContentController")
+      div(ng-show="authorizationService.authorized")
+        div(ng-view)
