@@ -961,5 +961,41 @@ describe('Model', function() {
         done();
       }).catch(done);
     });
+    it('should not allow creating two users with the same username in bulk', function (done) {
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.bulkCreate([{
+          username: "user01",
+          password: "mypassword"
+        }, {
+          username: "user01",
+          password: "mypassword"
+        }], {transaction: transaction}).then(function(users){
+          done(new Error("Unique username constraint is not enforced"));
+        });
+      }).catch(function(error){
+        assert.equal(error.name, 'SequelizeUniqueConstraintError');
+        done();
+      }).catch(done);
+    });
+    it('should not allow creating two users with the same username separately', function (done) {
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword"
+        }, {transaction: transaction});
+      }).then(function(){
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.User.create({
+            username: "user01",
+            password: "mypassword"
+          }, {transaction: transaction}).then(function(users){
+            done(new Error("Unique username constraint is not enforced"));
+          });
+        });
+      }).catch(function(error){
+        assert.equal(error.name, 'SequelizeUniqueConstraintError');
+        done();
+      }).catch(done);
+    });
   });
 });
