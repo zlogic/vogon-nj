@@ -53,6 +53,10 @@ var hashPassword = function(password, salt, options, done){
     pbkdf2(salt);
 };
 
+var normalizeUsername = function(username){
+  return username !== undefined ? username.toLowerCase().trim() : undefined;
+};
+
 /**
  * Model
  */
@@ -127,7 +131,13 @@ var FinanceTransactionComponent = sequelize.define('FinanceTransactionComponent'
 var User = sequelize.define('User', {
   username: {
     type: Sequelize.STRING,
-    unique: true
+    unique: true,
+    get: function(){
+      return normalizeUsername(this.getDataValue('username'));
+    },
+    set: function(value){
+      this.setDataValue('username', normalizeUsername(value));
+    }
   },
   password: Sequelize.TEXT,
   version: Version
@@ -373,6 +383,7 @@ exports.exportData = exportData;
 
 exports.convertAmountToFixed = convertAmountToFixed;
 exports.convertAmountToFloat = convertAmountToFloat;
+exports.normalizeUsername = normalizeUsername;
 
 exports.User = User;
 exports.FinanceTransaction = FinanceTransaction;

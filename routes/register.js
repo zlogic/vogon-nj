@@ -8,7 +8,7 @@ var i18n = require('i18n');
 router.post('/', function (req, res, next) {
   var user = req.body;
   if(auth.allowRegistration()){
-    dbService.User.findOrCreate({where: {username: user.username}, defaults: user}).spread(function(user, created){
+    dbService.User.findOrCreate({where: {username: dbService.normalizeUsername(user.username)}, defaults: user}).spread(function(user, created){
       if(created){
         res.send(user);
       } else {

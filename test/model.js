@@ -17,7 +17,7 @@ describe('Model', function() {
   describe('operations', function () {
     it('should be able to create related entities in sequence', function (done) {
       var user1 = dbService.User.build({
-        username: "user01",
+        username: " User01 ",
         password: "mypassword"
       });
       var account1 = dbService.Account.build({

@@ -25,7 +25,7 @@ passport.use(new BearerStrategy(
 
 passport.use(new LocalStrategy(
   function(username, password, done) {
-    dbService.User.findOne({where: {username: username}}).then(function (user) {
+    dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
       user.validatePassword(password, function(err, passwordValid){
@@ -40,7 +40,7 @@ passport.use(new LocalStrategy(
 ));
 
 server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
-  dbService.User.findOne({where: {username: username}}).then(function (user) {
+  dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
       user.validatePassword(password, function(err, passwordValid){
