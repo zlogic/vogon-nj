@@ -167,7 +167,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
   };
   var updateBalanceChart = function () {
     var newChartData = [];
-    var accountGraph = that.report[$scope.report.selectedCurrency].accountsBalanceGraph;
+    var accountGraph = $scope.report.accountsBalanceGraph;
     if (accountGraph !== undefined)
       for (var date in accountGraph)
         newChartData.push({x: new Date(date), y: accountGraph[date]});
