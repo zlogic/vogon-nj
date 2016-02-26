@@ -1,6 +1,7 @@
 var assert = require('assert');
 var dbService = require('../services/model');
 var fs = require('fs');
+var logger = require('./logger.js');
 
 var currentDate = function(){
   var currentTime = new Date();
@@ -9,10 +10,18 @@ var currentDate = function(){
 
 describe('Model', function() {
   beforeEach(function(done) {
+    logger.logFunction(this.currentTest.fullTitle());
     return dbService.sequelize.sync({force: true}).then(function(task){
+      dbService.sequelize.options.logging = logger.logFunction;
       done();
     });
   });
+
+  afterEach(
+    function(done) {
+      logger.flush(done);
+    }
+  );
 
   describe('operations', function () {
     it('should be able to create related entities in sequence', function (done) {
