@@ -377,9 +377,50 @@ var exportData = function(user){
   });
 };
 
+var performMaintenance = function(){
+  var deleteOrphans = function(){
+    return sequelize.transaction(function(transaction){
+      return Account.findAll({where: {UserId: null}, transaction: transaction}).then(function(orphanedAccounts){
+        return sequelize.Promise.all(orphanedAccounts.map(function(orphanedAccount){
+          return orphanedAccount.destroy({transaction: transaction});
+        }));
+      }).then(function(){
+        return FinanceTransaction.findAll({where: {UserId: null}, transaction: transaction}).then(function(orphanedFinanceTransactions){
+          return sequelize.Promise.all(orphanedFinanceTransactions.map(function(orphanedFinanceTransaction){
+            return orphanedFinanceTransaction.destroy({transaction: transaction});
+          }));
+        });
+      }).then(function(){
+        return FinanceTransactionComponent.findAll({where: {FinanceTransactionId: null}, transaction: transaction}).then(function(orphanedFinanceTransactionComponents){
+          return sequelize.Promise.all(orphanedFinanceTransactionComponents.map(function(orphanedFinanceTransactionComponent){
+            return orphanedFinanceTransactionComponent.destroy({transaction: transaction});
+          }));
+        });
+      });
+    });
+  };
+  var recalculateBalance = function(){
+    return sequelize.transaction(function(transaction){
+      return Account.findAll({transaction: transaction}).then(function(accounts){
+        return sequelize.Promise.all(accounts.map(function(account){
+          return account.update({balance: 0}, {transaction: transaction}).then(function(){
+            return account.getFinanceTransactionComponents().then(function(financeTransactionComponents){
+              return sequelize.Promise.all(financeTransactionComponents.map(function(financeTransactionComponent){
+                return account.increment("balance", {by: financeTransactionComponent.getDataValue('amount'), transaction: transaction});
+              }));
+            });
+          });
+        }));
+      });
+    });
+  }
+  return deleteOrphans().then(recalculateBalance);
+}
+
 exports.sequelize = sequelize;
 exports.importData = importData;
 exports.exportData = exportData;
+exports.performMaintenance = performMaintenance;
 
 exports.convertAmountToFixed = convertAmountToFixed;
 exports.convertAmountToFloat = convertAmountToFloat;

@@ -2,7 +2,6 @@ app.controller("UserSettingsController", function ($scope, AuthorizationService,
   $scope.userService = UserService;
   $scope.currencies = CurrencyService;
   $scope.file = undefined;
-  $scope.operationSuccessful = false;
   var importPostHeaders = {"Content-Type": undefined};
   $scope.submitEditing = function () {
     AuthorizationService.username = $scope.user.username;
@@ -35,18 +34,6 @@ app.controller("UserSettingsController", function ($scope, AuthorizationService,
       method: "post"
     });
     form.appendTo(document.body).submit().remove();
-  };
-  $scope.performCleanup = function () {
-    $scope.operationSuccessful = false;
-    $scope.userService.performCleanup().then(function () {
-      $scope.operationSuccessful = true;
-    });
-  };
-  $scope.performRecalculateBalance = function () {
-    $scope.operationSuccessful = false;
-    $scope.userService.performRecalculateBalance().then(function () {
-      $scope.operationSuccessful = true;
-    });
   };
   $scope.$watch(function () {
     return UserService.userData;

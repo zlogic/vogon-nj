@@ -20,19 +20,6 @@ form(name="userSettingsForm", novalidate)
         button(ng-click="exportData()", class="btn btn-default", type="button")
           span(class="glyphicon glyphicon-export", aria-hidden="true")
           |  #{__('Export data')}
-      div(class="form-group")
-        div(class="form-inline")
-          button(ng-click="performRecalculateBalance()", class="btn btn-default", type="button")
-            span(class="glyphicon glyphicon-repeat", aria-hidden="true")
-            |  #{__('Recalculate balance')}
-          =' '
-          button(ng-click="performCleanup()", class="btn btn-default", type="button")
-            span(class="glyphicon glyphicon-flash", aria-hidden="true")
-            |  #{__('Cleanup database')}
-      div(class="form-group", ng-show="operationSuccessful")
-        uib-alert(type="success")
-          span(class="glyphicon glyphicon-ok", aria-hidden="true")
-          | #{__('Done!')}
       p
         button(ng-click="cancelEditing()", class="btn btn-default", type="button")
           span(class="glyphicon glyphicon-remove", aria-hidden="true")

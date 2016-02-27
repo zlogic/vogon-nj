@@ -18,18 +18,6 @@ app.service("UserService", function ($rootScope, AuthorizationService, HTTPServi
           that.userData = data.data;
         }, that.update);
   };
-  this.performCleanup = function () {
-    return HTTPService.get("service/cleanup")
-        .then(function () {
-          HTTPService.updateAllData();
-        });
-  };
-  this.performRecalculateBalance = function () {
-    return HTTPService.get("service/recalculateBalance")
-        .then(function () {
-          HTTPService.updateAccounts();
-        });
-  };
   $rootScope.$watch(function () {
     return AuthorizationService.authorized;
   }, function () {

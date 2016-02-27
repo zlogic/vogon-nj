@@ -3,7 +3,7 @@ var path = require('path');
 
 
 var tmpdir = 'logs';
-var testsLog = path.join(tmpdir,'tests.log');
+var testsLog = path.join(tmpdir, 'tests.log');
 
 var prepareTestsLog = function(){
   try { fs.mkdirSync(tmpdir); }

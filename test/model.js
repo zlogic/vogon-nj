@@ -200,7 +200,7 @@ describe('Model', function() {
         }).then(function(createdTransaction){
           return createdTransaction.setUser(user, {transaction: transaction});
         }).then(function(createdTransaction){
-          return createdTransaction.FinanceTransactionComponents[0].setAccount(account1, {include: [dbService.FinanceTransaction], transaction: transaction});
+          return createdTransaction.FinanceTransactionComponents[0].setAccount(account1, {transaction: transaction});
         });
       }).then(function(){
         return dbService.User.findAll({
@@ -697,7 +697,7 @@ describe('Model', function() {
         done();
       }).catch(done);
     });
-    it('should correctly handle import data from the java version of vogon', function (done) {
+    it('should correctly import data from the java version of vogon', function (done) {
       dbService.User.create({
         username: "user01",
         password: "mypassword"
@@ -796,7 +796,7 @@ describe('Model', function() {
         });
       });
     });
-    it('should correctly handle import data from the node.js version of vogon', function (done) {
+    it('should correctly import data from the node.js version of vogon', function (done) {
       dbService.User.create({
         username: "user01",
         password: "mypassword"
@@ -895,7 +895,7 @@ describe('Model', function() {
         });
       });
     });
-    it('should correctly handle exporting data', function (done) {
+    it('should correctly export data', function (done) {
       var user = undefined;
       dbService.sequelize.transaction(function (transaction) {
         return dbService.User.create({
@@ -1031,7 +1031,7 @@ describe('Model', function() {
               tags: ["magic", "awesome"],
               FinanceTransactionComponents: [ { amount: 42 }, { amount: 160 } ]
             }
-          ],
+          ]
         }, {include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}], transaction: transaction}).then(function(createdUser){
           user = createdUser;
           var account = createdUser.Accounts[0];
@@ -1055,6 +1055,150 @@ describe('Model', function() {
       }).catch(function(error){
         assert.equal(error.name, 'SequelizeTimeoutError');
         done();
+      }).catch(done);
+    });
+    it('should properly delete orphaned entities during maintenance', function (done) {
+      var user;
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              id: 1,
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          FinanceTransactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              tags: ["magic", "awesome"],
+              FinanceTransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }
+          ]
+        }, {include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          user = createdUser;
+          var account = createdUser.Accounts[0];
+          var financeTransaction = createdUser.FinanceTransactions[0];
+          return financeTransaction.FinanceTransactionComponents[0].setAccount(account, {transaction: transaction}).then(function(){
+            return financeTransaction.FinanceTransactionComponents[1].setAccount(account, {transaction: transaction});
+          }).then(function(){
+            return financeTransaction.setUser(createdUser, {transaction: transaction});
+          });
+        });
+      }).then(function(){
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.Account.create({
+            name: "orphaned account 1",
+            currency: "RUB",
+            includeInTotal: true,
+            showInList: true
+          }, {transaction: transaction}).then(function(){
+            return dbService.FinanceTransaction.create({
+              description: "orphaned transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              tags: ["magic", "awesome"],
+              FinanceTransactionComponents: [ { amount: 9 }, { amount: 27 } ]
+            }, {include: dbService.FinanceTransactionComponent, transaction: transaction}).then(function(){
+              return dbService.FinanceTransactionComponent.create({ amount: 314 }, {transaction: transaction}).then(function(){
+                return dbService.FinanceTransactionComponent.create({ amount: 7 }, {transaction: transaction});
+              }).then(function(financeTransactionComponent){
+                return financeTransactionComponent.setAccount(user.Accounts[0], {transaction: transaction});
+              });
+            });
+          });
+        });
+      }).then(function(){
+        return dbService.Account.findAll().then(function(accounts){
+          assert.equal(accounts.length, 2);
+          assert.equal(accounts.some(function(account){ return account.name === "orphaned account 1"; }), true);
+        }).then(function(){
+          return dbService.FinanceTransaction.findAll().then(function(financeTransactions){
+            assert.equal(financeTransactions.length, 2);
+            assert.equal(financeTransactions.some(function(financeTransaction){ return financeTransaction.description === "orphaned transaction 1"; }), true);
+          });
+        }).then(function(){
+          return dbService.FinanceTransactionComponent.findAll().then(function(financeTransactionComponents){
+            assert.equal(financeTransactionComponents.length, 6);
+            assert.equal(financeTransactionComponents.some(function(financeTransactionComponent){ return financeTransactionComponent.amount === 314; }), true);
+            assert.equal(financeTransactionComponents.some(function(financeTransactionComponent){ return financeTransactionComponent.amount === 7; }), true);
+          });
+        });
+      }).then(dbService.performMaintenance).then(function(){
+        return dbService.Account.findAll().then(function(accounts){
+          assert.equal(accounts.length, 1);
+          assert.equal(accounts[0].name, "test account 1");
+          assert.equal(accounts[0].balance, 42 + 160);
+        }).then(function(){
+          return dbService.FinanceTransaction.findAll().then(function(financeTransactions){
+            assert.equal(financeTransactions.length, 1);
+            assert.equal(financeTransactions[0].description, "test transaction 1");
+          });
+        }).then(function(){
+          return dbService.FinanceTransactionComponent.findAll().then(function(financeTransactionComponents){
+            assert.equal(financeTransactionComponents.length, 2);
+            assert.equal(financeTransactionComponents.some(function(financeTransactionComponent){ return financeTransactionComponent.amount === 42; }), true);
+            assert.equal(financeTransactionComponents.some(function(financeTransactionComponent){ return financeTransactionComponent.amount === 160; }), true);
+          });
+        }).then(function(){
+          done();
+        });
+      }).catch(done);
+    });
+    it('should properly recalculate account balance during maintenance', function (done) {
+      var account;
+      dbService.sequelize.transaction(function(transaction){
+        return dbService.User.create({
+          username: "user01",
+          password: "mypassword",
+          Accounts: [
+            {
+              id: 1,
+              name: "test account 1",
+              balance: 5,
+              currency: "RUB",
+              includeInTotal: true,
+              showInList: true
+            }
+          ],
+          FinanceTransactions: [
+            {
+              description: "test transaction 1",
+              type: "expenseincome",
+              date: currentDate(),
+              tags: ["magic", "awesome"],
+              FinanceTransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+            }
+          ]
+        }, {include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}], transaction: transaction}).then(function(createdUser){
+          account = createdUser.Accounts[0];
+          var financeTransaction = createdUser.FinanceTransactions[0];
+          return financeTransaction.FinanceTransactionComponents[0].setAccount(account, {transaction: transaction}).then(function(){
+            return financeTransaction.FinanceTransactionComponents[1].setAccount(account, {transaction: transaction});
+          }).then(function(){
+            return financeTransaction.setUser(createdUser, {transaction: transaction});
+          });
+        });
+      }).then(function(){
+        return dbService.sequelize.transaction(function(transaction){
+          return account.update({ balance: dbService.convertAmountToFixed(11) }, {transaction: transaction});
+        });
+      }).then(function(){
+        return account.reload().then(function(){
+          assert.equal(account.balance, 11);
+        });
+      }).then(dbService.performMaintenance).then(function(){
+        return account.reload().then(function(){
+          assert.equal(account.balance, 42 + 160);
+          done();
+        });
       }).catch(done);
     });
   });
