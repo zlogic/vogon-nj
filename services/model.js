@@ -73,8 +73,14 @@ var Account = sequelize.define('Account', {
     }
   },
   currency: Sequelize.STRING,
-  includeInTotal: Sequelize.BOOLEAN,
-  showInList: Sequelize.BOOLEAN,
+  includeInTotal: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: true
+  },
+  showInList: {
+    type: Sequelize.BOOLEAN,
+    defaultValue: true
+  },
   version: Version
 }, {
   timestamps: false
@@ -86,8 +92,8 @@ var FinanceTransaction = sequelize.define('FinanceTransaction', {
   tags: {
     type: Sequelize.STRING,
     get: function() {
-      if(this.getDataValue("tags") === undefined)
-        return undefined;
+      if(this.getDataValue("tags") === undefined || this.getDataValue("tags") === null)
+        return [];
       return JSON.parse(this.getDataValue("tags")).filter(function(tag){
         return tag !== undefined && tag.length > 0;
       });
@@ -101,7 +107,8 @@ var FinanceTransaction = sequelize.define('FinanceTransaction', {
     }
   },
   date:{
-    type: Sequelize.DATEONLY
+    type: Sequelize.DATEONLY,
+    defaultValue: new Date().toJSON().split('T')[0]
   },
   version: Version
 }, {

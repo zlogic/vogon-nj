@@ -16,7 +16,7 @@ var upload = multer({ storage: storage });
 
 /* GET accounts. */
 router.get('/accounts', function(req, res, next) {
-  dbService.Account.findAll({where: {UserId: req.user.id} }).then(function(accounts){
+  dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}}).then(function(accounts){
     res.send(accounts);
   }).catch(next);
 });
@@ -38,6 +38,7 @@ router.post('/accounts', function(req, res, next) {
         return existingAccountIds[account.id] === undefined;
       }).map(function(account){
         delete account.id;
+        delete account.UserId;
         return account;
       });
       var deletedAccounts = dbAccounts.filter(function(account){
@@ -47,6 +48,7 @@ router.post('/accounts', function(req, res, next) {
         return existingAccountIds[account.id] !== undefined;
       }).map(function(account){
         delete account.balance;
+        delete account.UserId;
         return account;
       });
       return dbService.sequelize.Promise.all(
@@ -100,12 +102,12 @@ router.get('/transactions', function(req, res, next) {
     where.push({$or: filterTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}})});
   dbService.FinanceTransaction.findAll({
     where: {$and: where},
-    include: [dbService.FinanceTransactionComponent],
+    include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
+    attributes: {exclude: 'UserId'},
     order: sortOrder,
     offset: offset, limit: pageSize
   }).then(function(financeTransactions){
     res.send(financeTransactions.map(function(financeTransaction){
-      delete financeTransaction.UserId;
       return financeTransaction;
     }));
   }).catch(next);
@@ -113,7 +115,11 @@ router.get('/transactions', function(req, res, next) {
 
 /* GET transaction. */
 router.get('/transactions/transaction/:id', function(req, res, next) {
-  dbService.FinanceTransaction.findOne({where: {id: req.params.id, UserId: req.user.id}, include: [dbService.FinanceTransactionComponent]}).then(function(financeTransaction){
+  dbService.FinanceTransaction.findOne({
+    where: {id: req.params.id, UserId: req.user.id},
+    attributes: {exclude: 'UserId'},
+    include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
+  }).then(function(financeTransaction){
     res.send(financeTransaction.toJSON());
   });
 });
@@ -123,8 +129,10 @@ router.post('/transactions', function(req, res, next) {
   var reqFinanceTransaction = req.body;
   var reqFinanceTransactionComponents = reqFinanceTransaction.FinanceTransactionComponents !== undefined ? reqFinanceTransaction.FinanceTransactionComponents : [];
   delete reqFinanceTransaction.FinanceTransactionComponents;
+  delete reqFinanceTransaction.UserId;
   var reqFinanceTransactionComponentIds = {};
   reqFinanceTransactionComponents.forEach(function(financeTransactionComponent){
+    delete financeTransactionComponent.UserId;
     reqFinanceTransactionComponentIds[financeTransactionComponent.id] = financeTransactionComponent;
   });
   var dbFinanceTransaction = undefined;
@@ -188,7 +196,7 @@ router.post('/transactions', function(req, res, next) {
   }).catch(next);
 });
 
-/* POST transactions. */
+/* DELETE transaction. */
 router.delete('/transactions/transaction/:id', function(req, res, next) {
   dbService.sequelize.transaction(function(transaction){
     return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: req.params.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
@@ -205,6 +213,7 @@ router.delete('/transactions/transaction/:id', function(req, res, next) {
 router.get('/user', function(req, res, next) {
   var user = req.user.toJSON();
   delete user.password;
+  delete user.id;
   res.send(user);
 });
 
