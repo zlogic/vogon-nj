@@ -155,6 +155,16 @@ var User = sequelize.define('User', {
   }
 });
 
+var WorkerTask = sequelize.define('WorkerTask', {
+  name: {
+    type: Sequelize.STRING,
+    primaryKey: true
+  },
+  lastRun: Sequelize.DATE
+}, {
+  timestamps: false
+});
+
 /**
  * Associations
  */
@@ -430,3 +440,4 @@ exports.User = User;
 exports.FinanceTransaction = FinanceTransaction;
 exports.FinanceTransactionComponent = FinanceTransactionComponent;
 exports.Account = Account;
+exports.WorkerTask = WorkerTask;

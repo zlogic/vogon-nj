@@ -6,7 +6,8 @@
     "start": "node ./bin/www",
     "nodemon": "nodemon ./bin/www",
     "test": "mocha test/test.js",
-    "postinstall": "bower install"
+    "postinstall": "bower install",
+    "worker": "node ./services/maintenanceworker"
   },
   "dependencies": {
     "body-parser": "~1.15.0",
