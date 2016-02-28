@@ -145,6 +145,7 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
     $scope.report =  (currency !== undefined) ? {
       financeTransactions: that.report[currency].financeTransactions,
       tagExpenses: that.report[currency].tagExpenses,
+      accountsBalanceGraph: that.report[currency].accountsBalanceGraph,
       selectedCurrency: currency
     } : {};
     updateTagsChart();
