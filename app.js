@@ -12,6 +12,7 @@ var fragments = require('./routes/fragments');
 var register = require('./routes/register');
 var oauth = require('./routes/oauth');
 var service = require('./routes/service');
+var ssl = require('./services/ssl');
 
 var app = express();
 
@@ -27,6 +28,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bower', express.static(path.join(__dirname , '/bower_components')));
 
+// ssl
+app.use(ssl.enforceSSL);
 
 app.use('/', routes);
 app.use('/fragments', fragments);
