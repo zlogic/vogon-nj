@@ -8,7 +8,7 @@ See [details](#getting-started-on-heroku) below.
 
 ## Project description
 
-Simple web-based personal finance tracker using 
+Simple web-based personal finance tracker using
 
 * AngularJS on client-side
 * Node.js on the server side

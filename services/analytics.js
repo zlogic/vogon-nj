@@ -6,7 +6,7 @@ var calculateTransactionAmount = function(financeTransaction, real){
       return sum + (condition(financeTransactionComponent) ? financeTransactionComponent.getRawAmount() : 0);
     }, 0);
   };
-  
+
   if(real === true)
     return sumWithCondition(function(){return true;});
 
@@ -72,9 +72,9 @@ var buildReport = function(user, request){
   var selectedAccounts = request.selectedAccounts.map(function(account){
     return account.id;
   });
-  
+
   var report = {};
-  
+
   var buildTransactionsWhere = function(filterDate){
     var transactionsWhere = {UserId: user.id};
     if(filterDate === true)
@@ -95,14 +95,14 @@ var buildReport = function(user, request){
       transactionsWhere.$or = {tags: undefined};
     return transactionsWhere;
   };
-  
+
   var finalTransactionFilter = function(financeTransaction){
     return (financeTransaction.type === "transfer" && enabledTransferTransactions)
       || (financeTransaction.type === "expenseincome" && financeTransaction.rawAmount <= 0 && enabledExpenseTransactions)
       || (financeTransaction.type === "expenseincome" && financeTransaction.rawAmount >= 0 && enabledIncomeTransactions);
   };
-  
-  
+
+
   return dbService.Account.findAll({where: {UserId: user.id, id: {$in: selectedAccounts}}}).then(function(accounts){
     //Find and validate accounts
     var currencies = {};
@@ -131,7 +131,7 @@ var buildReport = function(user, request){
         if(financeTransactions.length > 0){
           var sortFunction = function(a, b){ return Math.abs(b.rawAmount) - Math.abs(a.rawAmount); };
           var processedFinanceTransactions = financeTransactions.map(function(financeTransaction){
-            return { 
+            return {
               description: financeTransaction.description,
               rawAmount: calculateTransactionAmount(financeTransaction, false),
               date: financeTransaction.date,
