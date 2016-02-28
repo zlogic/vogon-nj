@@ -958,7 +958,6 @@ describe('Model', function() {
         return dbService.exportData(user);
       }).then(function(exportData){
         assert.deepEqual(exportData, {
-          id:1,
           username:"user01",
           Accounts:[
             {id:1, name:"test account 1", balance:49, currency:"RUB", includeInTotal:true, showInList:true},

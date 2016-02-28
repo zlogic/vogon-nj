@@ -373,7 +373,7 @@ var exportData = function(user){
         [FinanceTransaction, "id", "ASC"],
         [FinanceTransaction, FinanceTransactionComponent, "id", "ASC"]
       ],
-      attributes: {exclude: ['version', 'password']},
+      attributes: {exclude: ['id', 'version', 'password']},
       transaction: transaction
     });
   }).then(function(user){
