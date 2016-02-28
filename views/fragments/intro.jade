@@ -12,42 +12,34 @@ div(class="form-control-static")
         p
           span(class="label label-info")
             | Notice
-          |  If you have entered an already existing username, you'll see an error and should use another username and password.
+          =' '
+          | If you have entered an already existing username, you'll see an error and should use another username and password.
         p
           span(class="label label-danger")
             | Warning
-          |  Registration is simple, we don't ask your contact details or stupid questions like your favorite food :)
+          =' '
+          | Registration is simple, we don't ask your contact details or stupid questions like your favorite food :)
           | And so there's no way of recovering passwords!
         p
           span(class="label label-danger")
             | Warning
-          |  This may be a non-production deployment of Vogon and may be reset or closed by the site admin without notice.
+          =' '
+          | This may be a non-production deployment of Vogon and may be reset or closed by the site admin without notice.
           | Consider exporting your data frequently or contacting the website administrator to confirm your data won't be destroyed without notice.
       else
         h3
           | Private deployment
         p
-          | This is a private Vogon deployment with registration disabled. You can try a public deployment at any of the following deployments:
-        ul
-          li
-            a(href="http://vogon-zlogic42demo.rhcloud.com")
-              | OpenShift (WildFly)
-          li
-            a(href="http://vogon-demo.herokuapp.com")
-              | Heroku
-            |  (may take a few minutes to load for the first time)
-          li
-            a(href="http://vogon-tomcat.azurewebsites.net")
-              | Azure (Tomcat)
-            |  (may take a few minutes to load for the first time)
-          li
-            a(href="http://vogon-jetty.azurewebsites.net")
-              | Azure (Jetty)
-            |  (may take a few minutes to load for the first time)
+          | This is a private Vogon deployment with registration disabled. You can try a public deployment on
+          =' '
+          a(href="http://vogon-nj-demo.herokuapp.com") Heroku
+          =' '
+          | (may take a few minutes to load for the first time)
         p
           span(class="label label-info")
             | Warning
-          |  The links above are provided as demos only and are not guaranteed to keep running. You can deploy Vogon on most free Java EE cloud providers.
+          =' '
+          | The link above is provided as a demo only and is not guaranteed to keep running. You can create a private deployment of Vogon on Heroku, see the project page below.
       h3
         | About Vogon
       p
@@ -55,12 +47,14 @@ div(class="form-control-static")
       p
         | It runs on most cloud providers, even on free tiers.
       p
-        | For more information, visit the project's 
-        a(href="http://github.com/zlogic/vogon")
-          Github
+        | For more information, visit the project's
+        =' '
+        a(href="https://github.com/zlogic/vogon-nj") Github
+        =' '
         | page.
       p
         | Developed by 
+        =' '
         a(href="https://plus.google.com/+DmitryZolotukhin")
           | Dmitry Zolotukhin
         | .
