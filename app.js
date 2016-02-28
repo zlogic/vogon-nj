@@ -16,6 +16,9 @@ var ssl = require('./services/ssl');
 
 var app = express();
 
+// ssl
+app.use(ssl.enforceSSL);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -28,8 +31,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/bower', express.static(path.join(__dirname , '/bower_components')));
 
-// ssl
-app.use(ssl.enforceSSL);
 
 app.use('/', routes);
 app.use('/fragments', fragments);

@@ -55,6 +55,14 @@ You should set `ALLOW_REGISTRATION` to `false` only after registering yourself.
 There's a `worker` dyno which performs regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances.
 It's completely optional and disabled by default, but may be helpful to automatically detect and fix problems.
 
+## How to run the Docker image
+
+To deploy create a Vogon container, run the following Docker command (change `[port]` to the port where Vogon will be accessible):
+
+`docker create --env ALLOW_REGISTRATION=true --publish [port]:3000 zlogic42/vogon-nj`
+
+This will create a container with an embedded SQLite database, allow registration and disable enforcement of HTTPS.
+
 ## How to run in standalone mode
 
 Run webapp:
@@ -72,3 +80,6 @@ Run tests:
 Run maintenance worker:
 
 `npm run worker`
+
+By default, Vogon runs in `development` mode, which disables SSL enforcement and enables advanced error logging.
+Set the `NODE_ENV` environment variable to something other than `development` (e.g. `production`) to disable this.
