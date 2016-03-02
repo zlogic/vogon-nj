@@ -16,8 +16,10 @@ var upload = multer({ storage: storage });
 
 /* GET accounts. */
 router.get('/accounts', function(req, res, next) {
-  dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}}).then(function(accounts){
-    res.send(accounts);
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction}).then(function(accounts){
+      res.send(accounts);
+    })
   }).catch(next);
 });
 
@@ -100,28 +102,34 @@ router.get('/transactions', function(req, res, next) {
     filterTags = JSON.parse(filterTags);
   if(filterTags !== undefined && filterTags.length > 0)
     where.push({$or: filterTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}})});
-  dbService.FinanceTransaction.findAll({
-    where: {$and: where},
-    include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
-    attributes: {exclude: 'UserId'},
-    order: sortOrder,
-    offset: offset, limit: pageSize
-  }).then(function(financeTransactions){
-    res.send(financeTransactions.map(function(financeTransaction){
-      return financeTransaction;
-    }));
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.FinanceTransaction.findAll({
+      where: {$and: where},
+      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
+      attributes: {exclude: 'UserId'},
+      transaction: transaction,
+      order: sortOrder,
+      offset: offset, limit: pageSize
+    }).then(function(financeTransactions){
+      res.send(financeTransactions.map(function(financeTransaction){
+        return financeTransaction;
+      }));
+    })
   }).catch(next);
 });
 
 /* GET transaction. */
 router.get('/transactions/transaction/:id', function(req, res, next) {
-  dbService.FinanceTransaction.findOne({
-    where: {id: req.params.id, UserId: req.user.id},
-    attributes: {exclude: 'UserId'},
-    include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
-  }).then(function(financeTransaction){
-    res.send(financeTransaction.toJSON());
-  });
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.FinanceTransaction.findOne({
+      where: {id: req.params.id, UserId: req.user.id},
+      attributes: {exclude: 'UserId'},
+      transaction: transaction,
+      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
+    }).then(function(financeTransaction){
+      res.send(financeTransaction.toJSON());
+    });
+  }).catch(next);
 });
 
 /* POST transactions. */
@@ -245,14 +253,16 @@ router.get('/currencies', function(req, res, next) {
 
 /* GET analytics tags. */
 router.get('/analytics/tags', function(req, res, next) {
-  dbService.FinanceTransaction.findAll({where: {UserId: req.user.id}, attributes: ['tags']}).then(function(financeTransactions){
-    var tagsSet = new Set([""]);
-    financeTransactions.forEach(function(financeTransaction){
-      financeTransaction.tags.forEach(function(tag){
-        tagsSet = tagsSet.add(tag);
+  dbService.sequelize.transaction(function(transaction){
+    return dbService.FinanceTransaction.findAll({where: {UserId: req.user.id}, attributes: ['tags'], transaction: transaction}).then(function(financeTransactions){
+      var tagsSet = new Set([""]);
+      financeTransactions.forEach(function(financeTransaction){
+        financeTransaction.tags.forEach(function(tag){
+          tagsSet = tagsSet.add(tag);
+        });
       });
+      res.send(Array.from(tagsSet));
     });
-    res.send(Array.from(tagsSet));
   }).catch(next);
 });
 
