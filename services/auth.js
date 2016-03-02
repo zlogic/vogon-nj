@@ -19,6 +19,7 @@ passport.use(new BearerStrategy(
     } else {
       dbService.User.findById(tokens[token]).then(function(user) {
         cb(null, user);
+        return user;
       }).catch(cb);
     }
   }));
@@ -33,7 +34,7 @@ passport.use(new LocalStrategy(
           return done(err);
         if(!passwordValid)
           return done(new Error(i18n.__("Bad credentials")));
-        done(null, user);
+        return done(null, user);
       });
     }).catch(done);
   }

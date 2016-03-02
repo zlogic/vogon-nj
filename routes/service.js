@@ -18,8 +18,10 @@ var upload = multer({ storage: storage });
 router.get('/accounts', function(req, res, next) {
   dbService.sequelize.transaction(function(transaction){
     return dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction}).then(function(accounts){
-      res.send(accounts);
+      return accounts;
     })
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -70,11 +72,13 @@ router.post('/accounts', function(req, res, next) {
       }).then(function(){
         return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction});
       }).then(function(accounts){
-        res.send(accounts.map(function(account){
+        return accounts.map(function(account){
           return account.toJSON();
-        }));
+        });
       });
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -111,10 +115,12 @@ router.get('/transactions', function(req, res, next) {
       order: sortOrder,
       offset: offset, limit: pageSize
     }).then(function(financeTransactions){
-      res.send(financeTransactions.map(function(financeTransaction){
+      return financeTransactions.map(function(financeTransaction){
         return financeTransaction;
-      }));
+      });
     })
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -127,8 +133,10 @@ router.get('/transactions/transaction/:id', function(req, res, next) {
       transaction: transaction,
       include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
     }).then(function(financeTransaction){
-      res.send(financeTransaction.toJSON());
+      return financeTransaction.toJSON();
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -198,9 +206,11 @@ router.post('/transactions', function(req, res, next) {
       }).then(function(){
         return dbFinanceTransaction.reload({transaction: transaction});
       }).then(function(financeTransactionComponent){
-        res.send(financeTransactionComponent.toJSON());
+        return financeTransactionComponent.toJSON();
       });
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -210,10 +220,12 @@ router.delete('/transactions/transaction/:id', function(req, res, next) {
     return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: req.params.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
       if(financeTransaction != null)
         return financeTransaction.destroy({transaction: transaction}).then(function(){
-          res.send(financeTransaction.toJSON());
+          return financeTransaction.toJSON();
         });
-      res.send("Error");
+      return "Error";
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -233,8 +245,10 @@ router.post('/user', function(req, res, next) {
     return req.user.update(reqUser, {transaction: transaction}).then(function(user){
       user = user.toJSON();
       delete user.password;
-      res.send(user);
+      return user;
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -261,8 +275,10 @@ router.get('/analytics/tags', function(req, res, next) {
           tagsSet = tagsSet.add(tag);
         });
       });
-      res.send(Array.from(tagsSet));
+      return Array.from(tagsSet);
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
@@ -286,8 +302,10 @@ router.post('/import', upload.single('file'), function(req, res, next) {
   var data = req.file.buffer.toString();
   dbService.sequelize.transaction(function(transaction){
     return dbService.importData(req.user, JSON.parse(data), {transaction: transaction}).then(function(){
-      res.send(true);
+      return true;
     });
+  }).then(function(response){
+    res.send(response);
   }).catch(next);
 });
 
