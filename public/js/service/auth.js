@@ -62,6 +62,10 @@ app.service("HTTPService", function ($http, $q, AlertService) {
     AlertService.endLoadingRequest();
     var deferred = $q.defer();
     if (data.status === 401) {
+      if (isTokenURL(data.config.url)){
+        deferred.reject({data: {error_description: data.data}});
+        return deferred.promise;
+      }
       var fixAuthCall = that.fixAuthorization();
       if (fixAuthCall !== undefined)
         fixAuthCall
