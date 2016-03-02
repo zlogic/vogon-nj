@@ -6,9 +6,9 @@ var crypto = require('crypto');
 
 var sequelizeConfigurer = function(){
   if(process.env.DATABASE_URL !== undefined)
-    return new Sequelize(process.env.DATABASE_URL);
+    return new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE});
   else
-    return new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite")});
+    return new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE});
 };
 
 var sequelize = sequelizeConfigurer();
