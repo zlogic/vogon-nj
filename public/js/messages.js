@@ -16,6 +16,6 @@ var messages = {
 };
 var complex_messages = {
   HTTP_ERROR_FORMAT: function (httpStatus, data) {
-    return "HTTP error: " + httpStatus + "(" + angular.toJson(data) + ")";
+    return "HTTP error: " + httpStatus + " (" + angular.toJson(data) + ")";
   }
 };
