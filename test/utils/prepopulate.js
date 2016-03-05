@@ -68,7 +68,7 @@ var prepopulate = function(){
             description: "test transaction 3",
             type: "expenseincome",
             date: "2014-05-17",
-            tags: ["hello", "everyone"],
+            tags: [],
             FinanceTransactionComponents: [
               {amount: 100}
             ]
