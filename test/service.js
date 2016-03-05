@@ -33,17 +33,8 @@ var tokenHeader = function(token){
 
 describe('Service', function() {
   var server;
-  before(function(){
+  before(function(done){
     dbConfiguration.reconfigureDb();
-  });
-  beforeEach(function(done) {
-    logger.logFunction(this.currentTest.fullTitle());
-    return dbService.sequelize.sync({force: true}).then(function(task){
-      dbService.sequelize.options.logging = logger.logFunction;
-      done();
-    });
-  });
-  beforeEach(function(done) {
     app.set('port', port);
     server = http.createServer(app);
     app._router.stack.filter(function(layer){
@@ -51,19 +42,24 @@ describe('Service', function() {
     }).forEach(function(layer){
       layer.handle = morgan('tiny', {stream: logger.stream});
     });
-    server.listen(port, null, done);
+    server.listen(port, null, null, done);
   });
 
-  afterEach(
-    function(done) {
-      logger.flush(done);
-    }
-  );
-  afterEach(
-    function(done) {
-      server.close(done);
-    }
-  );
+  after(function(done) {
+    server.close(done);
+  });
+
+  beforeEach(function(done) {
+    logger.logFunction(this.currentTest.fullTitle());
+    return dbService.sequelize.sync({force: true}).then(function(task){
+      dbService.sequelize.options.logging = logger.logFunction;
+      done();
+    });
+  });
+
+  afterEach(function(done) {
+    logger.flush(done);
+  });
 
   describe('registration', function () {
     it('should be able to register a new user if registration is allowed', function (done) {

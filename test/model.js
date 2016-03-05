@@ -23,11 +23,9 @@ describe('Model', function() {
     });
   });
 
-  afterEach(
-    function(done) {
-      logger.flush(done);
-    }
-  );
+  afterEach(function(done) {
+    logger.flush(done);
+  });
 
   describe('operations', function () {
     it('should be able to create related entities in sequence', function (done) {
