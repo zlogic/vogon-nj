@@ -21,7 +21,7 @@
     "pg-hstore": "~2.3.2",
     "sequelize": "~3.19.3",
     "sqlite3": "~3.1.1",
-    "i18n": "~0.7.0",
+    "i18n": "~0.8.1",
     "passport": "~0.3.2",
     "passport-local": "~1.0.0",
     "passport-http-bearer": "~1.0.1",
