@@ -134,7 +134,9 @@ router.get('/transactions/transaction/:id', function(req, res, next) {
       transaction: transaction,
       include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
     }).then(function(financeTransaction){
-      return financeTransaction.toJSON();
+      if(financeTransaction !== null)
+        return financeTransaction.toJSON();
+      return null;
     });
   }).then(function(response){
     res.send(response);

@@ -293,7 +293,7 @@ describe('Service', function() {
     });
   });
 
-  describe('transactions', function () {
+  describe('transactionslist', function () {
     it('should get a list of transactions for an authenticated user with default sort parameters', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       prepopulate().then(function(){
@@ -638,6 +638,72 @@ describe('Service', function() {
       prepopulate().then(function(){
         var token = 'aaaa';
         superagent.get(baseUrl + "/service/transactions").set(tokenHeader(token)).end(function(err, result){
+          try {
+            assert.ok(err);
+            assert.equal(err.status, 401);
+            assert.equal(err.response.text, 'Unauthorized');
+            done();
+          } catch(err) {done(err);}
+        });
+      }).catch(done);
+    });
+  });
+
+  describe('transaction', function () {
+    it('should get a specific requested transaction for an authenticated user', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, {
+                tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+                  {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+                ]
+              });
+              done();
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should not allow an authenticated user to get a specific requested transaction beloging to another user', function (done) {
+      var userData = {username: "user02", password: "mypassword2"};
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, {});
+              done();
+            } catch(err) {done(err);}
+          });
+        });
+      });
+    });
+    it('should not be able to get a specific requested transaction for an unauthenticated user (no token)' , function (done) {
+      prepopulate().then(function(){
+        superagent.get(baseUrl + "/service/transactions/transaction/1").end(function(err, result){
+          try {
+            assert.ok(err);
+            assert.equal(err.status, 401);
+            assert.equal(err.response.text, 'Unauthorized');
+            done();
+          } catch(err) {done(err);}
+        });
+      }).catch(done);
+    });
+    it('should not be able to get a specific requested transaction for an unauthenticated user (bad token)', function (done) {
+      prepopulate().then(function(){
+        var token = 'aaaa';
+        superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
           try {
             assert.ok(err);
             assert.equal(err.status, 401);
