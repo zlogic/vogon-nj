@@ -1,4 +1,5 @@
 var modelTest = require('./model.js');
+var serviceTest = require('./service.js');
 var i18n = require('i18n');
 var path = require('path');
 

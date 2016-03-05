@@ -51,6 +51,7 @@
 	"Password": "Password",
 	"Register": "Register",
 	"Registration failed": "Registration failed",
+	"Registration is not allowed": "Registration is not allowed",
 	"Remember me": "Remember me",
 	"Report by tags": "Report by tags",
 	"Report by transactions": "Report by transactions",

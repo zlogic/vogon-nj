@@ -10,6 +10,10 @@ router.post('/', function (req, res, next) {
   if(auth.allowRegistration()){
     dbService.User.findOrCreate({where: {username: dbService.normalizeUsername(user.username)}, defaults: user}).spread(function(user, created){
       if(created){
+        user = user.toJSON();
+        delete user.password;
+        delete user.id;
+        delete user.version;
         res.send(user);
       } else {
         res.status(500);
