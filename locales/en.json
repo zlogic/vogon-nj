@@ -19,6 +19,7 @@
 	"Cancel": "Cancel",
 	"Cannot register user because of error: %s": "Cannot register user because of error: %s",
 	"Currency": "Currency",
+	"Data was already updated from another session": "Data was already updated from another session",
 	"Date": "Date",
 	"Delete": "Delete",
 	"Deselect all accounts": "Deselect all accounts",

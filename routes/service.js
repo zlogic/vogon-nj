@@ -86,16 +86,17 @@ router.post('/accounts', function(req, res, next) {
 router.get('/transactions', function(req, res, next) {
   var pageSize = 100;
   var page = req.query.page;
-  var sortColumn = req.query.sortColumn;
-  var sortDirection = req.query.sortDirection;
+  var sortColumn = req.query.sortColumn || 'date';
+  var sortDirection = req.query.sortDirection || 'DESC';
   var filterDescription = req.query.filterDescription;
   var filterDate = req.query.filterDate;
   var filterTags = req.query.filterTags;
-  page = page !== undefined ? page : 0;
+  page = page || 0;
   var offset = page * pageSize;
   var sortOrder = [
     [sortColumn, sortDirection],
-    ['id', sortDirection]
+    ['id', sortDirection],
+    [dbService.FinanceTransactionComponent, 'id', sortDirection]
   ];
   var where = [{UserId: req.user.id}];
   if(filterDescription !== undefined && filterDescription.length > 0)

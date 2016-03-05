@@ -1,4 +1,4 @@
-var dbService = require('../services/model');
+var dbService = require('../../services/model');
 var path = require('path');
 var testdir = require('./testdir');
 

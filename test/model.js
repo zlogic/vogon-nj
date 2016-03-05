@@ -1,8 +1,9 @@
 var assert = require('assert');
 var dbService = require('../services/model');
 var fs = require('fs');
-var logger = require('./logger.js');
-var dbConfiguration = require('./dbconfiguration.js');
+var logger = require('./utils/logger.js');
+var dbConfiguration = require('./utils/dbconfiguration.js');
+var i18nConfiguration = require('./utils/i18nconfiguration.js');
 
 var currentDate = function(){
   var currentTime = new Date();
