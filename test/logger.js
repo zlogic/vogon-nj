@@ -1,17 +1,8 @@
 var fs = require('fs');
 var path = require('path');
+var testdir = require('./testdir');
 
-
-var tmpdir = 'logs';
-var testsLog = path.join(tmpdir, 'tests.log');
-
-var prepareTestsLog = function(){
-  try { fs.mkdirSync(tmpdir); }
-  catch (err) { }
-  try { fs.unlinkSync(testsLog); }
-  catch (err) { }
-};
-
+var testsLog = path.join(testdir.tmpdir, 'tests.log');
 var collectedMessages = '';
 
 var logFunction = function(message){
@@ -25,8 +16,6 @@ var flush = function(callback){
 };
 
 var stream = {write: logFunction};
-
-prepareTestsLog();
 
 module.exports.logFunction = logFunction;
 module.exports.flush = flush;

@@ -2,6 +2,7 @@ var assert = require('assert');
 var dbService = require('../services/model');
 var fs = require('fs');
 var logger = require('./logger.js');
+var dbConfiguration = require('./dbconfiguration.js');
 
 var currentDate = function(){
   var currentTime = new Date();
@@ -9,6 +10,10 @@ var currentDate = function(){
 };
 
 describe('Model', function() {
+  before(function(){
+    dbConfiguration.reconfigureDb();
+  });
+
   beforeEach(function(done) {
     logger.logFunction(this.currentTest.fullTitle());
     return dbService.sequelize.sync({force: true}).then(function(task){

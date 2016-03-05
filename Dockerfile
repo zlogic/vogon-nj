@@ -19,7 +19,7 @@ COPY . /usr/src/vogon-nj
 RUN npm test
 
 # Delete test resources
-RUN rm vogon-nj.sqlite || rm -rf logs
+RUN rm -rf test/tmp
 
 EXPOSE 3000
 CMD [ "npm", "start" ]

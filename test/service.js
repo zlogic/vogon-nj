@@ -5,6 +5,7 @@ var logger = require('./logger.js');
 var prepopulate = require('./prepopulate');
 var superagent = require('superagent');
 var i18n = require('i18n');
+var dbConfiguration = require('./dbconfiguration.js');
 
 var app = require('../app');
 var http = require('http');
@@ -15,6 +16,9 @@ var baseUrl = "http://localhost:" + port;
 
 describe('Service', function() {
   var server;
+  before(function(){
+    dbConfiguration.reconfigureDb();
+  });
   beforeEach(function(done) {
     logger.logFunction(this.currentTest.fullTitle());
     return dbService.sequelize.sync({force: true}).then(function(task){
