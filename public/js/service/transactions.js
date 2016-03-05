@@ -121,7 +121,7 @@ app.service("TransactionsService", function ($q, HTTPService, AuthorizationServi
           if (account !== undefined && predicate(component) && !accounts.some(function (checkAccount) {
             return checkAccount.id === account.id;
           }))
-            accounts.unshift(account);
+          accounts.unshift(account);
         });
     return accounts;
   };
