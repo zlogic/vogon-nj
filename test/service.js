@@ -1,65 +1,16 @@
+var serviceBase = require('./utils/serviceBase')
 var assert = require('assert');
 var dbService = require('../services/model');
-var fs = require('fs');
-var logger = require('./utils/logger.js');
 var prepopulate = require('./utils/prepopulate');
 var superagent = require('superagent');
 var i18n = require('i18n');
-var dbConfiguration = require('./utils/dbconfiguration.js');
-var i18nConfiguration = require('./utils/i18nconfiguration.js');
 
-var app = require('../app');
-var http = require('http');
-var morgan = require('morgan');
-
-var port = 3000;
-var baseUrl = "http://localhost:" + port;
-
-var authenticateUser = function(userData, callback){
-  superagent.post(baseUrl + "/oauth/token")
-    .send("username=" + userData.username)
-    .send("password=" + userData.password)
-    .send("grant_type=password")
-    .send("client_id=vogonweb")
-    .end(function(err, result){
-      if(err) return callback(err);
-      callback(null, result.body.access_token, result);
-    });
-};
-
-var tokenHeader = function(token){
-  return {Authorization: "Bearer " + token};
-};
+var baseUrl = serviceBase.baseUrl;
+var authenticateUser = serviceBase.authenticateUser;
+var tokenHeader = serviceBase.tokenHeader;
 
 describe('Service', function() {
-  var server;
-  before(function(done){
-    dbConfiguration.reconfigureDb();
-    app.set('port', port);
-    server = http.createServer(app);
-    app._router.stack.filter(function(layer){
-      return layer.name === 'logger';
-    }).forEach(function(layer){
-      layer.handle = morgan('tiny', {stream: logger.stream});
-    });
-    server.listen(port, null, null, done);
-  });
-
-  after(function(done) {
-    server.close(done);
-  });
-
-  beforeEach(function(done) {
-    logger.logFunction(this.currentTest.fullTitle());
-    return dbService.sequelize.sync({force: true}).then(function(task){
-      dbService.sequelize.options.logging = logger.logFunction;
-      done();
-    });
-  });
-
-  afterEach(function(done) {
-    logger.flush(done);
-  });
+  serviceBase.hooks();
 
   describe('registration', function () {
     it('should be able to register a new user if registration is allowed', function (done) {
