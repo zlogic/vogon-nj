@@ -145,9 +145,13 @@ var User = sequelize.define('User', {
     },
     set: function(value){
       this.setDataValue('username', normalizeUsername(value));
-    }
+    },
+    validate: { notEmpty: true }
   },
-  password: Sequelize.TEXT,
+  password: {
+    type: Sequelize.TEXT,
+    validate: { notEmpty: true }
+  },
   version: Version
 }, {
   timestamps: false,

@@ -81,6 +81,36 @@ describe('Service', function() {
         });
       }).catch(done);
     });
+    it('should not be able to register a new user if the username is empty', function (done) {
+      var userData = {username: "", password: "anotherpassword"};
+      process.env.ALLOW_REGISTRATION = true;
+      superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
+        try {
+          assert.ok(err);
+          assert.equal(result.status, 500);
+          assert.deepEqual(result.body, {exception : i18n.__('Cannot register user because of error: %s', 'SequelizeValidationError')});
+          dbService.User.findAll().then(function(users){
+            assert.equal(users.length, 0);
+            done();
+          }).catch(done);
+        } catch(err) {done(err);}
+      });
+    });
+    it('should not be able to register a new user if the password is empty', function (done) {
+      var userData = {username: "user01", password: ""};
+      process.env.ALLOW_REGISTRATION = true;
+      superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
+        try {
+          assert.ok(err);
+          assert.equal(result.status, 500);
+          assert.deepEqual(result.body, {exception : i18n.__('Cannot register user because of error: %s', 'SequelizeValidationError')});
+          dbService.User.findAll().then(function(users){
+            assert.equal(users.length, 0);
+            done();
+          }).catch(done);
+        } catch(err) {done(err);}
+      });
+    });
     it('should accept authentication of a valid user', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       prepopulate().then(function(){

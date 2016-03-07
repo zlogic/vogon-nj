@@ -173,6 +173,40 @@ describe('Service', function() {
         });
       }).catch(done);
     });
+    it('should not be able to change the username for an authenticated user if the new username is empty', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var newUserData = {username: ""};
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
+            try {
+              assert.ok(err);
+              assert.equal(result.status, 500);
+              assert.deepEqual(result.text, 'Validation error: Validation notEmpty failed');
+              validateDefaultUserdata(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should not be able to change the password for an authenticated user if the new password is empty', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var newUserData = {password: ""};
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
+            try {
+              assert.ok(err);
+              assert.equal(result.status, 500);
+              assert.deepEqual(result.text, 'Validation error: Validation notEmpty failed');
+              validateDefaultUserdata(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
     it('should ignore id in requests for getting user data and use OAuth data instead', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       prepopulate().then(function(){
