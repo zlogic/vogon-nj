@@ -395,6 +395,469 @@ describe('Service', function() {
     });
   });
 
+  describe('transactionchange', function () {
+    it('should be able to change a transaction for an authenticated user', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 1}, {AccountId: 2, amount: 15}
+        ]
+      };
+      var expectedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
+        ]
+      };
+      var finalFinanceTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
+        ] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 42+15+3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, expectedTransactionData);
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should be able to create a new transaction for an authenticated user', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+        tags: ['hello','super'], type: 'expenseincome', description: 'test transaction 4', date: '2016-02-07', FinanceTransactionComponents: [
+          {AccountId: 1, amount: 100}
+        ]
+      };
+      var expectedTransactionData = {
+        tags: ['hello','super'], id: 5, type: 'expenseincome', description: 'test transaction 4', date: '2016-02-07', version: 1, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 100, id: 6, version: 1}
+        ]
+      };
+      var finalFinanceTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] },
+        { UserId: 1, tags: ['hello','super'], id: 5, type: 'expenseincome', description: 'test transaction 4', date: '2016-02-07', version: 1, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 100, id: 6, version: 1}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 44.72 + 100, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, expectedTransactionData);
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should be able to delete all transaction components of a transaction for an authenticated user', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: []
+      };
+      var expectedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: []
+      };
+      var finalFinanceTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, expectedTransactionData);
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should not be able to change a transaction for an authenticated user with incorrect transaction version numbers', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 1}, {AccountId: 2, amount: 15}
+        ]
+      };
+      var expectedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
+        ]
+      };
+      var finalFinanceTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 1, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        return dbService.FinanceTransaction.update({version: 1}, {where: {}});
+      }).then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            try {
+              assert.ok(err);
+              assert.equal(result.status, 500);
+              assert.deepEqual(result.text, i18n.__('Data was already updated from another session'));
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should not be able to change a transaction for an authenticated user with incorrect transaction component version numbers', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 1}, {AccountId: 2, amount: 15}
+        ]
+      };
+      var expectedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
+        ]
+      };
+      var finalFinanceTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 2}, {AccountId: 2, amount: 160, id: 2, version: 2}
+        ] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 2}, {AccountId: 1, amount: 2.72, id: 4, version: 2},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 2}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        return dbService.FinanceTransactionComponent.update({version: 2}, {where: {}});
+      }).then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            try {
+              assert.ok(err);
+              assert.equal(result.status, 500);
+              assert.deepEqual(result.text, i18n.__('Data was already updated from another session'));
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should not allow a user to use an AccountId belonging to another user in requests for changing a transaction', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 42, id: 2, version: 1}, {AccountId: 3, amount: 15}
+        ]
+      };
+      var expectedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: null, amount: 42, id: 2, version: 2}, {AccountId: null, amount: 15, id: 6, version: 1}
+        ]
+      };
+      var finalFinanceTransactions =[
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: null, amount: 42, id: 2, version: 2}, {AccountId: null, amount: 15, id: 6, version: 1}
+        ] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, expectedTransactionData);
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should ignore UserId in requests for changing a transaction and use OAuth data instead', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var updatedTransactionData = {
+         UserId: 2, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 1}, {AccountId: 2, amount: 15}
+        ]
+      };
+      var expectedTransactionData = {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
+        ]
+      };
+      var finalFinanceTransactions =[
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
+        ] },
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] }
+      ];
+      var finalAccounts = [
+        { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 42+15+3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
+      ];
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, expectedTransactionData);
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+              }).then(function(){
+                return dbService.Account.findAll();
+              }).then(function(accounts){
+                accounts = accounts.map(function(account){return account.toJSON();});
+                assert.deepEqual(accounts, finalAccounts);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should not be able to change a specific requested transaction for an unauthenticated user (no token)' , function (done) {
+      var updatedTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
+        ] }
+      ];
+      prepopulate().then(function(){
+        superagent.post(baseUrl + "/service/transactions").send(updatedTransactions).end(function(err, result){
+          try {
+            assert.ok(err);
+            assert.equal(err.status, 401);
+            assert.equal(err.response.text, 'Unauthorized');
+            validateDefaultFinanceTransactionsData(done);
+          } catch(err) {done(err);}
+        });
+      }).catch(done);
+    });
+    it('should not be able to change a specific requested transaction for an unauthenticated user (bad token)', function (done) {
+      var updatedTransactions = [
+        { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
+        ] }
+      ];
+      prepopulate().then(function(){
+        var token = 'aaaa';
+        superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactions).end(function(err, result){
+          try {
+            assert.ok(err);
+            assert.equal(err.status, 401);
+            assert.equal(err.response.text, 'Unauthorized');
+            validateDefaultFinanceTransactionsData(done);
+          } catch(err) {done(err);}
+        });
+      }).catch(done);
+    });
+  });
+
   describe('transaction', function () {
     it('should get a specific requested transaction for an authenticated user', function (done) {
       var userData = {username: "user01", password: "mypassword"};

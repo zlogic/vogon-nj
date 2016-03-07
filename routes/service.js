@@ -147,7 +147,7 @@ router.get('/transactions/transaction/:id', function(req, res, next) {
 /* POST transactions. */
 router.post('/transactions', function(req, res, next) {
   var reqFinanceTransaction = req.body;
-  var reqFinanceTransactionComponents = reqFinanceTransaction.FinanceTransactionComponents !== undefined ? reqFinanceTransaction.FinanceTransactionComponents : [];
+  var reqFinanceTransactionComponents = reqFinanceTransaction.FinanceTransactionComponents || [];
   delete reqFinanceTransaction.FinanceTransactionComponents;
   delete reqFinanceTransaction.UserId;
   var reqFinanceTransactionComponentIds = {};
@@ -157,19 +157,30 @@ router.post('/transactions', function(req, res, next) {
   });
   var dbFinanceTransaction = undefined;
   var dbFinanceTransactionComponents = undefined;
+  var validateAccount = function(){};
   dbService.sequelize.transaction(function(transaction){
-    return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
-      if(financeTransaction == null){
-        return dbService.FinanceTransaction.create(reqFinanceTransaction, {transaction: transaction}).then(function(createdTransaction){
-          dbFinanceTransaction = createdTransaction;
-          dbFinanceTransactionComponents = [];
-          return createdTransaction.setUser(req.user, {transaction: transaction});
-        });
-      } else {
-        dbFinanceTransaction = financeTransaction;
-        dbFinanceTransactionComponents = financeTransaction.FinanceTransactionComponents;
-        return dbFinanceTransaction.update(reqFinanceTransaction, {transaction: transaction});
-      }
+    return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction}).then(function(accounts){
+      validateAccount = function(financeTransactionComponent){
+        if(accounts.some(function(account){return financeTransactionComponent.AccountId === account.id;}))
+          return financeTransactionComponent;
+        logger.error(i18n.__('Attempt to set an invalid account id: %s', JSON.stringify(financeTransactionComponent)));
+        financeTransactionComponent.AccountId = null;
+        return financeTransactionComponent;
+      };
+    }).then(function(){
+      return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
+        if(financeTransaction == null){
+          return dbService.FinanceTransaction.create(reqFinanceTransaction, {transaction: transaction}).then(function(createdTransaction){
+            dbFinanceTransaction = createdTransaction;
+            dbFinanceTransactionComponents = [];
+            return createdTransaction.setUser(req.user, {transaction: transaction});
+          });
+        } else {
+          dbFinanceTransaction = financeTransaction;
+          dbFinanceTransactionComponents = financeTransaction.FinanceTransactionComponents;
+          return dbFinanceTransaction.update(reqFinanceTransaction, {transaction: transaction});
+        }
+      });
     }).then(function(){
       var existingFinanceTransactionComponentIds = {};
       dbFinanceTransactionComponents.forEach(function(financeTransactionComponent){
@@ -205,12 +216,19 @@ router.post('/transactions', function(req, res, next) {
         }));
       }).then(function(){
         return dbService.sequelize.Promise.all(updatedFinanceTransactionComponents.map(function(financeTransactionComponent){
+          financeTransactionComponent = validateAccount(financeTransactionComponent);
           return existingFinanceTransactionComponentIds[financeTransactionComponent.id].update(financeTransactionComponent, {transaction: transaction});
         }));
       }).then(function(){
-        return dbFinanceTransaction.reload({transaction: transaction});
-      }).then(function(financeTransactionComponent){
-        return financeTransactionComponent.toJSON();
+        return dbFinanceTransaction.reload({transaction: transaction, include: [dbService.FinanceTransactionComponent]});
+      }).then(function(financeTransaction){
+        financeTransaction = financeTransaction.toJSON();
+        delete financeTransaction.UserId;
+        if(financeTransaction.FinanceTransactionComponents !== undefined)
+          financeTransaction.FinanceTransactionComponents.forEach(function(financeTransactionComponent){
+            delete financeTransactionComponent.FinanceTransactionId;
+          });
+        return financeTransaction;
       });
     });
   }).then(function(response){
