@@ -12,6 +12,33 @@ var tokenHeader = serviceBase.tokenHeader;
 describe('Service', function() {
   serviceBase.hooks();
 
+  var validateDefaultFinanceTransactionsData = function(done){
+    var defaultFinanceTransactions = [
+      { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+        {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+      ] },
+      { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+      { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+        {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+      ] },
+      { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+        {AccountId: 3, amount: 100, id: 5, version: 1}
+      ] }
+    ];
+    dbService.FinanceTransaction.findAll({
+      model: dbService.FinanceTransaction,
+      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+      order: [
+        ['id', 'ASC'],
+        [dbService.FinanceTransactionComponent, 'id', 'ASC']
+      ]
+    }).then(function(financeTransactions){
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, defaultFinanceTransactions);
+      done();
+    }).catch(done);
+  };
+
   describe('transactionslist', function () {
     it('should get a list of transactions for an authenticated user with default sort parameters', function (done) {
       var userData = {username: "user01", password: "mypassword"};
@@ -390,6 +417,47 @@ describe('Service', function() {
         });
       }).catch(done);
     });
+    it('should delete a specific requested transaction for an authenticated user', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var finalFinanceTransactions = [
+        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        ] },
+        { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 3, amount: 100, id: 5, version: 1}
+        ] }
+      ];
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.delete(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, {
+                tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+                  {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+                ]
+              });
+              dbService.FinanceTransaction.findAll({
+                model: dbService.FinanceTransaction,
+                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+                order: [
+                  ['id', 'ASC'],
+                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
+                ]
+              }).then(function(financeTransactions){
+                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+                assert.deepEqual(financeTransactions, finalFinanceTransactions);
+                done();
+              }).catch(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
     it('should not allow an authenticated user to get a specific requested transaction beloging to another user', function (done) {
       var userData = {username: "user02", password: "mypassword2"};
       prepopulate().then(function(){
@@ -406,6 +474,22 @@ describe('Service', function() {
           });
         });
       });
+    });
+    it('should not allow an authenticated user to delete a specific requested transaction beloging to another user', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      prepopulate().then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.delete(baseUrl + "/service/transactions/transaction/4").set(tokenHeader(token)).end(function(err, result){
+            try {
+              assert.ok(err);
+              assert.equal(result.status, 500);
+              assert.deepEqual(result.text, i18n.__('Cannot delete non-existing transaction'));
+              validateDefaultFinanceTransactionsData(done);
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
     });
     it('should not be able to get a specific requested transaction for an unauthenticated user (no token)' , function (done) {
       prepopulate().then(function(){
@@ -428,6 +512,31 @@ describe('Service', function() {
             assert.equal(err.status, 401);
             assert.equal(err.response.text, 'Unauthorized');
             done();
+          } catch(err) {done(err);}
+        });
+      }).catch(done);
+    });
+    it('should not be able to delete a specific requested transaction for an unauthenticated user (no token)' , function (done) {
+      prepopulate().then(function(){
+        superagent.delete(baseUrl + "/service/transactions/transaction/1").end(function(err, result){
+          try {
+            assert.ok(err);
+            assert.equal(err.status, 401);
+            assert.equal(err.response.text, 'Unauthorized');
+            validateDefaultFinanceTransactionsData(done);
+          } catch(err) {done(err);}
+        });
+      }).catch(done);
+    });
+    it('should not be able to delete a specific requested transaction for an unauthenticated user (bad token)', function (done) {
+      prepopulate().then(function(){
+        var token = 'aaaa';
+        superagent.delete(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
+          try {
+            assert.ok(err);
+            assert.equal(err.status, 401);
+            assert.equal(err.response.text, 'Unauthorized');
+            validateDefaultFinanceTransactionsData(done);
           } catch(err) {done(err);}
         });
       }).catch(done);

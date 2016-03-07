@@ -221,12 +221,16 @@ router.post('/transactions', function(req, res, next) {
 /* DELETE transaction. */
 router.delete('/transactions/transaction/:id', function(req, res, next) {
   dbService.sequelize.transaction(function(transaction){
-    return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: req.params.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
-      if(financeTransaction != null)
+    return dbService.FinanceTransaction.findOne({
+      where: {UserId: req.user.id, id: req.params.id},
+      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
+      attributes: {exclude: ['UserId']},
+      transaction: transaction}).then(function(financeTransaction){
+      if(financeTransaction !== null)
         return financeTransaction.destroy({transaction: transaction}).then(function(){
           return financeTransaction.toJSON();
         });
-      return "Error";
+      throw(new Error(i18n.__("Cannot delete non-existing transaction")));
     });
   }).then(function(response){
     res.send(response);

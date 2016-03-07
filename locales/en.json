@@ -17,6 +17,7 @@
 	"Balance": "Balance",
 	"Build report": "Build report",
 	"Cancel": "Cancel",
+	"Cannot delete non-existing transaction": "Cannot delete non-existing transaction",
 	"Cannot register user because of error: %s": "Cannot register user because of error: %s",
 	"Currency": "Currency",
 	"Data was already updated from another session": "Data was already updated from another session",
