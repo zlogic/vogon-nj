@@ -5,6 +5,7 @@ var passport = require('passport');
 var multer = require('multer');
 var currencies = require('country-data').currencies;
 var i18n = require('i18n');
+var logger = require('../services/logger').logger;
 var router = express.Router();
 
 /* Authentication */
@@ -248,6 +249,7 @@ router.post('/user', function(req, res, next) {
     return req.user.update(reqUser, {transaction: transaction}).then(function(user){
       user = user.toJSON();
       delete user.password;
+      delete user.id;
       return user;
     });
   }).then(function(response){
@@ -314,7 +316,7 @@ router.post('/import', upload.single('file'), function(req, res, next) {
 
 /* Error handler */
 router.use(function(err, req, res, next) {
-  console.error(i18n.__("An error has occurred: %s, stack trace:\n%s"), err, err.stack);
+  logger.error(i18n.__("An error has occurred: %s, stack trace:\n%s"), err, err.stack);
   res.status(err.status || 500);
   res.send(err.message);
 });

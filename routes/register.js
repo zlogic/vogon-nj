@@ -3,6 +3,7 @@ var router = express.Router();
 var dbService = require('../services/model');
 var auth = require('../services/auth');
 var i18n = require('i18n');
+var logger = require('../services/logger').logger;
 
 /* Register. */
 router.post('/', function (req, res, next) {
@@ -20,7 +21,7 @@ router.post('/', function (req, res, next) {
         res.send({exception: i18n.__('User already exists')});
       }
     }).catch(function(err){
-      console.error(err);
+      logger.error(err);
       res.status(500);
       res.send({exception: i18n.__('Cannot register user because of error: %s', err.name)});
     });

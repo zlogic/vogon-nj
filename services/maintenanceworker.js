@@ -1,6 +1,5 @@
 var dbService = require('./model');
-
-var logger = console.log;
+var logger = require('./logger').logger;
 
 var intervalHours = 24;
 
@@ -22,16 +21,16 @@ var run = function(){
   dbService.WorkerTask.findOrCreate({where: workerTaskValues, defaults: workerTaskValues}).spread(function(workerTask){
     var nextRun = getNextRun(workerTask.lastRun);
     if(nextRun === undefined) nextRun = new Date();
-    logger("Next run scheduled for " + nextRun.toISOString());
+    logger.info("Next run scheduled for " + nextRun.toISOString());
     if(nextRun.getTime() <= new Date().getTime()){
-      logger("Starting maintenance task");
+      logger.info("Starting maintenance task");
       dbService.performMaintenance().then(function(){
         return workerTask.update({lastRun: new Date()}).then(function(){
-          logger("Completed maintenance task");
+          logger.info("Completed maintenance task");
         });
       });
     } else {
-      logger("Skipping task");
+      logger.info("Skipping task");
     }
   });
 };

@@ -31,7 +31,7 @@ describe('Service', function() {
                 done();
               } catch (err) { done(err) };
             })
-          }).catch(done)
+          }).catch(done);
         } catch(err) {done(err);}
       });
     });
@@ -76,7 +76,7 @@ describe('Service', function() {
                   });
                 } catch (err) { done(err) };
               });
-            }).catch(done)
+            }).catch(done);
           } catch(err) {done(err);}
         });
       }).catch(done);

@@ -1,9 +1,10 @@
 var assert = require('assert');
 var dbService = require('../services/model');
 var fs = require('fs');
-var logger = require('./utils/logger.js');
+var logger = require('../services/logger').logger;
 var dbConfiguration = require('./utils/dbconfiguration.js');
-var i18nConfiguration = require('./utils/i18nconfiguration.js');
+require('./utils/i18nconfiguration.js');
+require('./utils/logging');
 
 var currentDate = function(){
   var currentTime = new Date();
@@ -16,15 +17,10 @@ describe('Model', function() {
   });
 
   beforeEach(function(done) {
-    logger.logFunction(this.currentTest.fullTitle());
+    logger.info(this.currentTest.fullTitle());
     return dbService.sequelize.sync({force: true}).then(function(task){
-      dbService.sequelize.options.logging = logger.logFunction;
       done();
     });
-  });
-
-  afterEach(function(done) {
-    logger.flush(done);
   });
 
   describe('operations', function () {
