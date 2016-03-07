@@ -71,7 +71,7 @@ router.post('/accounts', function(req, res, next) {
           return existingAccountIds[account.id].update(account, {transaction: transaction});
         }));
       }).then(function(){
-        return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction});
+        return dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction});
       }).then(function(accounts){
         return accounts.map(function(account){
           return account.toJSON();

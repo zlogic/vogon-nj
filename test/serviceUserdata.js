@@ -12,7 +12,7 @@ var tokenHeader = serviceBase.tokenHeader;
 describe('Service', function() {
   serviceBase.hooks();
 
-  var validateDefaultuserData = function(done){
+  var validateDefaultUserdata = function(done){
     dbService.User.findAll().then(function(users){
       assert.equal(users.length, 2);
       assert.equal(users[0].username, 'user01');
@@ -31,7 +31,7 @@ describe('Service', function() {
         } catch (err) { done(err) };
       });
     }).catch(done);
-  }
+  };
 
   describe('userdata', function () {
     it('should get details for an authenticated user', function (done) {
@@ -167,7 +167,7 @@ describe('Service', function() {
               assert.ok(err);
               assert.equal(result.status, 500);
               assert.deepEqual(result.text, 'Validation error');
-              validateDefaultuserData(done);
+              validateDefaultUserdata(done);
             } catch(err) {done(err);}
           });
         });
@@ -258,7 +258,7 @@ describe('Service', function() {
             assert.ok(err);
             assert.equal(err.status, 401);
             assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultuserData(done);
+            validateDefaultUserdata(done);
           } catch(err) {done(err);}
         });
       }).catch(done);
@@ -272,7 +272,7 @@ describe('Service', function() {
             assert.ok(err);
             assert.equal(err.status, 401);
             assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultuserData(done);
+            validateDefaultUserdata(done);
           } catch(err) {done(err);}
         });
       }).catch(done);
