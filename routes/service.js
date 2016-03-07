@@ -103,7 +103,7 @@ router.get('/transactions', function(req, res, next) {
   if(filterDescription !== undefined && filterDescription.length > 0)
     where.push(dbService.sequelize.where(dbService.sequelize.fn('lower', dbService.sequelize.col('description')), 'LIKE', filterDescription.toLowerCase()));
   if(filterDate !== undefined && filterDate.length > 0)
-    where.push({date: filterDate});
+    where.push({date: new Date(filterDate)});
   if(filterTags !== undefined && filterTags.length > 0)
     filterTags = JSON.parse(filterTags);
   if(filterTags !== undefined && filterTags.length > 0)

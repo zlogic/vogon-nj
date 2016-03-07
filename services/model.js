@@ -107,9 +107,21 @@ var FinanceTransaction = sequelize.define('FinanceTransaction', {
       }).sort()));
     }
   },
-  date:{
+  date: {
     type: Sequelize.DATEONLY,
-    defaultValue: new Date().toJSON().split('T')[0]
+    defaultValue: function() {
+      return new Date().toJSON().split('T')[0];
+    },
+    get: function() {
+      if(this.getDataValue("date") === undefined || this.getDataValue("date") === null)
+        return undefined;
+      return new Date(this.getDataValue("date")).toJSON().split('T')[0];
+    },
+    set: function(value) {
+      value = new Date(value);
+      value = new Date(Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()));
+      this.setDataValue("date", value);
+    }
   },
   version: Version
 }, {
