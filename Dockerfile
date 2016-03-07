@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:slim
 
 # Create app directory
 RUN mkdir -p /usr/src/vogon-nj
@@ -10,7 +10,12 @@ RUN echo '{ "allow_root": true }' > /root/.bowerrc
 # Install app dependencies
 COPY package.json /usr/src/vogon-nj/
 COPY bower.json /usr/src/vogon-nj/
-RUN npm install --unsafe-perm
+RUN  buildDeps='git' \
+  && set -x \
+  && apt-get update && apt-get install -y $buildDeps --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/* \
+  && npm install --unsafe-perm \
+  && apt-get purge -y --auto-remove $buildDeps
 
 # Bundle app source
 COPY . /usr/src/vogon-nj
