@@ -1,4 +1,4 @@
-FROM node:5.7
+FROM node:latest
 
 # Create app directory
 RUN mkdir -p /usr/src/vogon-nj
