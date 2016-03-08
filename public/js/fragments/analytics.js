@@ -120,13 +120,11 @@ app.controller("AnalyticsController", function ($scope, AccountsService, Transac
     reportConfiguration.selectedTags = [];
     for (var tag in $scope.tags)
       if ($scope.tags[tag].selected)
-        reportConfiguration.selectedTags.unshift($scope.tags[tag].tag);
+        reportConfiguration.selectedTags.push($scope.tags[tag].tag);
     reportConfiguration.selectedAccounts = [];
     for (var accountId in $scope.accounts) {
       if ($scope.accounts[accountId]) {
-        var account = AccountsService.getAccount(Number(accountId));
-        if (account !== undefined)
-          reportConfiguration.selectedAccounts.unshift(account);
+        reportConfiguration.selectedAccounts.push(accountId);
       }
     }
     HTTPService.post("service/analytics", reportConfiguration).then(function (data) {

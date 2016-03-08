@@ -1,7 +1,6 @@
 var dbService = require('../../services/model');
 
 var prepopulate = function(){
-  var users;
   return dbService.sequelize.transaction(function(transaction){
     return dbService.User.create({
       username: "user01",
@@ -30,7 +29,7 @@ var prepopulate = function(){
           ]
         }, {
           description: "test transaction 3",
-          type: "expenseincome",
+          type: "transfer",
           date: "2014-02-17",
           tags: [],
         }, {
@@ -39,7 +38,7 @@ var prepopulate = function(){
           date: "2015-01-07",
           tags: ["magic", "hello"],
           FinanceTransactionComponents: [
-            {amount: 3.14}, {amount: 2.72}
+            {amount: -3.14}, {amount: 2.72}
           ]
         }
       ]
@@ -83,4 +82,29 @@ var prepopulate = function(){
   });
 };
 
-module.exports = prepopulate;
+var prepopulateExtra = function(){
+  return prepopulate().then(function(){
+    return dbService.sequelize.transaction(function(transaction){
+      return dbService.User.findAll({transaction: transaction, include: [dbService.Account]}).then(function(users){
+        return dbService.FinanceTransaction.create({
+          description: "test transaction 4",
+          type: "transfer",
+          date: "2014-06-07",
+          tags: [],
+          FinanceTransactionComponents: [
+            {amount: -144}, {amount: 144}
+          ]
+        }, {include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
+          return dbService.sequelize.Promise.all([
+            financeTransaction.setUser(users[0], {transaction: transaction}),
+            financeTransaction.FinanceTransactionComponents[0].setAccount(users[0].Accounts[0], {transaction: transaction}),
+            financeTransaction.FinanceTransactionComponents[1].setAccount(users[0].Accounts[1], {transaction: transaction})
+          ]);
+        });
+      });
+    });
+  });
+};
+
+module.exports.prepopulate = prepopulate;
+module.exports.prepopulateExtra = prepopulateExtra;

@@ -1,7 +1,7 @@
 var serviceBase = require('./utils/servicebase')
 var assert = require('assert');
 var dbService = require('../services/model');
-var prepopulate = require('./utils/prepopulate');
+var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
 var i18n = require('i18n');
 

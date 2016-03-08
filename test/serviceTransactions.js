@@ -1,7 +1,7 @@
 var serviceBase = require('./utils/servicebase')
 var assert = require('assert');
 var dbService = require('../services/model');
-var prepopulate = require('./utils/prepopulate');
+var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
 var i18n = require('i18n');
 
@@ -17,9 +17,9 @@ describe('Service', function() {
       { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
         {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
       ] },
-      { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+      { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
       { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-        {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+        {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
       ] },
       { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
         {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -52,9 +52,9 @@ describe('Service', function() {
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: 3.14, id: 3, version: 1}
+                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
                 ] },
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
                 ] }
@@ -77,9 +77,9 @@ describe('Service', function() {
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: 3.14, id: 3, version: 1}
+                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
                 ] },
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
                 ] }
@@ -104,9 +104,9 @@ describe('Service', function() {
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
                 ] },
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
+                  {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
                 ] }
               ]);
               done();
@@ -126,9 +126,9 @@ describe('Service', function() {
               assert.ok(result);
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: 3.14, id: 3, version: 1}
+                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
                 ] },
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
@@ -155,9 +155,9 @@ describe('Service', function() {
                   {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
                 ] },
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
+                  {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
                 ] },
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] }
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] }
               ]);
               done();
             } catch(err) {done(err);}
@@ -176,7 +176,7 @@ describe('Service', function() {
               assert.ok(result);
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
                 ] }
@@ -216,7 +216,7 @@ describe('Service', function() {
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: 3.14, id: 3, version: 1}
+                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
                 ] },
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
@@ -257,7 +257,7 @@ describe('Service', function() {
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: 3.14, id: 3, version: 1}
+                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
                 ] }
               ]);
               done();
@@ -355,9 +355,9 @@ describe('Service', function() {
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
                 { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: 3.14, id: 3, version: 1}
+                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
                 ] },
-                { tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
                 { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
                   {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
                 ] }
@@ -412,9 +412,9 @@ describe('Service', function() {
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
           {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
         ] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -422,7 +422,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 42+15+3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 42 + 15 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -472,9 +472,9 @@ describe('Service', function() {
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
         ] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -485,7 +485,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 44.72 + 100, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -529,9 +529,9 @@ describe('Service', function() {
       };
       var finalFinanceTransactions = [
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -539,7 +539,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: -3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -589,9 +589,9 @@ describe('Service', function() {
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
           {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
         ] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 1, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 1, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 1, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 1, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -599,7 +599,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -650,9 +650,9 @@ describe('Service', function() {
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 1, amount: 42, id: 1, version: 2}, {AccountId: 2, amount: 160, id: 2, version: 2}
         ] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 2}, {AccountId: 1, amount: 2.72, id: 4, version: 2},
+          {AccountId: 2, amount: -3.14, id: 3, version: 2}, {AccountId: 1, amount: 2.72, id: 4, version: 2},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 2}
@@ -660,7 +660,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -711,9 +711,9 @@ describe('Service', function() {
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
           {AccountId: null, amount: 42, id: 2, version: 2}, {AccountId: null, amount: 15, id: 6, version: 1}
         ] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -721,7 +721,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: -3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -771,9 +771,9 @@ describe('Service', function() {
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 1, FinanceTransactionComponents: [
           {AccountId: 2, amount: 42, id: 2, version: 2}, {AccountId: 2, amount: 15, id: 6, version: 1}
         ] },
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}
@@ -781,7 +781,7 @@ describe('Service', function() {
       ];
       var finalAccounts = [
         { UserId: 1, balance: 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-        { UserId: 1, balance: 42+15+3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+        { UserId: 1, balance: 42 + 15 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
       prepopulate().then(function(){
@@ -821,7 +821,7 @@ describe('Service', function() {
           {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
         ] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
         ] }
       ];
       prepopulate().then(function(){
@@ -841,7 +841,7 @@ describe('Service', function() {
           {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
         ] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
         ] }
       ];
       prepopulate().then(function(){
@@ -883,9 +883,9 @@ describe('Service', function() {
     it('should delete a specific requested transaction for an authenticated user', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       var finalFinanceTransactions = [
-        { UserId: 1, tags: [], id: 2, type: 'expenseincome', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
         { UserId: 1, tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-          {AccountId: 2, amount: 3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1},
         ] },
         { UserId: 2, tags: [], id: 4, type: 'expenseincome', description: 'test transaction 3', date: '2014-05-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 100, id: 5, version: 1}

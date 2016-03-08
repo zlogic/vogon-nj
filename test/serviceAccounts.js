@@ -1,7 +1,7 @@
 var serviceBase = require('./utils/servicebase')
 var assert = require('assert');
 var dbService = require('../services/model');
-var prepopulate = require('./utils/prepopulate');
+var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
 var i18n = require('i18n');
 
@@ -14,8 +14,8 @@ describe('Service', function() {
 
   var validateDefaultAccountData = function(done){
     var defaultAccounts = [
-      { UserId: 1, balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-      { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
+      { UserId: 1, balance: 42 + 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+      { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
       { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
     ];
     dbService.Account.findAll().then(function(accounts){
@@ -37,8 +37,8 @@ describe('Service', function() {
               assert.ok(result);
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
-                { balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-                { balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 }
+                { balance: 42 + 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+                { balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 }
               ]);
               done();
             } catch(err) {done(err);}
@@ -54,12 +54,12 @@ describe('Service', function() {
         { balance: 333, name: 'test account 4', currency: 'USD', includeInTotal: true, showInList: true, version: 0 }
       ];
       var expectedAccountData = [
-        { balance: 44.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
+        { balance: 42 + 2.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
         { balance: 0, id: 4, name: 'test account 3', currency: 'EUR', includeInTotal: true, showInList: true, version: 1 },
         { balance: 0, id: 5, name: 'test account 4', currency: 'USD', includeInTotal: true, showInList: true, version: 1 }
       ];
       var finalAccounts = [
-        { UserId: 1, balance: 44.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
+        { UserId: 1, balance: 42 + 2.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 1, balance: 0, id: 4, name: 'test account 3', currency: 'EUR', includeInTotal: true, showInList: true, version: 1 },
         { UserId: 1, balance: 0, id: 5, name: 'test account 4', currency: 'USD', includeInTotal: true, showInList: true, version: 1 }
@@ -114,8 +114,8 @@ describe('Service', function() {
         { balance: 222, name: 'test account 3', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 }
       ];
       var finalAccounts = [
-        { UserId: 1, balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 1 },
-        { UserId: 1, balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 1 },
+        { UserId: 1, balance: 42 + 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 1 },
+        { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 1 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 1 }
       ];
       prepopulate().then(function(){
@@ -149,8 +149,8 @@ describe('Service', function() {
               assert.ok(result);
               assert.equal(result.status, 200);
               assert.deepEqual(result.body, [
-                { balance: 44.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-                { balance: 163.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 }
+                { balance: 42 + 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
+                { balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 }
               ]);
               done();
             } catch(err) {done(err);}
@@ -166,12 +166,12 @@ describe('Service', function() {
         { UserId: 2, balance: 333, name: 'test account 4', currency: 'USD', includeInTotal: true, showInList: true, version: 0 }
       ];
       var expectedAccountData = [
-        { balance: 44.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
+        { balance: 42 + 2.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
         { balance: 0, id: 4, name: 'test account 3', currency: 'EUR', includeInTotal: true, showInList: true, version: 1 },
         { balance: 0, id: 5, name: 'test account 4', currency: 'USD', includeInTotal: true, showInList: true, version: 1 }
       ];
       var finalAccounts = [
-        { UserId: 1, balance: 44.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
+        { UserId: 1, balance: 42 + 2.72, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 1 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 1, balance: 0, id: 4, name: 'test account 3', currency: 'EUR', includeInTotal: true, showInList: true, version: 1 },
         { UserId: 1, balance: 0, id: 5, name: 'test account 4', currency: 'USD', includeInTotal: true, showInList: true, version: 1 }

@@ -69,9 +69,7 @@ var buildReport = function(user, request){
   var enabledIncomeTransactions = request.enabledIncomeTransactions;
   var enabledExpenseTransactions = request.enabledExpenseTransactions;
   var selectedTags = request.selectedTags;
-  var selectedAccounts = request.selectedAccounts.map(function(account){
-    return account.id;
-  });
+  var selectedAccounts = request.selectedAccounts;
 
   var report = {};
 
@@ -101,7 +99,6 @@ var buildReport = function(user, request){
       || (financeTransaction.type === "expenseincome" && financeTransaction.rawAmount <= 0 && enabledExpenseTransactions)
       || (financeTransaction.type === "expenseincome" && financeTransaction.rawAmount >= 0 && enabledIncomeTransactions);
   };
-
 
   return dbService.Account.findAll({where: {UserId: user.id, id: {$in: selectedAccounts}}}).then(function(accounts){
     //Find and validate accounts
