@@ -339,23 +339,6 @@ describe('Service', function() {
         });
       }).catch(done);
     });
-    it('should ignore UserId in requests for getting a list of all tags and use OAuth data instead', function (done) {
-      var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token)).send({UserId: 2}).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, ["","hello","world","magic"]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      });
-    });
     it('should ignore UserId in requests for getting analytics and use OAuth data instead', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       var request = {

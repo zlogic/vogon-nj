@@ -343,31 +343,6 @@ describe('Service', function() {
         });
       }).catch(done);
     });
-    it('should ignore UserId in requests for getting a list of transactions and use OAuth data instead', function (done) {
-      var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions").set(tokenHeader(token)).send({UserId: 2}).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
-                ] },
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      });
-    });
     it('should not be able to get a list of transactions for an unauthenticated user (no token)' , function (done) {
       prepopulate().then(function(){
         superagent.get(baseUrl + "/service/transactions").end(function(err, result){

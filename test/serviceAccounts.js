@@ -138,26 +138,6 @@ describe('Service', function() {
         });
       }).catch(done);
     });
-    it('should ignore UserId in requests for getting a list of accounts and use OAuth data instead', function (done) {
-      var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/accounts").set(tokenHeader(token)).send({UserId: 2}).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { balance: 42 + 2.72, id: 1, name: 'test account 1', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 },
-                { balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      });
-    });
     it('should ignore UserId in requests for changing accounts and use OAuth data instead', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       var newAccountData = [
