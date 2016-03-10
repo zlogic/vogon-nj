@@ -24,7 +24,10 @@ COPY . /usr/src/vogon-nj
 RUN npm test
 
 # Delete test resources
-RUN rm -rf test/tmp
+RUN rm -rf \
+  test \
+  .git .gitignore \
+  Procfile
 
 EXPOSE 3000
 CMD [ "npm", "start" ]
