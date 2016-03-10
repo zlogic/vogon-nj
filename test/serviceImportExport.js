@@ -142,6 +142,7 @@ describe('Service', function() {
 
   describe('import', function () {
     it('should import data for an authenticated user with an empty account', function (done) {
+      this.timeout(4000);
       var userData = {username: "user03", password: "mypassword3"};
       var expectedUsers = [
         {
