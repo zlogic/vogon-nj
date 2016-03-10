@@ -52,6 +52,7 @@
 	"Logout": "Logout",
 	"Not Found": "Not Found",
 	"Password": "Password",
+	"Password is not set": "Password is not set",
 	"Register": "Register",
 	"Registration failed": "Registration failed",
 	"Registration is not allowed": "Registration is not allowed",

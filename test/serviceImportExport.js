@@ -236,7 +236,6 @@ describe('Service', function() {
                 assert.deepEqual(result.body, true);
                 dbService.User.findAll({
                   model: dbService.User,
-                  attributes: {exclude: ['password']},
                   include: [{
                     model: dbService.FinanceTransaction, attributes: {exclude: ['UserId']},
                     include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}]
@@ -250,9 +249,28 @@ describe('Service', function() {
                     [dbService.FinanceTransaction, dbService.FinanceTransactionComponent, 'id', 'ASC']
                   ]
                 }).then(function(users){
-                  users = users.map(function(user){return user.toJSON();});
-                  assert.deepEqual(users, expectedUsers);
-                  done();
+                  usersJson = users.map(function(user){return user.toJSON();});
+                  usersJson.forEach(function(user){ delete user.password; });
+                  assert.deepEqual(usersJson, expectedUsers);
+                  users[0].validatePassword('mypassword', function(err, passwordValid){
+                    if(err) return done(err);
+                    try {
+                      assert.equal(passwordValid, true);
+                      users[1].validatePassword('mypassword2', function(err, passwordValid){
+                        if(err) return done(err);
+                        try {
+                          assert.equal(passwordValid, true);
+                          users[2].validatePassword('mypassword3', function(err, passwordValid){
+                            if(err) return done(err);
+                            try {
+                              assert.equal(passwordValid, true);
+                              done();
+                            } catch (err) { done(err) };
+                          });
+                        } catch (err) { done(err) };
+                      });
+                    } catch (err) { done(err) };
+                  });
                 }).catch(done);
               } catch(err) {done(err);}
             });

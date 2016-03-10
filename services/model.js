@@ -169,6 +169,8 @@ var User = sequelize.define('User', {
   timestamps: false,
   instanceMethods: {
     validatePassword: function(password, done){
+      if(this.getDataValue('password') === undefined || this.getDataValue('password') === null)
+        return done(new Error(i18n.__("Password is not set")));
       var storedUserPassword = JSON.parse(this.getDataValue('password'));
       hashPassword(password, storedUserPassword.salt, storedUserPassword.options, function(err, result){
         if(err)
