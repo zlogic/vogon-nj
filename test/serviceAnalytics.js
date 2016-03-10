@@ -339,47 +339,17 @@ describe('Service', function() {
         });
       }).catch(done);
     });
-    it('should ignore UserId in requests for getting analytics and use OAuth data instead', function (done) {
+    it('should correctly handle an empty analytics request', function (done) {
       var userData = {username: "user01", password: "mypassword"};
-      var request = {
-        UserId: 2,
-        earliestDate: "2010-01-01",
-        latestDate: "2020-01-01",
-        enabledTransferTransactions: true,
-        enabledIncomeTransactions: true,
-        enabledExpenseTransactions: true,
-        selectedTags: ["","hello","world","magic"],
-        selectedAccounts: [1, 2]
-      };
-      var expectedAnalytics = {
-        RUB: {
-          financeTransactions: [
-            {description:"test transaction 4",date:"2014-06-07",type:"transfer",amount:144},
-            {description:"test transaction 1",date:"2014-02-17",type:"expenseincome",amount:42},
-            {description:"test transaction 2",date:"2015-01-07",type:"expenseincome",amount:2.72}
-          ],
-          tagExpenses: [{tag:"",amount:144},{tag:"hello",amount:42 + 2.72},{tag:"world",amount:42},{tag:"magic",amount:2.72}],
-          accountsBalanceGraph: {"2014-02-17":42,"2014-06-07":42-144,"2015-01-07":42-144+2.72}
-        },
-        EUR: {
-          financeTransactions: [
-            {description:"test transaction 1",date:"2014-02-17",type:"expenseincome",amount:160},
-            {description:"test transaction 4",date:"2014-06-07",type:"transfer",amount:144},
-            {description:"test transaction 2",date:"2015-01-07",type:"expenseincome",amount:-3.14}
-          ],
-          tagExpenses:[{tag:"world",amount:160},{tag:"hello",amount:160 - 3.14},{tag:"",amount:144},{tag:"magic",amount:-3.14}],
-          accountsBalanceGraph:{"2014-02-17":160,"2014-06-07":160+144,"2015-01-07":160+144-3.14}
-        }
-      };
       prepopulate().then(function(){
         authenticateUser(userData, function(err, token, result){
           if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
+          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).end(function(err, result){
             if(err) return done(err);
             try {
               assert.ok(result);
               assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
+              assert.deepEqual(result.body, {});
               done();
             } catch(err) {done(err);}
           });

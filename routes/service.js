@@ -137,7 +137,7 @@ router.get('/transactions/transaction/:id', function(req, res, next) {
     }).then(function(financeTransaction){
       if(financeTransaction !== null)
         return financeTransaction.toJSON();
-      return null;
+      throw new Error(i18n.__("Transaction %s does not exist", req.params.id));
     });
   }).then(function(response){
     res.send(response);
@@ -163,9 +163,7 @@ router.post('/transactions', function(req, res, next) {
       validateAccount = function(financeTransactionComponent){
         if(accounts.some(function(account){return financeTransactionComponent.AccountId === account.id;}))
           return financeTransactionComponent;
-        logger.error(i18n.__('Attempt to set an invalid account id: %s', JSON.stringify(financeTransactionComponent)));
-        financeTransactionComponent.AccountId = null;
-        return financeTransactionComponent;
+        throw new Error(i18n.__('Cannot set an invalid account id: %s', financeTransactionComponent.AccountId));
       };
     }).then(function(){
       return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
@@ -248,7 +246,7 @@ router.delete('/transactions/transaction/:id', function(req, res, next) {
         return financeTransaction.destroy({transaction: transaction}).then(function(){
           return financeTransaction.toJSON();
         });
-      throw(new Error(i18n.__("Cannot delete non-existing transaction")));
+      throw new Error(i18n.__("Cannot delete non-existing transaction: %s",req.params.id));
     });
   }).then(function(response){
     res.send(response);

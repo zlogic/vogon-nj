@@ -68,8 +68,8 @@ var buildReport = function(user, request){
   var enabledTransferTransactions = request.enabledTransferTransactions;
   var enabledIncomeTransactions = request.enabledIncomeTransactions;
   var enabledExpenseTransactions = request.enabledExpenseTransactions;
-  var selectedTags = request.selectedTags;
-  var selectedAccounts = request.selectedAccounts;
+  var selectedTags = request.selectedTags || [];
+  var selectedAccounts = request.selectedAccounts || [];
 
   var report = {};
 
