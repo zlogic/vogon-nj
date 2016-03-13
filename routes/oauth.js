@@ -14,8 +14,9 @@ router.post('/token',
   auth.oauth2server.errorHandler());
 
 router.post('/logout', passport.authenticate('bearer', { session: false }), function (req, res, next) {
-  auth.logout(req.body.token);
-  res.send("");
+  auth.logout(req.body.token).then(function(){
+    res.send("");
+  }).catch(next);
 });
 
 module.exports = router;

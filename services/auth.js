@@ -8,37 +8,41 @@ var LocalStrategy = require('passport-local').Strategy;
 
 var server = oauth2orize.createServer();
 
-// TODO: keep this in database?
-// TODO: expire tokens
-var tokens = {};
+var expireDate = function(){
+  var date = new Date();
+  var expireDays = JSON.parse(process.env.TOKEN_EXPIRES_DAYS || 14);
+  var expireMillis = expireDays * 24 * 60 * 60 * 1000;
+  date.setTime(date.getTime() + expireMillis);
+  return date;
+};
 
-passport.use(new BearerStrategy(
-  function(token, cb) {
-    if(tokens[token] === undefined){
-      cb(null, false);
-    } else {
-      dbService.User.findById(tokens[token]).then(function(user) {
-        cb(null, user);
-        return user;
-      }).catch(cb);
-    }
-  }));
-
-passport.use(new LocalStrategy(
-  function(username, password, done) {
-    dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
-      if (!user)
-        return done(new Error(i18n.__("Bad credentials")));
-      user.validatePassword(password, function(err, passwordValid){
-        if(err)
-          return done(err);
-        if(!passwordValid)
-          return done(new Error(i18n.__("Bad credentials")));
-        return done(null, user);
+passport.use(new BearerStrategy(function(token, cb) {
+  dbService.Token.findById(token, {include: [dbService.User]}).then(function(token) {
+    if(token === undefined || token === null)
+      return cb(null, false);
+    if(new Date(token.expires) <= new Date())
+      return token.destroy().then(function(){
+        cb(null, false);
       });
-    }).catch(done);
-  }
-));
+    var user = token.User;
+    cb(null, user);
+    return user;
+  }).catch(cb);
+}));
+
+passport.use(new LocalStrategy(function(username, password, done) {
+  dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
+    if (!user)
+      return done(new Error(i18n.__("Bad credentials")));
+    user.validatePassword(password, function(err, passwordValid){
+      if(err)
+        return done(err);
+      if(!passwordValid)
+        return done(new Error(i18n.__("Bad credentials")));
+      return done(null, user);
+    });
+  }).catch(done);
+}));
 
 server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
   dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
@@ -50,19 +54,22 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
         if(!passwordValid)
           return done(new Error(i18n.__("Bad credentials")));
         var accessToken = uid2(256);
-        tokens[accessToken] = user.id;
-        done(null, accessToken);
+        user.createToken({id: accessToken, expires: expireDate()}).then(function(){
+          done(null, accessToken);
+        })
       });
     }).catch(done);
 }));
 
 var allowRegistration= function(){
-  return process.env.ALLOW_REGISTRATION !== undefined ? JSON.parse(process.env.ALLOW_REGISTRATION) : false;
+  return JSON.parse(process.env.ALLOW_REGISTRATION || false);
 };
 
 var logout = function(token){
-  delete tokens[token];
-}
+  return dbService.Token.findById(token).then(function(token){
+    return token.destroy();
+  });
+};
 
 exports.allowRegistration = allowRegistration;
 exports.oauth2server = server;

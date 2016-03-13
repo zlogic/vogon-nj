@@ -14,6 +14,7 @@ var oauth = require('./routes/oauth');
 var service = require('./routes/service');
 var ssl = require('./services/ssl');
 var logger = require('./services/logger');
+var maintenanceWorker = require('./services/maintenanceworker');
 
 var app = express();
 
@@ -56,6 +57,9 @@ app.locals.__= i18n.__;
 
 // authentication
 app.use(passport.initialize());
+
+// maintenance worker
+maintenanceWorker.startWorker();
 
 // error handlers
 

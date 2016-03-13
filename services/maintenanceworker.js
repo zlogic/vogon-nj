@@ -5,8 +5,9 @@ var intervalHours = 24;
 
 var tryIntervalMinutes = 10;
 
-var run = function(){
-  var taskName = "maintenance";
+var tasks = {};
+
+var runTask = function(taskName){
   var getNextRun = function(lastRun){
     if(lastRun === undefined || lastRun === null) return undefined;
     nextRun = new Date(lastRun);
@@ -23,18 +24,39 @@ var run = function(){
     if(nextRun === undefined) nextRun = new Date();
     logger.info("Next run scheduled for " + nextRun.toISOString());
     if(nextRun.getTime() <= new Date().getTime()){
-      logger.info("Starting maintenance task");
-      dbService.performMaintenance().then(function(){
-        return workerTask.update({lastRun: new Date()}).then(function(){
-          logger.info("Completed maintenance task");
-        });
-      });
+      logger.info("Starting " + taskName + " task");
+      tasks[taskName]();
     } else {
-      logger.info("Skipping task");
+      logger.info("Skipping task " + taskName);
     }
+  });
+}
+
+var run = function(){
+  for(var taskName in tasks)
+    runTask(taskName);
+};
+
+tasks.maintenance = function(){
+  dbService.performMaintenance().then(function(){
+    return workerTask.update({lastRun: new Date()}).then(function(){
+      logger.info("Completed maintenance task");
+    });
   });
 };
 
-setInterval(run, tryIntervalMinutes * 60 * 1000);
+tasks.deleteExpiredTokens = function(){
+  dbService.deleteExpiredTokens().then(function(){
+    logger.info("Completed deleteExpiredTokens task");
+  });
+};
 
-run();
+//TODO: make tasks/interval configurable
+delete tasks.maintenance;
+
+var startWorker = function(){
+  setInterval(run, tryIntervalMinutes * 60 * 1000);
+};
+
+module.exports.startWorker = startWorker;
+module.exports.run = run;

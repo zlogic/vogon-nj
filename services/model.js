@@ -181,6 +181,18 @@ var User = sequelize.define('User', {
   }
 });
 
+var Token = sequelize.define('Token', {
+  id: {
+    type: Sequelize.STRING,
+    primaryKey: true
+  },
+  expires: {
+    type: Sequelize.DATEONLY
+  }
+}, {
+  timestamps: false
+});
+
 var WorkerTask = sequelize.define('WorkerTask', {
   name: {
     type: Sequelize.STRING,
@@ -200,8 +212,10 @@ FinanceTransaction.hasMany(FinanceTransactionComponent, {onDelete: 'cascade', ho
 FinanceTransaction.belongsTo(User);
 User.hasMany(FinanceTransaction, {onDelete: 'cascade', hooks:true});
 User.hasMany(Account, {onDelete: 'cascade', hooks:true});
+User.hasMany(Token, {onDelete: 'cascade'});
 Account.hasMany(FinanceTransactionComponent, {onDelete: 'cascade', hooks:true});
 Account.belongsTo(User);
+Token.belongsTo(User);
 
 /**
  * Hooks
@@ -451,12 +465,19 @@ var performMaintenance = function(){
     });
   }
   return deleteOrphans().then(recalculateBalance);
-}
+};
+
+var deleteExpiredTokens = function(){
+  return sequelize.transaction(function(transaction){
+    return Token.destroy({where: {expires: {lte: new Date()}}, transaction:transaction});
+  });
+};
 
 exports.sequelize = sequelize;
 exports.importData = importData;
 exports.exportData = exportData;
 exports.performMaintenance = performMaintenance;
+exports.deleteExpiredTokens = deleteExpiredTokens;
 
 exports.convertAmountToFixed = convertAmountToFixed;
 exports.convertAmountToFloat = convertAmountToFloat;
@@ -467,3 +488,4 @@ exports.FinanceTransaction = FinanceTransaction;
 exports.FinanceTransactionComponent = FinanceTransactionComponent;
 exports.Account = Account;
 exports.WorkerTask = WorkerTask;
+exports.Token = Token;
