@@ -25,7 +25,6 @@
     "passport-local": "~1.0.0",
     "passport-http-bearer": "~1.0.1",
     "oauth2orize": "~1.2.2",
-    "uid2": "~0.0.3",
     "multer": "~1.1.0",
     "bower": "~1.7.7",
     "country-data": "~0.0.24",

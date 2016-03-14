@@ -2,7 +2,7 @@ var passport = require('passport');
 var i18n = require('i18n');
 var dbService = require('./model');
 var oauth2orize = require('oauth2orize');
-var uid2 = require('uid2');
+var uuid = require('uuid');
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -10,7 +10,7 @@ var server = oauth2orize.createServer();
 
 var expireDate = function(){
   var date = new Date();
-  var expireDays = JSON.parse(process.env.TOKEN_EXPIRES_DAYS || 14);
+  var expireDays = parseInt(process.env.TOKEN_EXPIRES_DAYS || 14);
   var expireMillis = expireDays * 24 * 60 * 60 * 1000;
   date.setTime(date.getTime() + expireMillis);
   return date;
@@ -53,7 +53,7 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
           return done(err);
         if(!passwordValid)
           return done(new Error(i18n.__("Bad credentials")));
-        var accessToken = uid2(256);
+        var accessToken = uuid.v4();
         user.createToken({id: accessToken, expires: expireDate()}).then(function(){
           done(null, accessToken);
         })
