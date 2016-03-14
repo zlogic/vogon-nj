@@ -61,22 +61,8 @@ app.service("HTTPService", function ($http, $q, AlertService) {
   var errorHandler = function (data) {
     AlertService.endLoadingRequest();
     var deferred = $q.defer();
-    if (data.status === 401) {
-      if (isTokenURL(data.config.url)){
-        deferred.reject({data: {error_description: data.data}});
-        return deferred.promise;
-      }
-      var fixAuthCall = that.fixAuthorization();
-      if (fixAuthCall !== undefined)
-        fixAuthCall
-            .then(function (authData) {
-              if (that.authorized)
-                retryRequest(data.config).then(deferred.resolve, deferred.reject);
-              else
-                deferred.reject(authData);
-            }, deferred.reject);
-      else
-        deferred.reject();
+    if (data.status === 401 && isTokenURL(data.config.url)){
+      deferred.reject({data: {error_description: data.data}});
       return deferred.promise;
     } else {
       AlertService.addAlert(complex_messages.HTTP_ERROR_FORMAT(data.status, data.data));
