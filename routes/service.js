@@ -5,7 +5,7 @@ var passport = require('passport');
 var multer = require('multer');
 var currencies = require('country-data').currencies;
 var i18n = require('i18n');
-var logger = require('../services/logger').logger;
+var logger = require('../services/logger');
 var router = express.Router();
 
 /* Authentication */
@@ -336,7 +336,7 @@ router.post('/import', upload.single('file'), function(req, res, next) {
 
 /* Error handler */
 router.use(function(err, req, res, next) {
-  logger.error(i18n.__("An error has occurred: %s, stack trace:\n%s"), err, err.stack);
+  logger.logException(err);
   res.status(err.status || 500);
   res.send(err.message);
 });

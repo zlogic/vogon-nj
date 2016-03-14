@@ -1,12 +1,19 @@
 var winston = require('winston');
+var i18n = require('i18n');
 
-var stream = {write: winston.info};
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)({ json: false, showLevel: false })
+  ]
+});
+logger.level = 'debug';
 
-/*
-winston.remove(winston.transports.Console);
-winston.add(winston.transports.Console, {'showLevel': false});
-*/
-winston.level = 'debug';
+var stream = {write: logger.info};
 
-module.exports.logger = winston;
+var logException = function(err){
+  logger.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
+};
+
+module.exports.logger = logger;
 module.exports.stream = stream;
+module.exports.logException = logException;

@@ -111,32 +111,5 @@ describe('Service', function() {
         } catch(err) {done(err);}
       });
     });
-    it('should accept authentication of a valid user', function (done) {
-      var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          try {
-            assert.equal(result.status, 200);
-            assert.ok(token);
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
-    });
-    it('should reject authentication of an invalid user', function (done) {
-      var userData = {username: "user01", password: "badpassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 500);
-            assert.equal(err.response.body.error_description, i18n.__('Bad credentials'));
-            assert.equal(!!token, false);
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
-    });
   });
 });

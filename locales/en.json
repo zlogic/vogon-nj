@@ -17,6 +17,8 @@
 	"Balance": "Balance",
 	"Build report": "Build report",
 	"Cancel": "Cancel",
+	"Cannot create token": "Cannot create token",
+	"Cannot delete non-existing token %s": "Cannot delete non-existing token %s",
 	"Cannot delete non-existing transaction: %s": "Cannot delete non-existing transaction: %s",
 	"Cannot register user because of error: %s": "Cannot register user because of error: %s",
 	"Cannot set an invalid account id: %s": "Cannot set an invalid account id: %s",

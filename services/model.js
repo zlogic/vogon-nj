@@ -187,7 +187,7 @@ var Token = sequelize.define('Token', {
     primaryKey: true
   },
   expires: {
-    type: Sequelize.DATEONLY
+    type: Sequelize.DATE
   }
 }, {
   timestamps: false

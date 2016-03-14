@@ -1,5 +1,6 @@
 var passport = require('passport');
 var i18n = require('i18n');
+var logger = require('../services/logger');
 var dbService = require('./model');
 var oauth2orize = require('oauth2orize');
 var uuid = require('node-uuid');
@@ -10,7 +11,7 @@ var server = oauth2orize.createServer();
 
 var expireDate = function(){
   var date = new Date();
-  var expireDays = parseInt(process.env.TOKEN_EXPIRES_DAYS || 14);
+  var expireDays = parseFloat(process.env.TOKEN_EXPIRES_DAYS || 14);
   var expireMillis = expireDays * 24 * 60 * 60 * 1000;
   date.setTime(date.getTime() + expireMillis);
   return date;
@@ -53,10 +54,19 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
           return done(err);
         if(!passwordValid)
           return done(new Error(i18n.__("Bad credentials")));
-        var accessToken = uuid.v4();
-        user.createToken({id: accessToken, expires: expireDate()}).then(function(){
-          done(null, accessToken);
-        })
+        var createToken = function(remainingAttempts){
+          var accessToken = uuid.v4();
+          return user.createToken({id: accessToken, expires: expireDate()}).then(function(){
+            done(null, accessToken);
+          }).catch(function(err){
+            logger.logException(err);
+            remainingAttempts--;
+            if(remainingAttempts > 0)
+              return createToken(remainingAttempts);
+            throw new Error(i18n.__("Cannot create token"));
+          });
+        };
+        return createToken(5).catch(done);
       });
     }).catch(done);
 }));
@@ -66,8 +76,10 @@ var allowRegistration= function(){
 };
 
 var logout = function(token){
-  return dbService.Token.findById(token).then(function(token){
-    return token.destroy();
+  return dbService.Token.findById(token).then(function(foundToken){
+    if(foundToken === null || foundToken === undefined)
+      throw new Error(i18n.__("Cannot delete non-existing token %s", token));
+    return foundToken.destroy();
   });
 };
 

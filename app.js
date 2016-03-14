@@ -67,7 +67,7 @@ maintenanceWorker.startWorker();
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function errorHandler (err, req, res, next) {
-    logger.logger.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
+    logger.logException(err);
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -79,7 +79,7 @@ if (app.get('env') === 'development') {
 // production error handler
 // no stacktraces leaked to user
 app.use(function errorHandler (err, req, res, next) {
-  logger.logger.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
+  logger.logException(err);
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
