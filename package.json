@@ -35,5 +35,8 @@
     "mocha": "~2.4.5",
     "superagent": "~1.8.0"
   },
-  "engines" : { "node" : ">=5.8.0" }
+  "engines": {
+    "node": ">=5.8.0",
+    "npm": ">=3.7.3"
+  }
 }
