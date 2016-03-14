@@ -61,6 +61,8 @@ app.service("HTTPService", function ($http, $q, AlertService) {
   var errorHandler = function (data) {
     AlertService.endLoadingRequest();
     var deferred = $q.defer();
+    if (data.status === 401)
+      that.resetAuthorization();
     if (data.status === 401 && isTokenURL(data.config.url)){
       deferred.reject({data: {error_description: data.data}});
       return deferred.promise;
@@ -107,8 +109,8 @@ app.service("HTTPService", function ($http, $q, AlertService) {
     params.customData = requestParams;
     return $http.post(url, data, params).then(successHandler, errorHandler);
   };
-  this.fixAuthorization = function () {
-    throw messages.FIX_AUTHORIZATION_NOT_INITIALIZED;
+  this.resetAuthorization = function () {
+    throw messages.RESET_AUTHORIZATION_NOT_INITIALIZED;
   };
   this.setAccessToken = function (access_token) {
     if (access_token !== undefined)
@@ -185,19 +187,6 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
       return deferred.promise;
     }
   };
-  this.fixAuthorization = function () {
-    if (that.username !== undefined && that.password !== undefined) {
-      return that.performAuthorization(that.username, that.password);
-    } else {
-      var message;
-      if (that.authorized)
-        if (that.username !== undefined && that.password !== undefined)
-          message = messages.USERNAME_PASSWORD_NOT_ACCEPTED;
-        else if (that.access_token !== undefined)
-          message = messages.ACCESS_TOKEN_REJECTED;
-      that.resetAuthorization(that.authorized ? messages.CANT_FIX_AUTHORIZATION : undefined);
-    }
-  };
   this.resetAuthorization = function (message) {
     that.username = undefined;
     that.password = undefined;
@@ -209,7 +198,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
     if (message !== undefined)
       AlertService.addAlert(message);
   };
-  HTTPService.fixAuthorization = this.fixAuthorization;
+  HTTPService.resetAuthorization = this.resetAuthorization;
   AlertService.enabled = function () {
     return that.authorized;
   };
