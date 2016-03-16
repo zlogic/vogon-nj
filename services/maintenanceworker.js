@@ -48,7 +48,7 @@ tasks.push({
       nextRun.setMinutes(0);
       nextRun.setSeconds(0);
       nextRun.setMilliseconds(0);
-      var intervalHours = parseInt(process.env.RUN_MAINTENANCE_HOURS_INTERVAL || 24);
+      var intervalHours = parseInt(process.env.RUN_MAINTENANCE_HOURS_INTERVAL || 0);
       var intervalMillis = intervalHours * 60 * 60 * 1000;
       if(intervalMillis <= 0){
         logger.info("Task " + task.name + " is disabled");
