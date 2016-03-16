@@ -2,6 +2,7 @@ var passport = require('passport');
 var i18n = require('i18n');
 var logger = require('../services/logger');
 var dbService = require('./model');
+var tokencleaner = require('./tokencleaner');
 var oauth2orize = require('oauth2orize');
 var uuid = require('node-uuid');
 var BearerStrategy = require('passport-http-bearer').Strategy;
@@ -58,6 +59,7 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
           var accessToken = uuid.v4();
           return user.createToken({id: accessToken, expires: expireDate()}).then(function(){
             done(null, accessToken);
+            tokencleaner.rescheduleCleaner();
           }).catch(function(err){
             logger.logException(err);
             remainingAttempts--;

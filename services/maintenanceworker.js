@@ -43,30 +43,20 @@ tasks.push({
     dbService.WorkerTask.findById(task.name).then(function(workerTask){
       var lastRun = workerTask !== null ? workerTask.lastRun : undefined;
       lastRun = lastRun || new Date();
+      lastRun = new Date(lastRun);
       var nextRun = new Date(lastRun);
       nextRun.setMinutes(0);
       nextRun.setSeconds(0);
       nextRun.setMilliseconds(0);
-      var intervalHours = process.env.RUN_MAINTENANCE_HOURS_INTERVAL || 24;
+      var intervalHours = parseInt(process.env.RUN_MAINTENANCE_HOURS_INTERVAL || 24);
       var intervalMillis = intervalHours * 60 * 60 * 1000;
       if(intervalMillis <= 0){
-        logger.info("Task "+ task.name + " is disabled");
+        logger.info("Task " + task.name + " is disabled");
         return;
       }
       nextRun = new Date(nextRun.getTime() + intervalMillis);
       rescheduleTask(task, nextRun);
     });
-  }
-});
-
-tasks.push({
-  name: 'deleteExpiredTokens',
-  run: dbService.deleteExpiredTokens,
-  reschedule: function(){
-    var task = this;
-    dbService.Token.min('expires').then(function(expires){
-      rescheduleTask(task, expires);
-    })
   }
 });
 
