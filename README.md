@@ -31,11 +31,11 @@ It's not compatible with:
 - Azure (npm seems to download or build a non-working version of SQLite, and PostgreSQL doesn't run on Azure)
 
 It's not tested to work on:
-- Docker
 - Openshift
 
 Most SQLite versions do not support uppercase/lowercase conversions for non-ASCII characters.
 So search in deployments with SQLite may not always work correctly.
+SQLite transactions may also work unpredictably if they time out, resulting in duplicate entries.
 
 ## Getting started on Heroku
 
@@ -52,8 +52,12 @@ See the [documentation](https://devcenter.heroku.com/articles/config-vars) for m
 
 You should set `ALLOW_REGISTRATION` to `false` only after registering yourself.
 
-There's a `worker` dyno which performs regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances.
-It's completely optional and disabled by default, but may be helpful to automatically detect and fix problems.
+To periodically perform regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances:
+
+Set the `RUN_MAINTENANCE_HOURS_INTERVAL` variable to the interval (in hours) for performing maintenance (e.g. `24`).
+Note that this task may take a significant time and will likely update ALL data in the database.
+
+Set the `TOKEN_EXPIRES_DAYS` variable to the number of days before authorization expires and the user has to re-login (e.g. `14`);
 
 ## How to run the Docker image
 
@@ -77,9 +81,9 @@ Run tests:
 
 `npm test`
 
-Run maintenance worker:
+Run maintenance (performs regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances):
 
-`npm run worker`
+`npm run maintenance`
 
 By default, Vogon runs in `development` mode, which disables SSL enforcement and enables advanced error logging.
 Set the `NODE_ENV` environment variable to something other than `development` (e.g. `production`) to disable this.

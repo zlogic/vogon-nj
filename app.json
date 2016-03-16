@@ -8,6 +8,14 @@
     "ALLOW_REGISTRATION": {
       "description": "Allow anyone to register",
       "value": "true"
+    },
+    "RUN_MAINTENANCE_HOURS_INTERVAL": {
+      "description": "Interval (in hours) for performing regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances",
+      "value": "-1"
+    },
+    "TOKEN_EXPIRES_DAYS": {
+      "description": "Number of days before authorization expires and the user has to re-login",
+      "value": "14"
     }
   },
   "addons": [

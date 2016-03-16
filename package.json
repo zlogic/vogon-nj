@@ -6,6 +6,7 @@
     "start": "node ./bin/www",
     "nodemon": "nodemon ./bin/www",
     "test": "mocha test/*.js",
+    "maintenance": "node ./bin/maintenance",
     "postinstall": "bower install"
   },
   "dependencies": {
