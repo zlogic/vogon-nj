@@ -15,6 +15,7 @@ var service = require('./routes/service');
 var ssl = require('./services/ssl');
 var logger = require('./services/logger');
 var maintenanceWorker = require('./services/maintenanceworker');
+var tokencleaner = require('./services/tokencleaner');
 
 var app = express();
 
@@ -58,8 +59,13 @@ app.locals.__= i18n.__;
 // authentication
 app.use(passport.initialize());
 
-// maintenance worker
-maintenanceWorker.startWorker();
+// workers, start only after server is running
+app.on('listening', function(){
+  // maintenance worker
+  maintenanceWorker.startWorker();
+  // token cleaner
+  tokencleaner.rescheduleCleaner();
+});
 
 // error handlers
 

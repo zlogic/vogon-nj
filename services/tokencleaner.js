@@ -15,18 +15,16 @@ var rescheduleCleaner = function(){
     sleepMillis = Math.max(sleepMillis, 0);
     logger.debug("Planning expired token cleanup for " + expires.toISOString());
     plannedRun = setTimeout(function(){
-      dbService.deleteExpiredTokens().then(function(){
+      return dbService.deleteExpiredTokens().then(function(){
         rescheduleCleaner();
       });
     }, sleepMillis);
   };
 
-  dbService.Token.min('expires').then(function(expires){
+  return dbService.Token.min('expires').then(function(expires){
     if(expires !== null)
       planNextRun(expires);
   })
 };
-
-rescheduleCleaner();
 
 module.exports.rescheduleCleaner = rescheduleCleaner;

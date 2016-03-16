@@ -59,7 +59,7 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
           var accessToken = uuid.v4();
           return user.createToken({id: accessToken, expires: expireDate()}).then(function(){
             done(null, accessToken);
-            tokencleaner.rescheduleCleaner();
+            return tokencleaner.rescheduleCleaner();
           }).catch(function(err){
             logger.logException(err);
             remainingAttempts--;

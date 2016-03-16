@@ -1,4 +1,5 @@
 var dbService = require('../../services/model');
+var tokencleaner = require('../../services/tokencleaner');
 var logger = require('../../services/logger').logger;
 var superagent = require('superagent');
 var dbConfiguration = require('./dbconfiguration');
@@ -31,6 +32,7 @@ var hooks = function(){
   var server;
   before(function(done){
     dbConfiguration.reconfigureDb();
+    tokencleaner.rescheduleCleaner = function(){};
     app.set('port', port);
     server = http.createServer(app);
     server.listen(port, null, null, done);
