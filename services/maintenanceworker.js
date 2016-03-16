@@ -1,62 +1,79 @@
 var dbService = require('./model');
 var logger = require('./logger').logger;
 
-var intervalHours = 24;
+var tasks = [];
 
-var tryIntervalMinutes = 10;
-
-var tasks = {};
-
-var runTask = function(taskName){
-  var getNextRun = function(lastRun){
-    if(lastRun === undefined || lastRun === null) return undefined;
-    nextRun = new Date(lastRun);
-    nextRun.setMinutes(0);
-    nextRun.setSeconds(0);
-    nextRun.setMilliseconds(0);
-    var intervalMillis = intervalHours * 60 * 60 * 1000;
-    nextRun = new Date(nextRun.getTime() + intervalMillis);
-    return nextRun;
-  };
-  var workerTaskValues = {name: taskName};
-  dbService.WorkerTask.findOrCreate({where: workerTaskValues, defaults: workerTaskValues}).spread(function(workerTask){
-    var nextRun = getNextRun(workerTask.lastRun);
-    if(nextRun === undefined) nextRun = new Date();
-    logger.info("Next run scheduled for " + nextRun.toISOString());
-    if(nextRun.getTime() <= new Date().getTime()){
-      logger.info("Starting " + taskName + " task");
-      tasks[taskName]();
-    } else {
-      logger.info("Skipping task " + taskName);
-    }
-  });
-}
-
-var run = function(){
-  for(var taskName in tasks)
-    runTask(taskName);
-};
-
-tasks.maintenance = function(){
-  dbService.performMaintenance().then(function(){
-    return workerTask.update({lastRun: new Date()}).then(function(){
-      logger.info("Completed maintenance task");
+var runTask = function(task){
+  dbService.WorkerTask.findById(task.name).then(function(workerTask){
+    if(workerTask === null)
+      return dbService.WorkerTask.create({name: task.name});
+    return workerTask;
+  }).then(function(workerTask){
+    logger.info("Starting " + task.name + " task");
+    task.run().then(function(){
+      return workerTask.update({lastRun: new Date()}).then(function(){
+        logger.info("Completed " + task.name + " task");
+        task.reschedule(task);
+      });
     });
   });
 };
 
-tasks.deleteExpiredTokens = function(){
-  dbService.deleteExpiredTokens().then(function(){
-    logger.info("Completed deleteExpiredTokens task");
-  });
+var rescheduleTask = function(task, nextRun){
+  if(task.timer !== undefined)
+    clearTimeout(task.timer);
+  delete task.timer;
+  if(nextRun === undefined || nextRun === null){
+    logger.info("No planned schedule for " + task.name + " task");
+    return;
+  }
+  var currentTime = new Date();
+  var sleepMillis = Math.max(nextRun.getTime() - currentTime.getTime(), 0);
+  logger.info("Scheduling " + task.name + " task for " + nextRun.toISOString());
+  task.timer = setTimeout(function(){
+    runTask(task);
+  }, sleepMillis);
 };
 
-//TODO: make tasks/interval configurable
-delete tasks.maintenance;
+tasks.push({
+  name: 'maintenance',
+  run: dbService.performMaintenance,
+  reschedule: function(){
+    var task = this;
+    dbService.WorkerTask.findById(task.name).then(function(workerTask){
+      var lastRun = workerTask !== null ? workerTask.lastRun : undefined;
+      lastRun = lastRun || new Date();
+      var nextRun = new Date(lastRun);
+      nextRun.setMinutes(0);
+      nextRun.setSeconds(0);
+      nextRun.setMilliseconds(0);
+      var intervalHours = process.env.RUN_MAINTENANCE_HOURS_INTERVAL || 24;
+      var intervalMillis = intervalHours * 60 * 60 * 1000;
+      if(intervalMillis <= 0){
+        logger.info("Task "+ task.name + " is disabled");
+        return;
+      }
+      nextRun = new Date(nextRun.getTime() + intervalMillis);
+      rescheduleTask(task, nextRun);
+    });
+  }
+});
+
+tasks.push({
+  name: 'deleteExpiredTokens',
+  run: dbService.deleteExpiredTokens,
+  reschedule: function(){
+    var task = this;
+    dbService.Token.min('expires').then(function(expires){
+      rescheduleTask(task, expires);
+    })
+  }
+});
 
 var startWorker = function(){
-  setInterval(run, tryIntervalMinutes * 60 * 1000);
+  for(var i in tasks)
+    tasks[i].reschedule();
 };
 
+module.exports.tasks = tasks;
 module.exports.startWorker = startWorker;
-module.exports.run = run;
