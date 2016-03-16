@@ -13,7 +13,7 @@ var rescheduleCleaner = function(){
     var currentTime = new Date();
     var sleepMillis = expires.getTime() - currentTime.getTime();
     sleepMillis = Math.max(sleepMillis, 0);
-    logger.debug("Planning expired token cleanup for " + expires.toISOString());
+    logger.verbose("Planning expired token cleanup for " + expires.toISOString());
     plannedRun = setTimeout(function(){
       return dbService.deleteExpiredTokens().then(function(){
         rescheduleCleaner();

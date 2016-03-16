@@ -24,12 +24,12 @@ var rescheduleTask = function(task, nextRun){
     clearTimeout(task.timer);
   delete task.timer;
   if(nextRun === undefined || nextRun === null){
-    logger.info("No planned schedule for " + task.name + " task");
+    logger.verbose("No planned schedule for " + task.name + " task");
     return;
   }
   var currentTime = new Date();
   var sleepMillis = Math.max(nextRun.getTime() - currentTime.getTime(), 0);
-  logger.info("Scheduling " + task.name + " task for " + nextRun.toISOString());
+  logger.verbose("Scheduling " + task.name + " task for " + nextRun.toISOString());
   task.timer = setTimeout(function(){
     runTask(task);
   }, sleepMillis);

@@ -8,6 +8,8 @@ var app = require('../app');
 var debug = require('debug')('vogon-nj:server');
 var http = require('http');
 var model = require('../services/model');
+var maintenanceWorker = require('../services/maintenanceworker');
+var tokencleaner = require('../services/tokencleaner');
 
 /**
  * Get port from environment and store in Express.
@@ -30,6 +32,10 @@ model.sequelize.sync().then(function () {
   server.listen(port);
   server.on('error', onError);
   server.on('listening', onListening);
+  // start maintenance worker
+  maintenanceWorker.startWorker();
+  // start token cleaner
+  tokencleaner.rescheduleCleaner();
 });
 
 /**

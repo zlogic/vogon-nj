@@ -3,7 +3,7 @@ var winston = require('winston');
 var path = require('path');
 
 logger.configure({
-  level: 'debug',
+  level: 'silly',
   transports: [
     new (winston.transports.File)({ filename: path.join('test', 'tmp', 'tests.log'), json: false, showLevel: false, timestamp: false })
   ]

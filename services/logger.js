@@ -6,7 +6,7 @@ var logger = new (winston.Logger)({
     new (winston.transports.Console)({ json: false, showLevel: false })
   ]
 });
-logger.level = 'debug';
+logger.level = 'silly';
 
 var stream = {write: logger.info};
 
