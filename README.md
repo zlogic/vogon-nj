@@ -37,6 +37,21 @@ Most SQLite versions do not support uppercase/lowercase conversions for non-ASCI
 So search in deployments with SQLite may not always work correctly.
 SQLite transactions may also work unpredictably if they time out, resulting in duplicate entries.
 
+## Configuration
+
+If you do not want random people using your deployment, you may want to set the `ALLOW_REGISTRATION` environment variable to `false`.
+
+See the [documentation](https://devcenter.heroku.com/articles/config-vars) for more details on how to change configuration variables.
+
+You should set `ALLOW_REGISTRATION` to `false` only after registering yourself.
+
+Set the `TOKEN_EXPIRES_DAYS` variable to the number of days before authorization expires and the user has to re-login (e.g. `14`);
+
+To periodically perform regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances:
+
+Set the `RUN_MAINTENANCE_HOURS_INTERVAL` variable to the interval (in hours) for performing maintenance (e.g. `24`).
+Note that this task may take a significant time and will likely update ALL data in the database.
+
 ## Getting started on Heroku
 
 You can either
@@ -46,26 +61,47 @@ You can either
 
 This app requires a PostgreSQL database, the deployment button will automatically create a free database and configure it.
 
-If you do not want random people using your deployment, you may want to set the `ALLOW_REGISTRATION` environment variable to `false`.
+Configuration of Vogon-NJ can be done via environment variables, as described in the [Configuration](#configuration) section above.
 
 See the [documentation](https://devcenter.heroku.com/articles/config-vars) for more details on how to change configuration variables.
 
-You should set `ALLOW_REGISTRATION` to `false` only after registering yourself.
-
-To periodically perform regular maintenance tasks such as cleaning up unreachable database entries and recalculating account balances:
-
-Set the `RUN_MAINTENANCE_HOURS_INTERVAL` variable to the interval (in hours) for performing maintenance (e.g. `24`).
-Note that this task may take a significant time and will likely update ALL data in the database.
-
-Set the `TOKEN_EXPIRES_DAYS` variable to the number of days before authorization expires and the user has to re-login (e.g. `14`);
-
 ## How to run the Docker image
 
-To deploy create a Vogon container, run the following Docker command (change `[port]` to the port where Vogon will be accessible):
+To deploy create a Vogon-NJ container, run the following Docker command (change `[port]` to the port where Vogon-NJ will be accessible):
 
 `docker create --env ALLOW_REGISTRATION=true --publish [port]:3000 zlogic42/vogon-nj`
 
 This will create a container with an embedded SQLite database, allow registration and disable enforcement of HTTPS.
+
+Configuration of Vogon-NJ can be done via environment variables, as described in the [Configuration](#configuration) section above.
+
+Supply the configuration via `--env` properties when creating the Docker container.
+
+### A more advanced Docker configuration example
+
+Create the Posgtres DB container:
+
+`sudo docker create postgres:latest`
+
+Write down the Postgres container ID or name (like `65ff9625218ec70f5af7256e206f256723ff599e10f5c80e387b3a7ed34b9060` or `gigantic_stallman`).
+
+Create the `Vogon` database (change `[postgres_container]` to the Postgres container ID):
+
+`sudo docker exec [postgres_container] sh -c 'echo "CREATE DATABASE vogon;" | psql --username postgres'`
+
+Create the Vogon-NJ container (change `[postgres_container]` to the Postgres container ID, and provide any extra parameters via `--env`):
+
+```
+sudo docker create \
+	--env ALLOW_REGISTRATION=true \
+	--env DATABASE_URL=postgres://postgres@db/vogon \
+	--env NODE_ENV=production \
+	--restart=unless-stopped \
+	--link [postgres_container]:db \
+  zlogic42/vogon-nj
+```
+
+To use SSL, I highly recommend to create an NGINX container and use it as a reverse-proxy. That's what Heroku does!
 
 ## How to run in standalone mode
 
@@ -85,5 +121,5 @@ Run maintenance (performs regular maintenance tasks such as cleaning up unreacha
 
 `npm run maintenance`
 
-By default, Vogon runs in `development` mode, which disables SSL enforcement and enables advanced error logging.
+By default, Vogon-NJ runs in `development` mode, which disables SSL enforcement and enables advanced error logging.
 Set the `NODE_ENV` environment variable to something other than `development` (e.g. `production`) to disable this.
