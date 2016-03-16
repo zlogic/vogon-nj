@@ -95,8 +95,6 @@ Create the Vogon-NJ container (change `[postgres_container]` to the Postgres con
 sudo docker create \
 	--env ALLOW_REGISTRATION=true \
 	--env DATABASE_URL=postgres://postgres@db/vogon \
-	--env NODE_ENV=production \
-	--restart=unless-stopped \
 	--link [postgres_container]:db \
   zlogic42/vogon-nj
 ```
