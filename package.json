@@ -34,10 +34,10 @@
   "devDependencies": {
     "nodemon": "~1.9.1",
     "mocha": "~2.4.5",
-    "superagent": "~1.8.0"
+    "superagent": "~1.8.1"
   },
   "engines": {
-    "node": ">=5.8.0",
+    "node": ">=5.9.0",
     "npm": ">=3.7.3"
   }
 }
