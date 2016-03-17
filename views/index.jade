@@ -75,14 +75,12 @@ html
                 a(href="#/usersettings")
                   span(class="glyphicon glyphicon-edit", aria-hidden="true")
                   |  #{__('User settings')}
-            ul(class="nav navbar-nav navbar-right")
-              li
-                p(class="navbar-text")
-                  | #{__("Signed in as %s", "{{userService.userData.username}}")}
-              li
-                button(ng-click="logout()", ng-disabled="$eval(logoutLocked)", class="btn btn-default navbar-btn")
-                  span(class="glyphicon glyphicon-log-out", aria-hidden="true")
-                  |  #{__('Logout')}
+            div(class="nav navbar-right")
+              div(class="navbar-text")
+                | #{__("Signed in as %s", "{{userService.userData.username}}")}
+              button(ng-click="logout()", ng-disabled="$eval(logoutLocked)", class="btn btn-default navbar-btn")
+                span(class="glyphicon glyphicon-log-out", aria-hidden="true")
+                |  #{__('Logout')}
     div(ng-controller="LoginController")
       div(class="container-fluid form-control-static", ng-hide="authorizationService.authorized", ng-init="selectedTab = 'login'")
         div(class="row")

@@ -22,17 +22,17 @@ form(name="accountEditorForm", novalidate)
               button(ng-click="addAccount()", class="btn btn-default", type="button")
                 span(class="glyphicon glyphicon-plus", aria-hidden="true")
                 |  #{__('Add account')}
-          div(class="row")
-            hr
-            div(class="col-md-3 col-sm-4")
-              label
-                | #{__('Account name')}
-            div(class="col-md-2 col-sm-3 text-right")
-              label
-                | #{__('Balance')}
-            div(class="col-md-1 col-sm-1")
-              label
-                | #{__('Currency')}
+        div(class="row")
+          hr
+          div(class="col-md-3 col-sm-4")
+            label
+              | #{__('Account name')}
+          div(class="col-md-2 col-sm-3 text-right")
+            label
+              | #{__('Balance')}
+          div(class="col-md-7 col-sm-5")
+            label
+              | #{__('Currency')}
         div(ng-repeat="account in accountService.accounts")
           div(class="row", ng-if="!editingAccounts && account.showInList")
             hr
@@ -40,11 +40,11 @@ form(name="accountEditorForm", novalidate)
               | {{account.name}}
             div(class="col-md-2 col-sm-3 text-right")
               | {{account.balance| number:2}}
-            div(class="col-md-1 col-sm-1")
+            div(class="col-md-7 col-sm-5")
               | {{account.currency}}
-          div(class="row", ng-if="editingAccounts")
-            hr
-            ng-form(name="accountForm")
+          ng-form(name="accountForm", ng-if="editingAccounts")
+            div(class="row")
+              hr
               div(class="col-md-3 col-sm-4")
                 span(ng-class="{ 'has-error': accountForm.accountName.$invalid }")
                   input(type="text", ng-model="account.name", placeholder=__('Enter account name'), class="form-control", name="accountName", required)
@@ -56,18 +56,24 @@ form(name="accountEditorForm", novalidate)
                   label
                     input(type="checkbox", ng-model="account.showInList")
                     |  #{__('Show in accounts list')}
-              div(class="form-inline col-md-3 col-sm-4")
-                span(ng-class="{ 'has-error': accountForm.accountCurrency.$invalid }")
-                  select(ng-model="account.currency", ng-options="currency.currencyCode as currency.displayName for currency in currencies.currencies", class="form-control", name="accountCurrency", required)
-              div(class="form-inline col-md-1 col-sm-1 text-right")
-                button(ng-click="deleteAccount(account)", class="btn btn-default", type="button")
-                  span(class="glyphicon glyphicon-trash", aria-hidden="true")
-                  |  #{__('Delete')}
+              div(class="col-md-2 col-sm-3 text-right")
+                p
+                  | {{account.balance| number:2}}
+              div(class="col-md-7 col-sm-5")
+                p
+                  span(ng-class="{ 'has-error': accountForm.accountCurrency.$invalid }")
+                    select(ng-model="account.currency", ng-options="currency.currencyCode as currency.displayName for currency in currencies.currencies", class="form-control", name="accountCurrency", required)
+            div(class="row")
+              div(class="form-inline col-md-1 col-sm-1")
+                p
+                  button(ng-click="deleteAccount(account)", class="btn btn-danger", type="button")
+                    span(class="glyphicon glyphicon-trash", aria-hidden="true")
+                    |  #{__('Delete')}
         div(class="row total-amount", ng-repeat="(currency,data) in accountService.totalsForCurrency")
           hr
-          div(class="col-md-3 col-xs-4")
+          div(class="col-md-3 col-sm-4")
             | #{__('Total for %s', '{{data.name}}')}
-          div(class="col-md-2 col-xs-3 text-right")
+          div(class="col-md-2 col-sm-3 text-right")
             | {{data.total| number:2}}
-          div(class="col-md-1 col-xs-1")
+          div(class="col-md-7 col-sm-5")
             | {{currency}}
