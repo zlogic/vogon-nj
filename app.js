@@ -1,5 +1,6 @@
 var express = require('express');
 var path = require('path');
+var compression = require('compression');
 var favicon = require('serve-favicon');
 var morgan = require('morgan');
 var cookieParser = require('cookie-parser');
@@ -24,6 +25,7 @@ app.use(ssl.enforceSSL);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(compression());
 app.use(favicon(path.join(__dirname, 'public', 'images/vogon-favicon.png')));
 app.use(morgan('tiny', { stream: logger.stream }));
 app.use(bodyParser.json());
