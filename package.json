@@ -35,7 +35,7 @@
   "devDependencies": {
     "nodemon": "~1.9.1",
     "mocha": "~2.4.5",
-    "superagent": "~1.8.2"
+    "superagent": "~1.8.3"
   },
   "engines": {
     "node": ">=5.9.0",
