@@ -19,7 +19,7 @@
     "serve-favicon": "~2.3.0",
     "pg": "~4.5.1",
     "pg-hstore": "~2.3.2",
-    "sequelize": "~3.20.0",
+    "sequelize": "~3.21.0",
     "sqlite3": "~3.1.2",
     "i18n": "~0.8.1",
     "passport": "~0.3.2",
@@ -27,7 +27,7 @@
     "passport-http-bearer": "~1.0.1",
     "oauth2orize": "~1.2.2",
     "multer": "~1.1.0",
-    "bower": "~1.7.7",
+    "bower": "~1.7.9",
     "country-data": "~0.0.24",
     "winston": "~2.2.0",
     "compression": "~1.6.1"
