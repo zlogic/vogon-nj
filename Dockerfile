@@ -10,7 +10,7 @@ RUN echo '{ "allow_root": true }' > /root/.bowerrc
 # Install app dependencies
 COPY package.json /usr/src/vogon-nj/
 COPY bower.json /usr/src/vogon-nj/
-RUN  buildDeps='git g++ python make' \
+RUN  buildDeps='git' \
   && set -x \
   && apt-get update && apt-get install -y $buildDeps --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
