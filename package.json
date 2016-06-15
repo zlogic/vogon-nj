@@ -30,10 +30,10 @@
     "bower": "~1.7.9",
     "country-data": "~0.0.24",
     "winston": "~2.2.0",
-    "compression": "~1.6.1"
+    "compression": "~1.6.1",
+    "split": "~1.0.0"
   },
   "devDependencies": {
-    "nodemon": "~1.9.1",
     "mocha": "~2.5.3",
     "superagent": "~2.0.0"
   },
