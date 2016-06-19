@@ -148,7 +148,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
     if (access_token !== undefined) {
       that.access_token = access_token;
       if (that.rememberToken)
-        localStorage.setItem("access_token", access_token);
+        localStorage.setItem("vogon_access_token", access_token);
       HTTPService.setAccessToken(access_token);
       setAuthorized(true);
       if (username !== undefined)
@@ -193,7 +193,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
     that.access_token = undefined;
     HTTPService.setAccessToken();
     setAuthorized(false);
-    localStorage.removeItem("access_token");
+    localStorage.removeItem("vogon_access_token");
     this.rememberToken = defaultRememberToken;
     if (message !== undefined)
       AlertService.addAlert(message);
@@ -204,7 +204,7 @@ app.service("AuthorizationService", function ($q, AlertService, HTTPService) {
   };
 
   try {
-    this.access_token = localStorage["access_token"];
+    this.access_token = localStorage["vogon_access_token"];
   } catch (err) {
     this.access_token = undefined;
     AlertService.addAlert(err);
