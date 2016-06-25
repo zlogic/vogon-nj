@@ -10,18 +10,18 @@
     "postinstall": "bower install"
   },
   "dependencies": {
-    "body-parser": "~1.15.0",
+    "body-parser": "~1.15.2",
     "cookie-parser": "~1.4.1",
     "debug": "~2.2.0",
     "express": "~4.14.0",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.0",
-    "pg": "~5.1.0",
+    "pg": "~6.0.1",
     "pg-hstore": "~2.3.2",
-    "sequelize": "~3.23.2",
+    "sequelize": "~3.23.4",
     "sqlite3": "~3.1.4",
-    "i18n": "~0.8.2",
+    "i18n": "~0.8.3",
     "passport": "~0.3.2",
     "passport-local": "~1.0.0",
     "passport-http-bearer": "~1.0.1",
@@ -38,7 +38,7 @@
     "superagent": "~2.0.0"
   },
   "engines": {
-    "node": "~6.2.1",
-    "npm": "~3.9.3"
+    "node": "~6.2.2",
+    "npm": "~3.9.5"
   }
 }
