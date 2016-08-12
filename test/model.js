@@ -16,11 +16,9 @@ describe('Model', function() {
     dbConfiguration.reconfigureDb();
   });
 
-  beforeEach(function(done) {
+  beforeEach(function() {
     logger.info(this.currentTest.fullTitle());
-    return dbService.sequelize.sync({force: true}).then(function(task){
-      done();
-    });
+    return dbService.sequelize.sync({force: true});
   });
 
   describe('operations', function () {
