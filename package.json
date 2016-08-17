@@ -25,7 +25,7 @@
     "passport": "~0.3.2",
     "passport-local": "~1.0.0",
     "passport-http-bearer": "~1.0.1",
-    "oauth2orize": "~1.4.0",
+    "oauth2orize": "~1.4.1",
     "multer": "~1.2.0",
     "bower": "~1.7.9",
     "country-data": "~0.0.27",
@@ -35,10 +35,10 @@
   },
   "devDependencies": {
     "mocha": "~3.0.2",
-    "superagent": "~2.1.0"
+    "superagent": "~2.2.0"
   },
   "engines": {
-    "node": "~6.3.1",
+    "node": "~6.4.0",
     "npm": "~3.10.3"
   }
 }
