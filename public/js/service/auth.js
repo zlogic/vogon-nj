@@ -12,7 +12,7 @@ app.service("AlertService", function ($timeout) {
   this.addAlert = function (message) {
     if (!that.enabled())
       return;
-    var alert = {msg: message, type: "danger"};
+    var alert = {msg: message, class: "alert-danger"};
     that.alerts.push(alert);
     $timeout(function () {
       var alertIndex = that.alerts.indexOf(alert);
