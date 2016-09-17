@@ -411,16 +411,29 @@ var exportData = function(user){
     });
   }).then(function(user){
     user = user.toJSON();
+    delete user.username;
+    delete user.version;
+    user.accounts = user.Accounts;
+    delete user.Accounts;
+    user.transactions = user.FinanceTransactions;
+    delete user.FinanceTransactions;
     var accountRemappings = {};
-    user.Accounts = user.Accounts.map(function(account, i){
+    user.accounts = user.accounts.map(function(account, i){
+      delete account.version;
       var newAccountId = i+1;
       accountRemappings[account.id] = newAccountId;
       account.id = newAccountId;
       return account;
     });
-    user.FinanceTransactions.forEach(function(financeTransaction){
-      financeTransaction.FinanceTransactionComponents.forEach(function(financeTransactionComponent){
-        financeTransactionComponent.AccountId = accountRemappings[financeTransactionComponent.AccountId];
+    user.transactions.forEach(function(financeTransaction){
+      delete financeTransaction.version;
+      financeTransaction.components = financeTransaction.FinanceTransactionComponents;
+      financeTransaction.type = financeTransaction.type.toUpperCase();
+      delete financeTransaction.FinanceTransactionComponents;
+      financeTransaction.components.forEach(function(financeTransactionComponent){
+        delete financeTransactionComponent.version;
+        financeTransactionComponent.accountId = accountRemappings[financeTransactionComponent.AccountId];
+        delete financeTransactionComponent.AccountId;
       });
     });
     return user;

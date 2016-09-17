@@ -1,10 +1,4 @@
 {
-  "user" : {
-    "id" : 1,
-    "username" : "user01",
-    "defaultCurrency" : "RUB",
-    "authorities" : [ "ROLE_VOGON_USER", "ROLE_VOGON_ADMIN" ]
-  },
   "accounts" : [ {
     "id" : 2,
     "version" : 1,
@@ -128,6 +122,5 @@
       "amount" : -100.0,
       "accountId" : 4
     } ]
-  } ],
-  "currencyRates" : null
+  } ]
 }

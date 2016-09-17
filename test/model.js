@@ -700,106 +700,7 @@ describe('Model', function() {
         username: "user01",
         password: "mypassword"
       }).then(function(user){
-        return fs.readFile("./test/data/vogon-java-export.json", function(error, data){
-          if (error) done(error);
-          data = JSON.parse(data);
-          dbService.sequelize.transaction(function (transaction) {
-            return dbService.importData(user, data, {transaction: transaction});
-          }).then(function(){
-            return dbService.User.findAll({
-              include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}],
-              order: [
-                [dbService.Account, "id", "ASC"],
-                [dbService.FinanceTransaction, "id", "ASC"],
-                [dbService.FinanceTransaction, dbService.FinanceTransactionComponent, "id", "ASC"]
-              ]
-            });
-          }).then(function(users){
-            assert.equal(users.length, 1);
-            var user = users[0];
-            assert.equal(user.Accounts.length, 4);
-            assert.equal(user.Accounts[0].name, "Orange Bank");
-            assert.equal(user.Accounts[0].balance, 990.0);
-            assert.equal(user.Accounts[0].currency, "PLN");
-            assert.equal(user.Accounts[0].includeInTotal, true);
-            assert.equal(user.Accounts[0].showInList, true);
-            assert.equal(user.Accounts[1].name, "Green Bank");
-            assert.equal(user.Accounts[1].balance, 900.0);
-            assert.equal(user.Accounts[1].currency, "ALL");
-            assert.equal(user.Accounts[1].includeInTotal, true);
-            assert.equal(user.Accounts[1].showInList, false);
-            assert.equal(user.Accounts[2].name, "Purple Bank");
-            assert.equal(user.Accounts[2].balance, 800.0);
-            assert.equal(user.Accounts[2].currency, "ZWL");
-            assert.equal(user.Accounts[2].includeInTotal, false);
-            assert.equal(user.Accounts[2].showInList, true);
-            assert.equal(user.Accounts[3].name, "Magical Credit Card");
-            assert.equal(user.Accounts[3].balance, -80.0);
-            assert.equal(user.Accounts[3].currency, "PLN");
-            assert.equal(user.Accounts[3].includeInTotal, false);
-            assert.equal(user.Accounts[3].showInList, false);
-
-            assert.equal(user.FinanceTransactions.length, 5);
-
-            assert.equal(user.FinanceTransactions[0].type, "expenseincome");
-            assert.equal(user.FinanceTransactions[0].description, "Widgets");
-            assert.deepEqual(user.FinanceTransactions[0].tags, ["Widgets"]);
-            assert.equal(user.FinanceTransactions[0].date, "2015-11-02");
-            assert.equal(user.FinanceTransactions[0].FinanceTransactionComponents.length, 1);
-            assert.equal(user.FinanceTransactions[0].FinanceTransactionComponents[0].amount, -100.0);
-            assert.equal(user.FinanceTransactions[0].FinanceTransactionComponents[0].AccountId, user.Accounts[1].id);
-
-            assert.equal(user.FinanceTransactions[1].type, "expenseincome");
-            assert.equal(user.FinanceTransactions[1].description, "Salary");
-            assert.deepEqual(user.FinanceTransactions[1].tags, ["Salary"]);
-            assert.equal(user.FinanceTransactions[1].date, "2015-11-01");
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents.length, 3);
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents[0].amount, 1000.0);
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents[0].AccountId, user.Accounts[0].id);
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents[1].amount, 1000.0);
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents[1].AccountId, user.Accounts[1].id);
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents[2].amount, 1000.0);
-            assert.equal(user.FinanceTransactions[1].FinanceTransactionComponents[2].AccountId, user.Accounts[2].id);
-
-            assert.equal(user.FinanceTransactions[2].type, "expenseincome");
-            assert.equal(user.FinanceTransactions[2].description, "Gadgets");
-            assert.deepEqual(user.FinanceTransactions[2].tags, ["Gadgets"]);
-            assert.equal(user.FinanceTransactions[2].date, "2015-11-03");
-            assert.equal(user.FinanceTransactions[2].FinanceTransactionComponents.length, 1);
-            assert.equal(user.FinanceTransactions[2].FinanceTransactionComponents[0].amount, -100.0);
-            assert.equal(user.FinanceTransactions[2].FinanceTransactionComponents[0].AccountId, user.Accounts[3].id);
-
-            assert.equal(user.FinanceTransactions[3].type, "transfer");
-            assert.equal(user.FinanceTransactions[3].description, "Credit card payment");
-            assert.deepEqual(user.FinanceTransactions[3].tags, ["Credit"]);
-            assert.equal(user.FinanceTransactions[3].date, "2015-11-09");
-            assert.equal(user.FinanceTransactions[3].FinanceTransactionComponents.length, 2);
-            assert.equal(user.FinanceTransactions[3].FinanceTransactionComponents[0].amount, -100.0);
-            assert.equal(user.FinanceTransactions[3].FinanceTransactionComponents[0].AccountId, user.Accounts[2].id);
-            assert.equal(user.FinanceTransactions[3].FinanceTransactionComponents[1].amount, 20.0);
-            assert.equal(user.FinanceTransactions[3].FinanceTransactionComponents[1].AccountId, user.Accounts[3].id);
-
-            assert.equal(user.FinanceTransactions[4].type, "expenseincome");
-            assert.equal(user.FinanceTransactions[4].description, "Stuff");
-            assert.deepEqual(user.FinanceTransactions[4].tags, ["Gadgets","Widgets"]);
-            assert.equal(user.FinanceTransactions[4].date, "2015-11-07");
-            assert.equal(user.FinanceTransactions[4].FinanceTransactionComponents.length, 2);
-            assert.equal(user.FinanceTransactions[4].FinanceTransactionComponents[0].amount, -10.0);
-            assert.equal(user.FinanceTransactions[4].FinanceTransactionComponents[0].AccountId, user.Accounts[0].id);
-            assert.equal(user.FinanceTransactions[4].FinanceTransactionComponents[1].amount, -100.0);
-            assert.equal(user.FinanceTransactions[4].FinanceTransactionComponents[1].AccountId, user.Accounts[2].id);
-
-            done();
-          }).catch(done);
-        });
-      });
-    });
-    it('should correctly import data from the node.js version of vogon', function (done) {
-      dbService.User.create({
-        username: "user01",
-        password: "mypassword"
-      }).then(function(user){
-        return fs.readFile("./test/data/vogon-nodejs-export.json", function(error, data){
+        return fs.readFile("./test/data/vogon-export.json", function(error, data){
           if (error) done(error);
           data = JSON.parse(data);
           dbService.sequelize.transaction(function (transaction) {
@@ -956,14 +857,13 @@ describe('Model', function() {
         return dbService.exportData(user);
       }).then(function(exportData){
         assert.deepEqual(exportData, {
-          username:"user01",
-          Accounts:[
+          accounts:[
             {id:1, name:"test account 1", balance:49, currency:"RUB", includeInTotal:true, showInList:true},
             {id:2, name:"test account 2", balance:173, currency:"RUB", includeInTotal:true, showInList:true}
           ],
-          FinanceTransactions:[
-            {type:"expenseincome", description:"test transaction 1", date:currentDate(), tags:["awesome","magic"], FinanceTransactionComponents:[{amount:42, AccountId:1}, {amount:160, AccountId:2}]},
-            {type:"expenseincome", description:"test transaction 2", date:currentDate(), tags:["magic"], FinanceTransactionComponents:[{amount:7, AccountId:1}, {amount:13, AccountId:2}]}]});
+          transactions:[
+            {type:"EXPENSEINCOME", description:"test transaction 1", date:currentDate(), tags:["awesome","magic"], components:[{amount:42, accountId:1}, {amount:160, accountId:2}]},
+            {type:"EXPENSEINCOME", description:"test transaction 2", date:currentDate(), tags:["magic"], components:[{amount:7, accountId:1}, {amount:13, accountId:2}]}]});
         done();
       }).catch(done);
     });

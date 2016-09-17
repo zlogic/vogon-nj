@@ -17,8 +17,7 @@ describe('Service', function() {
     it('should export data for an authenticated user', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       var expectedExportData = {
-        username: "user01",
-        Accounts: [
+        accounts: [
           {
             id: 1,
             name: "test account 1",
@@ -35,28 +34,28 @@ describe('Service', function() {
             showInList: true
           }
         ],
-        FinanceTransactions: [
+        transactions: [
           {
             description: "test transaction 1",
-            type: "expenseincome",
+            type: "EXPENSEINCOME",
             date: "2014-02-17",
             tags: ["hello", "world"],
-            FinanceTransactionComponents: [
-              {amount: 42, AccountId: 1}, {amount: 160, AccountId: 2}
+            components: [
+              {amount: 42, accountId: 1}, {amount: 160, accountId: 2}
             ]
           }, {
             description: "test transaction 3",
-            type: "transfer",
+            type: "TRANSFER",
             date: "2014-02-17",
             tags: [],
-            FinanceTransactionComponents: []
+            components: []
           }, {
             description: "test transaction 2",
-            type: "expenseincome",
+            type: "EXPENSEINCOME",
             date: "2015-01-07",
             tags: ["hello","magic"],
-            FinanceTransactionComponents: [
-              {amount: -3.14, AccountId: 2}, {amount: 2.72, AccountId: 1}
+            components: [
+              {amount: -3.14, accountId: 2}, {amount: 2.72, accountId: 1}
             ]
           }
         ]
@@ -79,9 +78,8 @@ describe('Service', function() {
     it('should export data for an authenticated user with an empty account', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       var expectedExportData = {
-        username: "user01",
-        Accounts: [],
-        FinanceTransactions: []
+        accounts: [],
+        transactions: []
       };
       dbService.User.create({
         username: "user01",
@@ -196,40 +194,50 @@ describe('Service', function() {
           ]
         }
       ];
-      var importData =
       prepopulate().then(function(){
         return dbService.User.create({
           username: "user03",
           password: "mypassword3"
         });
       }).then(function(){
-        return fs.readFile("./test/data/vogon-nodejs-export.json", function(error, importData){
-          if(error) return done(err);
+        return fs.readFile("./test/data/vogon-export.json", function(error, importData){
+          if(error) return done(error);
           var user3 = JSON.parse(importData);
           user3.username = "user03";
           user3.id = 3;
           user3.version = 0;
+          user3.Accounts = user3.accounts;
+          delete user3.accounts;
           user3.Accounts.sort(function(a,b){return a.id - b.id;});
           user3.Accounts.forEach(function(account){
-            account.version = 0;
+            account.version = 1;
             delete account.id;
           });
+          user3.FinanceTransactions = user3.transactions;
+          delete user3.transactions;
           user3.FinanceTransactions.sort(function(a,b){return a.id - b.id;});
+          var transactionIdRemappings = {6: 1, 8: 2, 12: 3, 14: 4, 17: 5};
+          var transactionComponentIdRemappings = {7: 1, 9: 2, 10: 3, 11: 4, 13: 5, 15: 6, 16: 7, 18: 8, 19: 9};
           user3.FinanceTransactions.forEach(function(financeTransaction){
-            financeTransaction.version = 0;
-            financeTransaction.id += 4;
+            financeTransaction.version = 1;
+            financeTransaction.id = transactionIdRemappings[financeTransaction.id] + 4;
+            financeTransaction.type = financeTransaction.type.toLowerCase();
             financeTransaction.tags.sort();
+            delete financeTransaction.amount;
+            financeTransaction.FinanceTransactionComponents = financeTransaction.components;
+            delete financeTransaction.components;
             financeTransaction.FinanceTransactionComponents.sort(function(a,b){return a.id - b.id;});
             financeTransaction.FinanceTransactionComponents.forEach(function(financeTransactionComponent){
               financeTransactionComponent.version = 1;
-              financeTransactionComponent.AccountId += 3;
-              financeTransactionComponent.id += 5;
+              financeTransactionComponent.AccountId = financeTransactionComponent.accountId + 2;
+              delete financeTransactionComponent.accountId;
+              financeTransactionComponent.id = transactionComponentIdRemappings[financeTransactionComponent.id] + 5;
             });
           });
           expectedUsers.push(user3);
           authenticateUser(userData, function(err, token, result){
             if(err) return done(err);
-            superagent.post(baseUrl + "/service/import").set(tokenHeader(token)).attach("file","./test/data/vogon-nodejs-export.json").end(function(err, result){
+            superagent.post(baseUrl + "/service/import").set(tokenHeader(token)).attach("file","./test/data/vogon-export.json").end(function(err, result){
               if(err) return done(err);
               try {
                 assert.ok(result);
