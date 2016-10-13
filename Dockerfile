@@ -4,17 +4,13 @@ FROM node:slim
 RUN mkdir -p /usr/src/vogon-nj
 WORKDIR /usr/src/vogon-nj
 
-# Allow bower to run as root
-RUN echo '{ "allow_root": true }' > /root/.bowerrc
-
 # Install app dependencies
 COPY package.json /usr/src/vogon-nj/
-COPY bower.json /usr/src/vogon-nj/
 RUN  buildDeps='git' \
   && set -x \
   && apt-get update && apt-get install -y $buildDeps --no-install-recommends \
   && rm -rf /var/lib/apt/lists/* \
-  && npm install --unsafe-perm \
+  && npm install \
   && apt-get purge -y --auto-remove $buildDeps
 
 # Bundle app source
