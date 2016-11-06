@@ -18,7 +18,7 @@
     "serve-favicon": "~2.3.0",
     "pg": "~6.1.0",
     "pg-hstore": "~2.3.2",
-    "sequelize": "~3.24.6",
+    "sequelize": "~3.24.8",
     "sqlite3": "~3.1.8",
     "i18n": "~0.8.3",
     "passport": "~0.3.2",
