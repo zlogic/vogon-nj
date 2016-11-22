@@ -11,14 +11,14 @@
   "dependencies": {
     "body-parser": "~1.15.2",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.3.2",
+    "debug": "~2.3.3",
     "express": "~4.14.0",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.2",
     "pg": "~6.1.0",
     "pg-hstore": "~2.3.2",
-    "sequelize": "~3.26.0",
+    "sequelize": "~3.27.0",
     "sqlite3": "~3.1.8",
     "i18n": "~0.8.3",
     "passport": "~0.3.2",
@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "mocha": "~3.1.2",
-    "superagent": "~2.3.0"
+    "superagent": "~3.0.0"
   },
   "engines": {
     "node": "~6.9.1",
