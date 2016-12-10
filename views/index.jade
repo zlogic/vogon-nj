@@ -60,19 +60,19 @@ html
           div(class="collapse navbar-collapse", id="navbarMain")
             ul(class="nav navbar-nav")
               li(ng-class="{active: isActivePath('transactions')}")
-                a(href="#/transactions")
+                a(href="#!/transactions")
                   span(class="glyphicon glyphicon-list", aria-hidden="true")
                   |  #{__('Transactions')}
               li(ng-class="{active: isActivePath('accounts')}")
-                a(href="#/accounts")
+                a(href="#!/accounts")
                   span(class="glyphicon glyphicon-piggy-bank", aria-hidden="true")
                   |  #{__('Accounts')}
               li(ng-class="{active: isActivePath('analytics')}")
-                a(href="#/analytics")
+                a(href="#!/analytics")
                   span(class="glyphicon glyphicon-list", aria-hidden="true")
                   |  #{__('Analytics')}
               li(ng-class="{active: isActivePath('usersettings')}")
-                a(href="#/usersettings")
+                a(href="#!/usersettings")
                   span(class="glyphicon glyphicon-edit", aria-hidden="true")
                   |  #{__('User settings')}
             div(class="nav navbar-right")
