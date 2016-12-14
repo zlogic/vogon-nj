@@ -11,12 +11,12 @@
   "dependencies": {
     "body-parser": "~1.15.2",
     "cookie-parser": "~1.4.3",
-    "debug": "~2.3.3",
+    "debug": "~2.4.1",
     "express": "~4.14.0",
     "jade": "~1.11.0",
     "morgan": "~1.7.0",
     "serve-favicon": "~2.3.2",
-    "pg": "~6.1.0",
+    "pg": "~6.1.2",
     "pg-hstore": "~2.3.2",
     "sequelize": "~3.27.0",
     "sqlite3": "~3.1.8",
@@ -25,7 +25,7 @@
     "passport-local": "~1.0.0",
     "passport-http-bearer": "~1.0.1",
     "oauth2orize": "~1.5.1",
-    "multer": "~1.2.0",
+    "multer": "~1.2.1",
     "country-data": "~0.0.31",
     "winston": "~2.3.0",
     "compression": "~1.6.2",
@@ -44,10 +44,10 @@
   },
   "devDependencies": {
     "mocha": "~3.2.0",
-    "superagent": "~3.1.0"
+    "superagent": "~3.3.0"
   },
   "engines": {
-    "node": "~6.9.1",
-    "npm": "~3.10.8"
+    "node": "~6.9.2",
+    "npm": "~3.10.9"
   }
 }
