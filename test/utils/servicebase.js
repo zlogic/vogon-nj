@@ -1,4 +1,4 @@
-var dbService = require('../../services/model');
+var dbService = require('../../services/dbservice');
 var tokencleaner = require('../../services/tokencleaner');
 var logger = require('../../services/logger').logger;
 var superagent = require('superagent');
@@ -31,7 +31,6 @@ var tokenHeader = function(token){
 var hooks = function(){
   var server;
   before(function(done){
-    dbConfiguration.reconfigureDb();
     tokencleaner.rescheduleCleaner = function(){};
     app.set('port', port);
     server = http.createServer(app);
@@ -44,6 +43,7 @@ var hooks = function(){
 
   beforeEach(function() {
     logger.info(this.currentTest.fullTitle());
+    dbConfiguration.reconfigureDb();
     return dbService.sequelize.sync({force: true});
   });
 }

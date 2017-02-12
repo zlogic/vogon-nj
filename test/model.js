@@ -1,5 +1,5 @@
 var assert = require('assert');
-var dbService = require('../services/model');
+var dbService = require('../services/dbservice');
 var fs = require('fs');
 var logger = require('../services/logger').logger;
 var dbConfiguration = require('./utils/dbconfiguration.js');
@@ -12,12 +12,9 @@ var currentDate = function(){
 };
 
 describe('Model', function() {
-  before(function(){
-    dbConfiguration.reconfigureDb();
-  });
-
   beforeEach(function() {
     logger.info(this.currentTest.fullTitle());
+    dbConfiguration.reconfigureDb();
     return dbService.sequelize.sync({force: true});
   });
 
@@ -906,37 +903,40 @@ describe('Model', function() {
     it('should not allow conflicting updates from separate transactions', function (done) {
       this.timeout(4000);
       var user;
-      dbService.sequelize.transaction(function(transaction){
-        return dbService.User.create({
-          username: "user01",
-          password: "mypassword",
-          Accounts: [
-            {
-              id: 1,
-              name: "test account 1",
-              balance: 5,
-              currency: "RUB",
-              includeInTotal: true,
-              showInList: true
-            }
-          ],
-          FinanceTransactions: [
-            {
-              description: "test transaction 1",
-              type: "expenseincome",
-              date: currentDate(),
-              tags: ["magic", "awesome"],
-              FinanceTransactionComponents: [ { amount: 42 }, { amount: 160 } ]
-            }
-          ]
-        }, {include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}], transaction: transaction}).then(function(createdUser){
-          user = createdUser;
-          var account = createdUser.Accounts[0];
-          var financeTransaction = createdUser.FinanceTransactions[0];
-          return financeTransaction.FinanceTransactionComponents[0].setAccount(account, {transaction: transaction}).then(function(){
-            return financeTransaction.FinanceTransactionComponents[1].setAccount(account, {transaction: transaction});
-          }).then(function(){
-            return financeTransaction.setUser(createdUser, {transaction: transaction});
+      dbConfiguration.reconfigureDb(false);
+      dbService.sequelize.sync({force: true}).then(function() {
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.User.create({
+            username: "user01",
+            password: "mypassword",
+            Accounts: [
+              {
+                id: 1,
+                name: "test account 1",
+                balance: 5,
+                currency: "RUB",
+                includeInTotal: true,
+                showInList: true
+              }
+            ],
+            FinanceTransactions: [
+              {
+                description: "test transaction 1",
+                type: "expenseincome",
+                date: currentDate(),
+                tags: ["magic", "awesome"],
+                FinanceTransactionComponents: [ { amount: 42 }, { amount: 160 } ]
+              }
+            ]
+          }, {include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}], transaction: transaction}).then(function(createdUser){
+            user = createdUser;
+            var account = createdUser.Accounts[0];
+            var financeTransaction = createdUser.FinanceTransactions[0];
+            return financeTransaction.FinanceTransactionComponents[0].setAccount(account, {transaction: transaction}).then(function(){
+              return financeTransaction.FinanceTransactionComponents[1].setAccount(account, {transaction: transaction});
+            }).then(function(){
+              return financeTransaction.setUser(createdUser, {transaction: transaction});
+            });
           });
         });
       }).then(function(){

@@ -1,4 +1,4 @@
-var dbService = require('./model');
+var dbService = require('./dbservice');
 
 var calculateTransactionAmount = function(financeTransaction, real){
   var sumWithCondition = function(condition){

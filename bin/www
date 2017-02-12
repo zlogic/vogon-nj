@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('vogon-nj:server');
 var http = require('http');
-var model = require('../services/model');
+var dbservice = require('../services/dbservice');
 var maintenanceWorker = require('../services/maintenanceworker');
 var tokencleaner = require('../services/tokencleaner');
 
@@ -28,7 +28,7 @@ var server = http.createServer(app);
  * Init Sequelize, then listen on provided port, on all network interfaces.
  */
 
-model.sequelize.sync().then(function () {
+dbservice.sequelize.sync().then(function () {
   server.listen(port);
   server.on('error', onError);
   server.on('listening', onListening);

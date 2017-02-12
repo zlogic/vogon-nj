@@ -1,4 +1,4 @@
-var dbService = require('./model');
+var dbService = require('./dbservice');
 var logger = require('./logger').logger;
 
 var plannedRun;

@@ -1,4 +1,4 @@
-var dbService = require('../../services/model');
+var dbService = require('../../services/dbservice');
 
 var prepopulate = function(){
   return dbService.sequelize.transaction(function(transaction){
