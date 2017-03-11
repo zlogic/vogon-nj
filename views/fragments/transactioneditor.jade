@@ -1,4 +1,4 @@
-form(name="transactionEditorForm", novalidate)
+form(name="transactionEditorForm", autocomplete="off", novalidate)
 	div(class="panel panel-default")
 		div(class="panel-heading")
 			h3
@@ -28,7 +28,7 @@ form(name="transactionEditorForm", novalidate)
 						|  #{__('Add component')}
 			div(class="row form-control-static", ng-repeat="component in transaction.FinanceTransactionComponents")
 				div(class="form-inline col-md-12")
-					ng-form(name="transactionForm")
+					ng-form(name="transactionForm", autocomplete="off")
 						div(class="form-group")
 							span(ng-class="{ 'has-error': transactionForm.account.$invalid }" )
 								select(ng-model="component.AccountId", ng-options="account.id as account.name for account in accountService.accounts | filter:isAccountVisible", class="form-control", name="account", required)
