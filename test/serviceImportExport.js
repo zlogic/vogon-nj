@@ -101,7 +101,7 @@ describe('Service', function() {
     });
     it('should not be able to export data for an unauthenticated user (no token)' , function (done) {
       prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/export").end(function(err, result){
+        superagent.post(baseUrl + "/service/export").end(function(err, result){
           try {
             assert.ok(err);
             assert.equal(err.status, 401);
@@ -289,7 +289,7 @@ describe('Service', function() {
     });
     it('should not be able to import data for an unauthenticated user (no token)' , function (done) {
       prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/import").end(function(err, result){
+        superagent.post(baseUrl + "/service/import").end(function(err, result){
           try {
             assert.ok(err);
             assert.equal(err.status, 401);

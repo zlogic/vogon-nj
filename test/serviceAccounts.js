@@ -217,7 +217,7 @@ describe('Service', function() {
         });
       }).catch(done);
     });
-    it('should not be able to get a list of accounts for an unauthenticated user (bad token)', function (done) {
+    it('should not be able to change accounts for an unauthenticated user (bad token)', function (done) {
       var newAccountData = [
         { UserId: 2, balance: 111, id: 1, name: 'test account 1a', currency: 'RUB', includeInTotal: false, showInList: false, version: 0 },
         { UserId: 2, balance: 222, name: 'test account 3', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
