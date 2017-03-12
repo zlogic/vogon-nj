@@ -17,7 +17,7 @@ RUN  buildDeps='git' \
 COPY . /usr/src/vogon-nj
 
 # Run tests
-RUN npm test
+RUN DOCKER_BUILD=true npm test
 
 # Delete test resources
 RUN rm -rf \

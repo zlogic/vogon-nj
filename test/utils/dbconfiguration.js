@@ -6,7 +6,7 @@ var Sequelize = require('sequelize');
 var logger = require('../../services/logger').logger;
 
 var reconfigureDb = function(inMemory){
-  inMemory = inMemory !== undefined ? inMemory : true;
+  inMemory = inMemory !== undefined ? inMemory : (process.env.DOCKER_BUILD || true);
   var storage = inMemory === true ? ":memory:" : path.resolve(testdir.tmpdir, "vogon-nj.sqlite");
   var currentDbService = model.model("sqlite:", {storage: storage, isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.verbose});
   for(var k in currentDbService)
