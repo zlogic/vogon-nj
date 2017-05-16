@@ -4,7 +4,7 @@ var logger = require('../services/logger');
 var dbService = require('./dbservice');
 var tokencleaner = require('./tokencleaner');
 var oauth2orize = require('oauth2orize');
-var uuid = require('node-uuid');
+var uuid = require('uuid/v4');
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
 

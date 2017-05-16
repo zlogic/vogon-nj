@@ -4,7 +4,7 @@ var dbService = require('../services/dbservice');
 var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
 var i18n = require('i18n');
-var uuid = require('node-uuid');
+var uuid = require('uuid/v4');
 
 var baseUrl = serviceBase.baseUrl;
 var authenticateUser = serviceBase.authenticateUser;
