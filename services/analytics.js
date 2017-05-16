@@ -86,7 +86,7 @@ var buildReport = function(user, request){
     var realTags = selectedTags.filter(function(tag){
       return tag.length > 0;
     });
-    transactionsWhere.$or = realTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}});
+    transactionsWhere.$or = realTags.map(function(tag){return {tags: {$like: '%' + JSON.stringify(tag) + '%'}}});
     if(selectedTags.some(function(tag){ return tag.length === 0; }))
       transactionsWhere.$or.push({tags: JSON.stringify([])});
     if(selectedTags.length === 0)

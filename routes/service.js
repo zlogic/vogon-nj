@@ -107,7 +107,7 @@ router.get('/transactions', function(req, res, next) {
   if(filterTags !== undefined && filterTags.length > 0)
     filterTags = JSON.parse(filterTags);
   if(filterTags !== undefined && filterTags.length > 0)
-    where.push({$or: filterTags.map(function(tag){return {tags: {$like: '%"' + tag + '"%'}}})});
+    where.push({$or: filterTags.map(function(tag){return {tags: {$like: '%' + JSON.stringify(tag) + '%'}}})});
   dbService.sequelize.transaction(function(transaction){
     return dbService.FinanceTransaction.findAll({
       where: {$and: where},
