@@ -37,3 +37,6 @@ bower_components
 
 # Tests temporary directory
 test/tmp
+
+# Visual Studio Code configuration
+.vscode
