@@ -14,9 +14,9 @@
     "debug": "~2.6.8",
     "express": "~4.15.3",
     "jade": "~1.11.0",
-    "morgan": "~1.8.1",
+    "morgan": "~1.8.2",
     "serve-favicon": "~2.4.3",
-    "pg": "~6.2.2",
+    "pg": "~6.2.3",
     "pg-hstore": "~2.3.2",
     "sequelize": "~3.30.4",
     "sqlite3": "~3.1.8",
@@ -44,7 +44,7 @@
     "uuid": "~3.0.1"
   },
   "devDependencies": {
-    "mocha": "~3.4.1",
+    "mocha": "~3.4.2",
     "superagent": "~3.5.2"
   },
   "engines": {
