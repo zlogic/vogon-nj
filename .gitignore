@@ -38,5 +38,8 @@ bower_components
 # Tests temporary directory
 test/tmp
 
+# TypeScript generated sources
+*.js.map
+
 # Visual Studio Code configuration
 .vscode
