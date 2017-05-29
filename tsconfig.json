@@ -1,8 +1,17 @@
 {
   "compilerOptions": {
-    "sourceMap": true
+    "target": "es5",
+    "module": "system",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "lib": [ "es2015", "dom" ],
+    "noImplicitAny": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "outFile": "public/js/app.bundle.js"
   },
   "include": [
-    "public/ts/**/*"
+    "public/ts/**/*.ts"
   ]
 }

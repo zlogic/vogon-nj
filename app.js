@@ -38,7 +38,8 @@ app.use(express.static(path.join(__dirname, 'public')));
   "bootstrap", "angular-ui-bootstrap",
   "ng-infinite-scroll",
   "ng-tags-input",
-  "d3", "nvd3", "angular-nvd3"].forEach(function(component){
+  "d3", "nvd3", "angular-nvd3",
+  "core-js", "systemjs", "zone.js"].forEach(function(component){
   app.use('/js/' + component, express.static(path.join(__dirname , '/node_modules/' + component)));
 })
 

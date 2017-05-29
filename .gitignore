@@ -40,6 +40,7 @@ test/tmp
 
 # TypeScript generated sources
 *.js.map
+public/js/app.bundle.js
 
 # Visual Studio Code configuration
 .vscode
