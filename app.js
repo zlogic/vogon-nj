@@ -33,13 +33,13 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 [
+  // TODO: clean this up
   "angular", "angular-cookies", "angular-route",
   "jquery",
   "bootstrap", "angular-ui-bootstrap",
   "ng-infinite-scroll",
   "ng-tags-input",
-  "d3", "nvd3", "angular-nvd3",
-  "core-js", "systemjs", "zone.js"].forEach(function(component){
+  "d3", "nvd3", "angular-nvd3"].forEach(function(component){
   app.use('/js/' + component, express.static(path.join(__dirname , '/node_modules/' + component)));
 })
 

@@ -31,15 +31,16 @@ html
     script(type='text/javascript', src='js/fragments/analytics.js')
     script(type='text/javascript', src='js/fragments/accounts.js')
     script(type='text/javascript', src='js/fragments/transactions.js')
-    script(type='text/javascript', src='js/core-js/client/shim.min.js')
-    script(type='text/javascript', src='js/zone.js/dist/zone.js')
-    script(type='text/javascript', src='js/systemjs/dist/system.js')
-    script(type='text/javascript', src='js/app.bundle.js')
     link(rel='stylesheet', type='text/css', href='stylesheets/style.css')
     link(rel='stylesheet', type='text/css', href='stylesheets/tags-bootstrap.css')
     link(rel='icon', type='image/png', href='images/vogon-favicon.png')
     meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
-  body(ng-app="vogon")
+  body
+    vogon-app
+      | #{__('Loading...')}
+  script(type='text/javascript', src='js/polyfills.bundle.js')
+  script(type='text/javascript', src='js/app.bundle.js')
+  //- 
     div(ng-controller="NotificationController")
       div(class="navbar-fixed-top")
         div(class="alert alert-warning", role="alert", ng-show="alertService.isLoading")
