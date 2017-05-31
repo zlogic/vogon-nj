@@ -3,8 +3,11 @@ var webpack = require('webpack');
 
 module.exports = {
   entry: {
-    'app': './public/ts/output/newmain.js',
-    'polyfills': './public/ts/output/polyfills.js'
+    'app': './public/ts/main.ts',
+    'polyfills': './public/ts/polyfills.ts'
+  },
+  resolve: {
+    extensions: ['.ts', '.js']
   },
   output: {
     path: path.join(__dirname, 'public', 'js'),
@@ -13,10 +16,14 @@ module.exports = {
   module: {
     loaders: [
       {
-        test: /\.js$/,
-        loader: 'babel-loader',
+        test: /\.ts$/,
+        loader: 'awesome-typescript-loader',
         query: {
-          presets: ['es2015']
+          useBabel: true,
+          useCache: false,
+          babelOptions: {
+            presets : [[ 'es2015', { modules: false } ],]
+          }
         }
       }
     ]
@@ -31,6 +38,6 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin({
       name: ['app', 'polyfills']
     }),
-    new webpack.optimize.UglifyJsPlugin({ comments: false })
+    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false })
   ]
 };
