@@ -9,12 +9,12 @@ i18n.configure({
 
 module.exports = {
   entry: {
-    'app': './public/ts/main.ts',
-    'polyfills': './public/ts/polyfills.ts'
+    'app': './app/main.ts',
+    'polyfills': './app/polyfills.ts'
   },
   resolve: {
     alias: {
-      views: path.resolve(__dirname, 'views/'),
+      views: path.resolve(__dirname, 'app', 'views/'),
     },
     extensions: ['.ts', '.js']
   },

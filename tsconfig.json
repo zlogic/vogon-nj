@@ -8,10 +8,6 @@
     "experimentalDecorators": true,
     "lib": [ "es2015", "dom" ],
     "noImplicitAny": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "outDir": "public/ts/output"
-  },
-  "include": [
-    "public/ts/**/*.ts"
-  ]
+    "suppressImplicitAnyIndexErrors": true
+  }
 }
