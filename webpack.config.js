@@ -1,5 +1,11 @@
 var path = require('path');
 var webpack = require('webpack');
+var i18n = require('i18n');
+
+i18n.configure({
+  locales: ['en'],
+  directory: __dirname + '/locales'
+});
 
 module.exports = {
   entry: {
@@ -7,6 +13,9 @@ module.exports = {
     'polyfills': './public/ts/polyfills.ts'
   },
   resolve: {
+    alias: {
+      views: path.resolve(__dirname, 'views/'),
+    },
     extensions: ['.ts', '.js']
   },
   output: {
@@ -14,15 +23,27 @@ module.exports = {
     filename: '[name].bundle.js'
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.ts$/,
-        loader: 'awesome-typescript-loader',
-        query: {
-          useBabel: true,
-          useCache: false,
-          babelOptions: {
-            presets : [[ 'es2015', { modules: false } ],]
+        use: {
+          loader: 'awesome-typescript-loader',
+          options: {
+            useBabel: true,
+            useCache: false,
+            babelOptions: {
+              presets: [[ 'es2015', { modules: false } ]]
+            }
+          }
+        }
+      },
+      {
+        test: /\.pug$/,
+        use: {
+          loader: 'pug-static-loader',
+          options: {
+            pretty: false,
+            locals: {__ : i18n.__}
           }
         }
       }

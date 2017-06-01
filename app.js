@@ -9,7 +9,6 @@ var i18n = require('i18n');
 var passport = require('passport');
 
 var routes = require('./routes/index');
-var fragments = require('./routes/fragments');
 var register = require('./routes/register');
 var oauth = require('./routes/oauth');
 var service = require('./routes/service');
@@ -23,7 +22,7 @@ app.use(ssl.enforceSSL);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 app.use(compression());
 app.use(favicon(path.join(__dirname, 'public', 'images/vogon-favicon.png')));
@@ -41,7 +40,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.use('/', routes);
-app.use('/fragments', fragments);
 app.use('/register', register);
 app.use('/oauth', oauth);
 app.use('/service', service);

@@ -12,7 +12,7 @@ Simple web-based personal finance tracker using
 
 * AngularJS on client-side
 * Node.js on the server side
-* Jade for page generation
+* Pug for page generation
 * Sequelize for entity management
 * SQLite database for data storage, or (preferrable) a server-provided PostgreSQL (Heroku)
 
