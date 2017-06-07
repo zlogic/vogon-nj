@@ -32,9 +32,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 [
-  // TODO: clean this up
-  "jquery",
-  "bootstrap"].forEach(function(component){
+  "@angular/material",
+  "material-design-icons"
+].forEach(function(component){
   app.use('/js/' + component, express.static(path.join(__dirname , '/node_modules/' + component)));
 })
 

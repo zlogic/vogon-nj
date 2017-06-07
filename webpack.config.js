@@ -14,7 +14,7 @@ module.exports = {
   },
   resolve: {
     alias: {
-      views: path.resolve(__dirname, 'app', 'views/'),
+      views: path.resolve(__dirname, 'app', 'templates/'),
     },
     extensions: ['.ts', '.js']
   },
@@ -43,6 +43,7 @@ module.exports = {
           loader: 'pug-static-loader',
           options: {
             pretty: false,
+            doctype: 'html',
             locals: {__ : i18n.__}
           }
         }

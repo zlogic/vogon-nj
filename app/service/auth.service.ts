@@ -1,33 +1,16 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs/rx'
-
-class Alert {
-  msg: string;
-  class: string;
-}
+import { MdSnackBar } from '@angular/material';
 
 @Injectable()
 export class AlertService {
-  public alerts: Alert[];
   private loadingRequests: number;
 
-  constructor() {
-    this.alerts = [];
+  constructor(private snackBar: MdSnackBar) {
     this.loadingRequests = 0;
-  }
-  
-  closeAlert(alertIndex: number) {
-    this.alerts.splice(alertIndex, 1);
   }
 
   addAlert(message: string) {
-    var alert = {msg: message, class: "alert-danger"};
-    this.alerts.push(alert);
-    Observable.timer(30000).subscribe(() => {
-      var alertIndex = this.alerts.indexOf(alert);
-      if (alertIndex !== -1)
-        this.closeAlert(alertIndex);
-    });
+    this.snackBar.open(message, require('../templates/components/snackbar.pug'));
   }
 
   startLoadingRequest() {
