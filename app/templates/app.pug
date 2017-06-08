@@ -25,7 +25,7 @@ md-sidenav-container(fullscreen)
     span
       | #{__('Vogon')}
     span(style='flex: 1 1 auto;')
-    md-icon(*ngIf="alertService.isLoading()") sync
+    md-icon(*ngIf="isLoading()") sync
     button(md-icon-button, aria-label="#{__('Open menu')}", (click)="test()")
       md-icon more_vert
   router-outlet

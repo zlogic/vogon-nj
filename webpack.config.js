@@ -1,6 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var i18n = require('i18n');
+var AotPlugin = require('@ngtools/webpack').AotPlugin;
 
 i18n.configure({
   locales: ['en'],
@@ -26,16 +27,7 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        use: {
-          loader: 'awesome-typescript-loader',
-          options: {
-            useBabel: true,
-            useCache: false,
-            babelOptions: {
-              presets: [[ 'es2015', { modules: false } ]]
-            }
-          }
-        }
+        loader: '@ngtools/webpack'
       },
       {
         test: /\.pug$/,
@@ -60,6 +52,11 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin({
       name: ['app', 'polyfills']
     }),
-    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false })
+    new AotPlugin({
+      tsConfigPath: './tsconfig.json',
+      entryModule: path.join(__dirname, 'app', 'app.module#AppModule')
+    }),
+    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
+    new webpack.LoaderOptionsPlugin({ minimize: true })
   ]
 };

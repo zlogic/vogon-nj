@@ -3,7 +3,7 @@ import { AlertService } from './service/auth.service';
 
 @Component({
   selector: 'vogon-app',
-  template: require('./templates/app.pug')
+  templateUrl: './templates/app.pug'
 })
 
 export class AppComponent {
