@@ -30,4 +30,8 @@ export class AlertService {
 export class AuthService {
   constructor() {}
   
+  isAuthorized():boolean {
+    //TODO: implement real check here
+    return false;
+  }
 }

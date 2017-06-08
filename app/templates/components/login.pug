@@ -1,0 +1,22 @@
+div(class="login-container")
+  md-card(style="width:400px;")
+    md-card-content
+      h3
+        | #{__('Vogon authorization')}
+      section
+      p
+        md-button-toggle-group
+          md-button-toggle(selected)
+            span #{__('Login')}
+          md-button-toggle
+            span #{__('Register')}
+      p
+        md-input-container
+          input(mdInput,placeholder=__('Enter username'))
+        |  
+        md-input-container
+          input(mdInput,placeholder=__('Enter password'))
+      p
+        md-checkbox(checked) #{__('Remember me')}
+      p
+        button(md-raised-button, color="primary") #{__('Login')}

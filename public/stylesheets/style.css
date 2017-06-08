@@ -46,6 +46,13 @@ html, body {
   background-color:rgba(0,0,0,.06);
 }
 
+.login-container {
+  display: -webkit-flex;
+  display: flex;
+  justify-content: center;
+  padding: 30px;
+}
+
 .clickable {
 	cursor: pointer
 }
