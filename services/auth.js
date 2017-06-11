@@ -36,11 +36,9 @@ passport.use(new LocalStrategy(function(username, password, done) {
   dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
     if (!user)
       return done(new Error(i18n.__("Bad credentials")));
-    user.validatePassword(password, function(err, passwordValid){
-      if(err)
-        return done(err);
+    return user.validatePassword(password).then(function(passwordValid) {
       if(!passwordValid)
-        return done(new Error(i18n.__("Bad credentials")));
+        throw new Error(i18n.__("Bad credentials"));
       return done(null, user);
     });
   }).catch(done);
@@ -50,11 +48,9 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
   dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
       if (!user)
         return done(new Error(i18n.__("Bad credentials")));
-      user.validatePassword(password, function(err, passwordValid){
-        if(err)
-          return done(err);
+      return user.validatePassword(password).then(function(passwordValid) {
         if(!passwordValid)
-          return done(new Error(i18n.__("Bad credentials")));
+          throw new Error(i18n.__("Bad credentials"));
         var createToken = function(remainingAttempts){
           var accessToken = uuid.v4();
           return user.createToken({id: accessToken, expires: expireDate()}).then(function(){

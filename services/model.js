@@ -26,7 +26,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   else
     sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.verbose});
 
-  var hashPassword = function(password, salt, options, done){
+  var hashPassword = function(password, salt, options){
     if(options === null || options === undefined)
       options = {
         iterations: 10000,
@@ -35,27 +35,31 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
         saltlen: 256
       };
     var pbkdf2 = function(salt){
-      crypto.pbkdf2(password, salt, options.iterations, options.keylen, options.digest, function(err, hash){
-        if(err)
-          return done(err);
-        hash = hash.toString('hex');
-        options =  {
-          iterations: options.iterations,
-          keylen: options.keylen,
-          digest: options.digest
-        };
-        done(null, JSON.stringify({salt: salt, hash:hash, options: options}));
+      return new sequelize.Promise(function(resolve, reject) {
+        crypto.pbkdf2(password, salt, options.iterations, options.keylen, options.digest, function(err, hash){
+          if(err)
+            return reject(err);
+          hash = hash.toString('hex');
+          options =  {
+            iterations: options.iterations,
+            keylen: options.keylen,
+            digest: options.digest
+          };
+          resolve(JSON.stringify({salt: salt, hash:hash, options: options}));
+        });
       });
     };
-    if(salt === null || salt === undefined)
-      crypto.randomBytes(options.saltlen, function(err, salt){
-        if(err)
-          return done(err);
-        salt = salt.toString('hex');
-        pbkdf2(salt);
-      });
-    else
-      pbkdf2(salt);
+    return new sequelize.Promise(function(resolve, reject) {
+      if(salt === null || salt === undefined)
+        crypto.randomBytes(options.saltlen, function(err, salt){
+          if(err)
+            return reject(err);
+          salt = salt.toString('hex');
+          resolve(pbkdf2(salt));
+        });
+      else
+        resolve(pbkdf2(salt));
+    });
   };
 
   /**
@@ -108,7 +112,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       }
     },
     date: {
-      type: Sequelize.DATEONLY,
+      type: Sequelize.DATE,
       defaultValue: function() {
         return new Date().toJSON().split('T')[0];
       },
@@ -140,13 +144,11 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     },
     version: Version
   }, {
-    timestamps: false,
-    instanceMethods: {
-      getRawAmount: function(){
-        return parseInt(this.getDataValue('amount'), 10);
-      }
-    }
+    timestamps: false
   });
+  FinanceTransactionComponent.prototype.getRawAmount = function(){
+    return parseInt(this.getDataValue('amount'), 10);
+  };
 
   var User = sequelize.define('User', {
     username: {
@@ -167,19 +169,18 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     version: Version
   }, {
     timestamps: false,
-    instanceMethods: {
-      validatePassword: function(password, done){
-        if(this.getDataValue('password') === undefined || this.getDataValue('password') === null)
-          return done(new Error(i18n.__("Password is not set")));
-        var storedUserPassword = JSON.parse(this.getDataValue('password'));
-        hashPassword(password, storedUserPassword.salt, storedUserPassword.options, function(err, result){
-          if(err)
-            return done(err);
-          done(null, JSON.parse(result).hash === storedUserPassword.hash);
-        });
-      }
-    }
   });
+  User.prototype.validatePassword = function(password){
+    var instance = this;
+    return new sequelize.Promise(function(resolve, reject) {
+      if(instance.getDataValue('password') === undefined || instance.getDataValue('password') === null)
+        return reject(new Error(i18n.__("Password is not set")));
+      var storedUserPassword = JSON.parse(instance.getDataValue('password'));
+      hashPassword(password, storedUserPassword.salt, storedUserPassword.options).then(function(result){
+        resolve(JSON.parse(result).hash === storedUserPassword.hash);
+      }).catch(reject);
+    });
+  };
 
   var Token = sequelize.define('Token', {
     id: {
@@ -223,6 +224,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   //TODO: set default values or do validation for all fields
   Account.hook('beforeCreate', function(account, options){
     account.balance = 0;
+    return sequelize.Promise.resolve();
   });
 
   FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionComponent, options){
@@ -232,13 +234,13 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     var newAmount = financeTransactionComponent.getDataValue("amount");
 
     if(financeTransactionComponent.AccountId === undefined && previousAccount === undefined)
-      return;
+      return sequelize.Promise.resolve();
 
     if(!financeTransactionComponent.changed("AccountId") && !financeTransactionComponent.changed("amount"))
-      return;
+      return sequelize.Promise.resolve();
 
     if(options === undefined || options.transaction === undefined)
-      throw new Error(i18n.__("FinanceTransactionComponent afterUpdate hook can only be run from a transaction"));
+      return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterUpdate hook can only be run from a transaction")));
     var transaction = options.transaction;
 
     var updatePreviousAccount = function(){
@@ -265,10 +267,10 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
   FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComponent, options){
     if(financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null)
-      return;
+      return sequelize.Promise.resolve();
 
     if(options === undefined || options.transaction === undefined)
-      throw new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction"));
+      return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction")));
 
     var transaction = options.transaction;
     return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
@@ -276,14 +278,12 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     });
   });
 
-  var userPasswordHashingHook = function(user, options, done){
+  var userPasswordHashingHook = function(user, options) {
     if (!user.changed('password'))
-      return done();
-    hashPassword(user.getDataValue('password'), null, null, function(err, result){
-      if(err)
-        return done(err);
+      return sequelize.Promise.resolve();
+    
+    return hashPassword(user.getDataValue('password'), null, null).then(function(result) {
       user.setDataValue('password', result);
-      done();
     });
   };
   User.hook('beforeCreate', userPasswordHashingHook);
@@ -293,7 +293,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     if(options === undefined || options.transaction === undefined)
       throw new Error(i18n.__("conflictResolutionHook hook can only be run from a transaction"));
     var transaction = options.transaction;
-    return instance.Model.findOne({where: {id: instance.id}, transaction: transaction}).then(function(dbInstance){
+    return instance.constructor.findOne({where: {id: instance.id}, transaction: transaction}).then(function(dbInstance){
       if(dbInstance.version !== instance.version){
         throw new Error(i18n.__("Data was already updated from another session"));
       } else if(!instance.changed('version')){

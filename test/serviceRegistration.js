@@ -24,13 +24,10 @@ describe('Service', function() {
           dbService.User.findAll().then(function(users){
             assert.equal(users.length, 1);
             assert.equal(users[0].username, 'user01');
-            users[0].validatePassword('password', function(err, passwordValid){
-              if(err) return done(err);
-              try {
-                assert.equal(passwordValid, true);
-                done();
-              } catch (err) { done(err) };
-            })
+            users[0].validatePassword('password').then(function(passwordValid) {
+              assert.equal(passwordValid, true);
+              done();
+            }).catch(done);
           }).catch(done);
         } catch(err) {done(err);}
       });
@@ -63,19 +60,13 @@ describe('Service', function() {
               assert.equal(users.length, 2);
               assert.equal(users[0].username, 'user01');
               assert.equal(users[1].username, 'user02');
-              users[0].validatePassword('mypassword', function(err, passwordValid){
-                if(err) return done(err);
-                try {
-                  assert.equal(passwordValid, true);
-                  users[1].validatePassword('mypassword2', function(err, passwordValid){
-                    if(err) return done(err);
-                    try {
-                      assert.equal(passwordValid, true);
-                      done();
-                    } catch (err) { done(err) };
-                  });
-                } catch (err) { done(err) };
-              });
+              users[0].validatePassword('mypassword').then(function(passwordValid) {
+                assert.equal(passwordValid, true);
+                return users[1].validatePassword('mypassword2');
+              }).then(function(passwordValid) {
+                assert.equal(passwordValid, true);
+                done();
+              }).catch(done);
             }).catch(done);
           } catch(err) {done(err);}
         });

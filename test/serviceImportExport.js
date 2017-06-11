@@ -261,25 +261,16 @@ describe('Service', function() {
                   usersJson = users.map(function(user){return user.toJSON();});
                   usersJson.forEach(function(user){ delete user.password; });
                   assert.deepEqual(usersJson, expectedUsers);
-                  users[0].validatePassword('mypassword', function(err, passwordValid){
-                    if(err) return done(err);
-                    try {
-                      assert.equal(passwordValid, true);
-                      users[1].validatePassword('mypassword2', function(err, passwordValid){
-                        if(err) return done(err);
-                        try {
-                          assert.equal(passwordValid, true);
-                          users[2].validatePassword('mypassword3', function(err, passwordValid){
-                            if(err) return done(err);
-                            try {
-                              assert.equal(passwordValid, true);
-                              done();
-                            } catch (err) { done(err) };
-                          });
-                        } catch (err) { done(err) };
-                      });
-                    } catch (err) { done(err) };
-                  });
+                  users[0].validatePassword('mypassword').then(function(passwordValid) {
+                    assert.equal(passwordValid, true);
+                    return users[1].validatePassword('mypassword2');
+                  }).then(function(passwordValid) {
+                    assert.equal(passwordValid, true);
+                    return users[2].validatePassword('mypassword3');
+                  }).then(function(passwordValid) {
+                    assert.equal(passwordValid, true);
+                    done();
+                  }).catch(done);
                 }).catch(done);
               } catch(err) {done(err);}
             });

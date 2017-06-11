@@ -17,19 +17,13 @@ describe('Service', function() {
       assert.equal(users.length, 2);
       assert.equal(users[0].username, 'user01');
       assert.equal(users[1].username, 'user02');
-      users[0].validatePassword('mypassword', function(err, passwordValid){
-        if(err) return done(err);
-        try {
-          assert.equal(passwordValid, true);
-          users[1].validatePassword('mypassword2', function(err, passwordValid){
-            if(err) return done(err);
-            try {
-              assert.equal(passwordValid, true);
-              done();
-            } catch (err) { done(err) };
-          });
-        } catch (err) { done(err) };
-      });
+      users[0].validatePassword('mypassword').then(function(passwordValid) {
+        assert.equal(passwordValid, true);
+        return users[1].validatePassword('mypassword2');
+      }).then(function(passwordValid) {
+        assert.equal(passwordValid, true);
+        done();
+      }).catch(done);
     }).catch(done);
   };
 
@@ -67,19 +61,13 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user03');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword', function(err, passwordValid){
-                  if(err) return done(err);
-                  try {
-                    assert.equal(passwordValid, true);
-                    users[1].validatePassword('mypassword2', function(err, passwordValid){
-                      if(err) return done(err);
-                      try {
-                        assert.equal(passwordValid, true);
-                        done();
-                      } catch (err) { done(err) };
-                    });
-                  } catch (err) { done(err) };
-                });
+                users[0].validatePassword('mypassword').then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  return users[1].validatePassword('mypassword2');
+                }).then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  done();
+                }).catch(done);
               }).catch(done);
             } catch(err) {done(err);}
           });
@@ -102,19 +90,13 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user01');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword1', function(err, passwordValid){
-                  if(err) return done(err);
-                  try {
-                    assert.equal(passwordValid, true);
-                    users[1].validatePassword('mypassword2', function(err, passwordValid){
-                      if(err) return done(err);
-                      try {
-                        assert.equal(passwordValid, true);
-                        done();
-                      } catch (err) { done(err) };
-                    });
-                  } catch (err) { done(err) };
-                });
+                users[0].validatePassword('mypassword1').then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  return users[1].validatePassword('mypassword2');
+                }).then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  done();
+                }).catch(done);
               }).catch(done);
             } catch(err) {done(err);}
           });
@@ -137,19 +119,13 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user03');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword1', function(err, passwordValid){
-                  if(err) return done(err);
-                  try {
-                    assert.equal(passwordValid, true);
-                    users[1].validatePassword('mypassword2', function(err, passwordValid){
-                      if(err) return done(err);
-                      try {
-                        assert.equal(passwordValid, true);
-                        done();
-                      } catch (err) { done(err) };
-                    });
-                  } catch (err) { done(err) };
-                });
+                users[0].validatePassword('mypassword1').then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  return users[1].validatePassword('mypassword2');
+                }).then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  done();
+                }).catch(done);
               }).catch(done);
             } catch(err) {done(err);}
           });
@@ -183,7 +159,7 @@ describe('Service', function() {
             try {
               assert.ok(err);
               assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Validation error: Validation notEmpty failed');
+              assert.deepEqual(result.text, 'Validation error: Validation notEmpty on username failed');
               validateDefaultUserdata(done);
             } catch(err) {done(err);}
           });
@@ -200,7 +176,7 @@ describe('Service', function() {
             try {
               assert.ok(err);
               assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Validation error: Validation notEmpty failed');
+              assert.deepEqual(result.text, 'Validation error: Validation notEmpty on password failed');
               validateDefaultUserdata(done);
             } catch(err) {done(err);}
           });
@@ -240,19 +216,13 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user03');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword1', function(err, passwordValid){
-                  if(err) return done(err);
-                  try {
-                    assert.equal(passwordValid, true);
-                    users[1].validatePassword('mypassword2', function(err, passwordValid){
-                      if(err) return done(err);
-                      try {
-                        assert.equal(passwordValid, true);
-                        done();
-                      } catch (err) { done(err) };
-                    });
-                  } catch (err) { done(err) };
-                });
+                users[0].validatePassword('mypassword1').then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  return users[1].validatePassword('mypassword2');
+                }).then(function(passwordValid) {
+                  assert.equal(passwordValid, true);
+                  done();
+                }).catch(done);
               }).catch(done);
             } catch(err) {done(err);}
           });

@@ -43,8 +43,9 @@ var hooks = function(){
 
   beforeEach(function() {
     logger.info(this.currentTest.fullTitle());
-    dbConfiguration.reconfigureDb();
-    return dbService.sequelize.sync({force: true});
+    return dbConfiguration.reconfigureDb().then(function() {
+      return dbService.sequelize.sync({force: true});
+    });
   });
 }
 

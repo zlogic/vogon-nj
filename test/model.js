@@ -84,12 +84,10 @@ describe('Model', function() {
         assert.equal(component.amount, 100);
         assert.equal(component.AccountId, account.id);
         assert.equal(component.FinanceTransactionId, transaction.id);
-        user.validatePassword("mypassword", function(err, validPassword){
-          if(err)
-            return done(err);
+        user.validatePassword("mypassword").then(function(validPassword) {
           assert.equal(validPassword, true);
           done();
-        });
+        }).catch(done);
       }).catch(done);
     });
     it('should be able to create related entities all at once', function (done) {
@@ -152,12 +150,10 @@ describe('Model', function() {
         assert.equal(component.amount, 100);
         assert.equal(component.AccountId, account.id);
         assert.equal(component.FinanceTransactionId, transaction.id);
-        user.validatePassword("mypassword", function(err, validPassword){
-          if(err)
-            return done(err);
+        user.validatePassword("mypassword").then(function(validPassword) {
           assert.equal(validPassword, true);
           done();
-        });
+        }).catch(done);
       }).catch(done);
     });
     it('should correctly handle adding a transaction', function (done) {
