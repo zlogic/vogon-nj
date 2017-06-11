@@ -5,18 +5,21 @@ div(class="login-container")
         | #{__('Vogon authorization')}
       section
       p
-        md-button-toggle-group
-          md-button-toggle(selected)
+        md-button-toggle-group([(ngModel)]="mode")
+          md-button-toggle(value="login")
             span #{__('Login')}
-          md-button-toggle
+          md-button-toggle(value="register")
             span #{__('Register')}
       p
         md-input-container
-          input(mdInput,placeholder=__('Enter username'))
+          input(mdInput, placeholder=__('Enter username'))
         |  
         md-input-container
-          input(mdInput,placeholder=__('Enter password'))
+          input(mdInput, type="password", placeholder=__('Enter password'))
       p
         md-checkbox(checked) #{__('Remember me')}
       p
-        button(md-raised-button, color="primary") #{__('Login')}
+        button(md-raised-button, color="primary", *ngIf="modeIsLogin()") #{__('Login')}
+        button(md-raised-button, color="primary", *ngIf="modeIsRegister()") #{__('Register')}
+        | 
+        button(md-raised-button) #{__('Help/Info')}
