@@ -24,7 +24,7 @@ describe('Service', function() {
           dbService.User.findAll().then(function(users){
             assert.equal(users.length, 1);
             assert.equal(users[0].username, 'user01');
-            users[0].validatePassword('password').then(function(passwordValid) {
+            return users[0].validatePassword('password').then(function(passwordValid) {
               assert.equal(passwordValid, true);
               done();
             }).catch(done);
@@ -60,7 +60,7 @@ describe('Service', function() {
               assert.equal(users.length, 2);
               assert.equal(users[0].username, 'user01');
               assert.equal(users[1].username, 'user02');
-              users[0].validatePassword('mypassword').then(function(passwordValid) {
+              return users[0].validatePassword('mypassword').then(function(passwordValid) {
                 assert.equal(passwordValid, true);
                 return users[1].validatePassword('mypassword2');
               }).then(function(passwordValid) {

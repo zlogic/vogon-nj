@@ -17,7 +17,7 @@ describe('Service', function() {
       assert.equal(users.length, 2);
       assert.equal(users[0].username, 'user01');
       assert.equal(users[1].username, 'user02');
-      users[0].validatePassword('mypassword').then(function(passwordValid) {
+      return users[0].validatePassword('mypassword').then(function(passwordValid) {
         assert.equal(passwordValid, true);
         return users[1].validatePassword('mypassword2');
       }).then(function(passwordValid) {
@@ -61,7 +61,7 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user03');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword').then(function(passwordValid) {
+                return users[0].validatePassword('mypassword').then(function(passwordValid) {
                   assert.equal(passwordValid, true);
                   return users[1].validatePassword('mypassword2');
                 }).then(function(passwordValid) {
@@ -90,7 +90,7 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user01');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword1').then(function(passwordValid) {
+                return users[0].validatePassword('mypassword1').then(function(passwordValid) {
                   assert.equal(passwordValid, true);
                   return users[1].validatePassword('mypassword2');
                 }).then(function(passwordValid) {
@@ -119,7 +119,7 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user03');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword1').then(function(passwordValid) {
+                return users[0].validatePassword('mypassword1').then(function(passwordValid) {
                   assert.equal(passwordValid, true);
                   return users[1].validatePassword('mypassword2');
                 }).then(function(passwordValid) {
@@ -216,7 +216,7 @@ describe('Service', function() {
                 assert.equal(users.length, 2);
                 assert.equal(users[0].username, 'user03');
                 assert.equal(users[1].username, 'user02');
-                users[0].validatePassword('mypassword1').then(function(passwordValid) {
+                return users[0].validatePassword('mypassword1').then(function(passwordValid) {
                   assert.equal(passwordValid, true);
                   return users[1].validatePassword('mypassword2');
                 }).then(function(passwordValid) {

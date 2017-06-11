@@ -261,7 +261,7 @@ describe('Service', function() {
                   usersJson = users.map(function(user){return user.toJSON();});
                   usersJson.forEach(function(user){ delete user.password; });
                   assert.deepEqual(usersJson, expectedUsers);
-                  users[0].validatePassword('mypassword').then(function(passwordValid) {
+                  return users[0].validatePassword('mypassword').then(function(passwordValid) {
                     assert.equal(passwordValid, true);
                     return users[1].validatePassword('mypassword2');
                   }).then(function(passwordValid) {

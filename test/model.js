@@ -84,7 +84,7 @@ describe('Model', function() {
         assert.equal(component.amount, 100);
         assert.equal(component.AccountId, account.id);
         assert.equal(component.FinanceTransactionId, transaction.id);
-        user.validatePassword("mypassword").then(function(validPassword) {
+        return user.validatePassword("mypassword").then(function(validPassword) {
           assert.equal(validPassword, true);
           done();
         }).catch(done);
@@ -150,7 +150,7 @@ describe('Model', function() {
         assert.equal(component.amount, 100);
         assert.equal(component.AccountId, account.id);
         assert.equal(component.FinanceTransactionId, transaction.id);
-        user.validatePassword("mypassword").then(function(validPassword) {
+        return user.validatePassword("mypassword").then(function(validPassword) {
           assert.equal(validPassword, true);
           done();
         }).catch(done);

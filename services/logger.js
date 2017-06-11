@@ -15,6 +15,11 @@ var logException = function(err){
   logger.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
 };
 
+var sequelizeLogger = function(args) {
+  logger.verbose(args);
+}
+
 module.exports.logger = logger;
 module.exports.stream = stream;
 module.exports.logException = logException;
+module.exports.sequelizeLogger = sequelizeLogger;

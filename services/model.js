@@ -3,7 +3,7 @@ var path = require('path');
 var os = require('os');
 var i18n = require('i18n');
 var crypto = require('crypto');
-var logger = require('./logger').logger;
+var logger = require('./logger');
 
 var fixedPointMultiplier = 100.0;
 var convertAmountToFloat = function (amount){
@@ -22,9 +22,9 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   if(databaseUrl && sequelizeOptions)
     sequelize = new Sequelize(databaseUrl, sequelizeOptions);
   else if(process.env.DATABASE_URL !== undefined)
-    sequelize = new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.verbose});
+    sequelize = new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
   else
-    sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.verbose});
+    sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
 
   var hashPassword = function(password, salt, options){
     if(options === null || options === undefined)
@@ -49,17 +49,19 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
         });
       });
     };
-    return new sequelize.Promise(function(resolve, reject) {
-      if(salt === null || salt === undefined)
+    if(salt === null || salt === undefined)  
+      return new sequelize.Promise(function(resolve, reject) {
         crypto.randomBytes(options.saltlen, function(err, salt){
           if(err)
             return reject(err);
           salt = salt.toString('hex');
-          resolve(pbkdf2(salt));
+          resolve(salt);
         });
-      else
-        resolve(pbkdf2(salt));
-    });
+      }).then(function(salt) {
+        return pbkdf2(salt);
+      });
+    else
+      return pbkdf2(salt);
   };
 
   /**
@@ -172,13 +174,11 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   });
   User.prototype.validatePassword = function(password){
     var instance = this;
-    return new sequelize.Promise(function(resolve, reject) {
-      if(instance.getDataValue('password') === undefined || instance.getDataValue('password') === null)
-        return reject(new Error(i18n.__("Password is not set")));
-      var storedUserPassword = JSON.parse(instance.getDataValue('password'));
-      hashPassword(password, storedUserPassword.salt, storedUserPassword.options).then(function(result){
-        resolve(JSON.parse(result).hash === storedUserPassword.hash);
-      }).catch(reject);
+    if(instance.getDataValue('password') === undefined || instance.getDataValue('password') === null)
+     return sequelize.Promise.reject(new Error(i18n.__("Password is not set")));
+    var storedUserPassword = JSON.parse(instance.getDataValue('password'));
+    return hashPassword(password, storedUserPassword.salt, storedUserPassword.options).then(function(result){
+      return JSON.parse(result).hash === storedUserPassword.hash;
     });
   };
 
@@ -284,6 +284,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     
     return hashPassword(user.getDataValue('password'), null, null).then(function(result) {
       user.setDataValue('password', result);
+      return null;
     });
   };
   User.hook('beforeCreate', userPasswordHashingHook);
