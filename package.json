@@ -41,7 +41,7 @@
     "pg": "~6.2.4",
     "pg-hstore": "~2.3.2",
     "rxjs": "~5.4.0",
-    "sequelize": "~4.0.0",
+    "sequelize": "~4.1.0",
     "serve-favicon": "~2.4.3",
     "split": "~1.0.0",
     "sqlite3": "~3.1.8",
