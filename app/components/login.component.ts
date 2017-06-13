@@ -9,4 +9,5 @@ export class LoginComponent {
 
   modeIsLogin(): boolean { return this.mode == "login"; }
   modeIsRegister(): boolean { return this.mode == "register"; }
+  isAllowRegistration():boolean { return allowRegistration; }
 }

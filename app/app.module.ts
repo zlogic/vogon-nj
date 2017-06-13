@@ -15,6 +15,7 @@ import { TransactionsComponent } from './components/transactions.component';
 import { AccountsComponent } from './components/accounts.component';
 import { AnalyticsComponent } from './components/analytics.component';
 import { UsersettingsComponent } from './components/usersettings.component';
+import { IntroComponent } from './components/intro.component';
 
 @NgModule({
   imports: [ 
@@ -30,7 +31,8 @@ import { UsersettingsComponent } from './components/usersettings.component';
     TransactionsComponent,
     AccountsComponent,
     AnalyticsComponent,
-    UsersettingsComponent
+    UsersettingsComponent,
+    IntroComponent
   ],
   providers: [
     AlertService,

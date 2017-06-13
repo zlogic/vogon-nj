@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AlertService } from './service/auth.service';
+import { AlertService, AuthService } from './service/auth.service';
 
 @Component({
   selector: 'vogon-app',
@@ -7,10 +7,14 @@ import { AlertService } from './service/auth.service';
 })
 
 export class AppComponent {
-  constructor(private alertService: AlertService){ }
+  constructor(private alertService: AlertService, private authService: AuthService){ }
   
   isLoading(): boolean { 
     return this.alertService.isLoading();
+  }
+
+  isAuthorized(): boolean {
+    return this.authService.isAuthorized();
   }
 
   //TODO: delete this test code

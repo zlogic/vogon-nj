@@ -8,6 +8,7 @@ import { TransactionsComponent } from './components/transactions.component';
 import { AccountsComponent } from './components/accounts.component';
 import { AnalyticsComponent } from './components/analytics.component';
 import { UsersettingsComponent } from './components/usersettings.component';
+import { IntroComponent } from './components/intro.component';
 
 export class AuthGuard implements CanActivate {
   constructor(private router: Router, private authService: AuthService) { }
@@ -34,6 +35,7 @@ export const appRoutes: Routes = [
   { path: 'accounts', component: AccountsComponent, canActivate: [AuthGuard] },
   { path: 'analytics', component: AnalyticsComponent, canActivate: [AuthGuard] },
   { path: 'usersettings', component: UsersettingsComponent, canActivate: [AuthGuard] },
+  { path: 'intro', component: IntroComponent },
   { path: '**', redirectTo: '/login' }
 ];
 

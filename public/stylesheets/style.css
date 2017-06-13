@@ -50,7 +50,11 @@ html, body {
   display: -webkit-flex;
   display: flex;
   justify-content: center;
-  padding: 30px;
+}
+
+.login-card {
+  margin: 30px;
+  width: 400px;
 }
 
 .clickable {

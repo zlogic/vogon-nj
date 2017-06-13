@@ -1,32 +1,26 @@
 // TODO: make this locale-specific
-div(class="form-control-static")
-  div(class="panel panel-default")
-    div(class="panel-body")
-      if allowRegistration
+div(class="login-container")
+  md-card(class="login-card")
+    md-card-content
+      ng-template([ngIf]="isAllowRegistration()")
         h3
           | Registration
         p
           | To register, select the #{__('Register')} tab and enter a username and password.
         p
           | Press #{__('Register')} and you'll be registered logged into your account.
+        h4 Notice
         p
-          span(class="label label-info")
-            | Notice
-          =' '
           | If you have entered an already existing username, you'll see an error and should use another username and password.
+        h4 Warning
         p
-          span(class="label label-danger")
-            | Warning
-          =' '
           | Registration is simple, we don't ask your contact details or stupid questions like your favorite food :)
           | And so there's no way of recovering passwords!
+        h4 Warning
         p
-          span(class="label label-danger")
-            | Warning
-          =' '
           | This may be a non-production deployment of Vogon and may be reset or closed by the site admin without notice.
           | Consider exporting your data frequently or contacting the website administrator to confirm your data won't be destroyed without notice.
-      else
+      ng-template([ngIf]="!isAllowRegistration()")
         h3
           | Private deployment
         p
@@ -35,11 +29,11 @@ div(class="form-control-static")
           a(href="http://vogon-nj-demo.herokuapp.com") Heroku
           =' '
           | (may take a few minutes to load for the first time)
+        h4 Warning
         p
-          span(class="label label-info")
-            | Warning
-          =' '
           | The link above is provided as a demo only and is not guaranteed to keep running. You can create a private deployment of Vogon on Heroku, see the project page below.
+  md-card(class="login-card")
+    md-card-content
       h3
         | About Vogon
       p

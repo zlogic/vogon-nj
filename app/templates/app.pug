@@ -3,22 +3,31 @@ md-sidenav-container(fullscreen)
     md-toolbar(color="accent")
       | #{__("Signed in as %s", "User")}
     md-nav-list
-      a(md-list-item, [routerLinkActive]="['active']", routerLink="transactions")
-        md-icon(md-list-icon) list
-        | #{__('Transactions')}
-      a(md-list-item, [routerLinkActive]="['active']", routerLink="accounts")
-        md-icon(md-list-icon) account_balance_wallet
-        | #{__('Accounts')}
-      a(md-list-item, [routerLinkActive]="['active']", routerLink="analytics")
-        md-icon(md-list-icon) multiline_chart
-        | #{__('Analytics')}
-      a(md-list-item, [routerLinkActive]="['active']", routerLink="usersettings")
-        md-icon(md-list-icon) settings
-        | #{__('User settings')}
+      ng-template([ngIf]="isAuthorized()")
+        a(md-list-item, [routerLinkActive]="['active']", routerLink="transactions")
+          md-icon(md-list-icon) list
+          | #{__('Transactions')}
+        a(md-list-item, [routerLinkActive]="['active']", routerLink="accounts")
+          md-icon(md-list-icon) account_balance_wallet
+          | #{__('Accounts')}
+        a(md-list-item, [routerLinkActive]="['active']", routerLink="analytics")
+          md-icon(md-list-icon) multiline_chart
+          | #{__('Analytics')}
+        a(md-list-item, [routerLinkActive]="['active']", routerLink="usersettings")
+          md-icon(md-list-icon) settings
+          | #{__('User settings')}
+        md-divider
+        a(md-list-item, routerLink)
+          md-icon(md-list-icon) exit_to_app
+          | #{__('Logout')}
+      ng-template([ngIf]="!isAuthorized()")
+        a(md-list-item, routerLink)
+          md-icon(md-list-icon) open_in_browser
+          | #{__('Login')}
       md-divider
-      a(md-list-item, routerLink)
-        md-icon(md-list-icon) exit_to_app
-        | #{__('Logout')}
+      a(md-list-item, [routerLinkActive]="['active']", routerLink="intro")
+        md-icon(md-list-icon) help
+        | #{__('Help/Info')}
   md-toolbar(color="primary")
     button(md-icon-button, aria-label="#{__('Toggle sidebar')}")
       md-icon((click)="sidenav.toggle()") menu
