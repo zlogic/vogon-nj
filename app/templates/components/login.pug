@@ -1,23 +1,24 @@
 div(class="login-container")
   md-card(style="width:400px;")
     md-card-content
-      h3
-        | #{__('Vogon authorization')}
-      section
-      p(*ngIf="isAllowRegistration()")
-        md-button-toggle-group([(ngModel)]="mode")
-          md-button-toggle(value="login")
-            span #{__('Login')}
-          md-button-toggle(value="register", )
-            span #{__('Register')}
-      p
-        md-input-container
-          input(mdInput, placeholder=__('Enter username'))
-        |  
-        md-input-container
-          input(mdInput, type="password", placeholder=__('Enter password'))
-      p
-        md-checkbox(checked) #{__('Remember me')}
-      p
-        button(md-raised-button, color="primary", *ngIf="modeIsLogin()") #{__('Login')}
-        button(md-raised-button, color="primary", *ngIf="modeIsRegister()") #{__('Register')}
+      form([formGroup]="loginForm", (ngSubmit)="onSubmit()", novalidate)
+        h3
+          | #{__('Vogon authorization')}
+        section
+        p(*ngIf="isAllowRegistration()")
+          md-button-toggle-group([(ngModel)]="mode")
+            md-button-toggle(value="login")
+              span #{__('Login')}
+            md-button-toggle(value="register", )
+              span #{__('Register')}
+        p
+          md-input-container
+            input(mdInput, type="text", placeholder=__('Enter username'), formControlName="username")
+          |  
+          md-input-container
+            input(mdInput, type="password", placeholder=__('Enter password'), formControlName="password")
+        p
+          md-checkbox(checked, formControlName="rememberToken") #{__('Remember me')}
+        p
+          button(md-raised-button, type="submit", color="primary", *ngIf="modeIsLogin()", [disabled]="!loginForm.valid") #{__('Login')}
+          button(md-raised-button, type="submit", color="primary", *ngIf="modeIsRegister()", [disabled]="!loginForm.valid") #{__('Register')}

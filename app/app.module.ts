@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { VogonMaterialModule } from './material.module';
 
@@ -23,7 +23,8 @@ import { IntroComponent } from './components/intro.component';
     BrowserAnimationsModule,
     VogonRoutingModule,
     VogonMaterialModule,
-    FormsModule
+    FormsModule,
+    ReactiveFormsModule
   ],
   declarations: [
     AppComponent,
