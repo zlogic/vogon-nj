@@ -2,11 +2,30 @@ var path = require('path');
 var webpack = require('webpack');
 var i18n = require('i18n');
 var AotPlugin = require('@ngtools/webpack').AotPlugin;
+var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
 i18n.configure({
   locales: ['en'],
   directory: __dirname + '/locales'
 });
+
+function I18nPlugin() { }
+
+I18nPlugin.prototype.apply = function(compiler) {
+  compiler.plugin("compilation", function(compilation, data) {
+    data.normalModuleFactory.plugin("parser", function(parser, options) {
+      parser.plugin("call __", function (expr) {
+        var args = expr.arguments.map(function(argument) { return parser.evaluateExpression(argument).string; });
+        var result = i18n.__.apply(null, args);
+        const dep = new ConstDependency(JSON.stringify(result), expr.range);
+        dep.loc = expr.loc;
+        this.state.current.addDependency(dep);
+        return true;
+      });
+    });
+  });
+};
+
 
 module.exports = {
   entry: {
@@ -49,6 +68,7 @@ module.exports = {
       path.join(__dirname, 'public', 'js'),
       {}
     ),
+    new I18nPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
       name: ['app', 'polyfills']
     }),

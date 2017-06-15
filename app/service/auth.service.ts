@@ -10,7 +10,7 @@ export class AlertService {
   }
 
   addAlert(message: string) {
-    this.snackBar.open(message, require('../templates/components/snackbar.pug'));
+    this.snackBar.open(message, __('Dismiss'));
   }
 
   startLoadingRequest() {
