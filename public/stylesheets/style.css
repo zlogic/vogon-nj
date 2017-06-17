@@ -46,15 +46,25 @@ html, body {
   background-color:rgba(0,0,0,.06);
 }
 
-.login-container {
+.card-container {
   display: -webkit-flex;
   display: flex;
   justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 24px;
 }
 
-.login-card {
-  margin: 30px;
+.large-card {
+  margin-right: 24px;
+  margin-bottom: 24px;
   width: 400px;
+}
+
+.small-card {
+  margin-right: 24px;
+  margin-bottom: 24px;
+  width: 300px;
 }
 
 .clickable {

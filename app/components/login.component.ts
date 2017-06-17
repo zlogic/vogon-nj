@@ -3,10 +3,11 @@ import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Response } from '@angular/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
-import { HTTPService, AuthorizationService } from '../service/auth.service';
+import { AuthorizationService } from '../service/auth.service';
+import { HTTPService } from '../service/http.service';
 
 @Component({
-  templateUrl: '../templates/components/login.pug',
+  templateUrl: '../templates/components/login.pug'
 })
 
 export class LoginComponent {

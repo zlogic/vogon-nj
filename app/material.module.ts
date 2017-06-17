@@ -11,6 +11,7 @@ import {
   MdSidenavModule,
   MdToolbarModule,
   MdSnackBarModule,
+  MdChipsModule,
   MaterialModule
 } from '@angular/material';
 
@@ -25,6 +26,7 @@ import {
     MdButtonToggleModule,
     MdSidenavModule,
     MdToolbarModule,
+    MdChipsModule,
     MdSnackBarModule,
   ],
   exports: [
@@ -37,6 +39,7 @@ import {
     MdButtonToggleModule,
     MdSidenavModule,
     MdToolbarModule,
+    MdChipsModule,
     MdSnackBarModule
   ],
   providers: [MdSnackBarModule]

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AlertService, AuthorizationService } from './service/auth.service';
+import { AuthorizationService } from './service/auth.service';
+import { AlertService } from './service/http.service';
 
 @Component({
   selector: 'vogon-app',

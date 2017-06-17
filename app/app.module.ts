@@ -4,9 +4,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
+import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+
 import { VogonMaterialModule } from './material.module';
 
-import { AlertService, AuthorizationService, HTTPService } from './service/auth.service';
+import { AuthorizationService } from './service/auth.service';
+import { AlertService, HTTPService } from './service/http.service';
+import { TransactionsService } from './service/transactions.service';
+import { AccountsService } from './service/accounts.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
@@ -26,7 +31,8 @@ import { IntroComponent } from './components/intro.component';
     VogonMaterialModule,
     FormsModule,
     ReactiveFormsModule,
-    HttpModule
+    HttpModule,
+    InfiniteScrollModule
   ],
   declarations: [
     AppComponent,
@@ -40,7 +46,9 @@ import { IntroComponent } from './components/intro.component';
   providers: [
     AlertService,
     AuthorizationService,
-    HTTPService
+    HTTPService,
+    TransactionsService,
+    AccountsService
   ],
   bootstrap: [ AppComponent ]
 })

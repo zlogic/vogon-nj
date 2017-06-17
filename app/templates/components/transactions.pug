@@ -1,0 +1,37 @@
+div(id="transactionsTableStart")
+div(class="card-container", infiniteScroll, (scrolled)="transactionsService.nextPage()", [infiniteScrollDisabled]="transactionsService.isLoadingNextPage() || transactionsService.isLastPage()", [immediateCheck]="true", [scrollWindow]="false", [infiniteScrollContainer]="'.mat-sidenav-content'")
+  md-card(class="small-card", *ngFor="let transaction of transactionsService.transactions")
+    md-card-title
+      div(style="display: flex; align-items: center;")
+        span(style="align-self: center;") {{transaction.description}}
+        span(style="flex: 1 1 auto;")
+        button(md-icon-button, style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+          md-icon more_vert
+    md-card-subtitle
+      | {{transaction.date | date}}
+    md-card-content
+      md-chip-list
+        md-chip(*ngFor="let tag of transaction.tags", selectable="false") {{tag}}
+    md-card-content([ngClass]="{'mat-input-error': !transactionsService.isAmountOk(transaction)}")
+      div(style="display: flex; align-items: top;")
+        div(style="display: block;")
+          ng-template([ngIf]="transactionsService.isExpenseIncomeTransaction(transaction)")
+            div(*ngFor="let account of transactionsService.getAccounts(transaction, transactionsService.allAccountsPredicate); last as last")
+              | {{account.name}}{{last ? '' : ', '}}
+          ng-template([ngIf]="transactionsService.isTransferTransaction(transaction)")
+            div(*ngFor="let account of transactionsService.getAccounts(transaction, transactionsService.fromAccountsPredicate); last as last; first as first")
+              | {{first && !last ? '(' : ''}}{{account.name}}{{last ? '' : ', '}}{{last && !first ? ')' : ''}}
+            md-icon arrow_downward
+            div(*ngFor="let account of transactionsService.getAccounts(transaction, transactionsService.toAccountsPredicate); last as last; first as first")
+              | {{first && !last ? '(' : ''}}{{account.name}}{{last ? '' : ', '}}{{last && !first ? ')' : ''}}
+        span(style="flex: 1 1 auto;")
+        div(*ngFor="let currencyAmount of totalsByCurrency(transaction)", style="text-align: right")
+          span(*ngIf="transactionsService.isTransferTransaction(transaction)")
+            | &sum;
+          | {{currencyAmount.amount | number:"1.2-2"}} {{currencyAmount.currency}}
+div(*ngIf="transactionsService.isLoadingNextPage()", class="card-container")
+  md-card(class="large-card")
+    md-card-content
+      div(style="display: flex; align-items: center;")
+        md-icon sync
+        span(style="align-self: center;") #{__('Loading...')}

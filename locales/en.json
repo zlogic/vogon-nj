@@ -91,5 +91,7 @@
 	"updateUser not properly initialized": "updateUser not properly initialized",
 	"Unable to authenticate": "Unable to authenticate",
 	"Already logged out": "Already logged out",
-	"HTTP error: {0} ({1})": "HTTP error: {0} ({1})"
+	"HTTP error: {0} ({1})": "HTTP error: {0} ({1})",
+	"Expense/income": "Expense/income",
+	"Transfer": "Transfer"
 }
