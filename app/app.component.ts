@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { AlertService, AuthService } from './service/auth.service';
+import { Router } from '@angular/router';
+import { AlertService, AuthorizationService } from './service/auth.service';
 
 @Component({
   selector: 'vogon-app',
@@ -7,22 +8,29 @@ import { AlertService, AuthService } from './service/auth.service';
 })
 
 export class AppComponent {
-  constructor(private alertService: AlertService, private authService: AuthService){ }
+  constructor(
+    private alertService: AlertService,
+    private authorizationService: AuthorizationService,
+    private router: Router
+  ){ }
   
   isLoading(): boolean { 
     return this.alertService.isLoading();
   }
 
   isAuthorized(): boolean {
-    return this.authService.isAuthorized();
+    return this.authorizationService.isAuthorized();
   }
 
-  //TODO: delete this test code
-  test() {
-    if(!this.alertService.isLoading())
-    this.alertService.startLoadingRequest();
-    else
-    this.alertService.endLoadingRequest();
-    this.alertService.addAlert("Hello");
+  private navigateToLogin() {
+    this.router.navigate(['/login']);
+  }
+
+  logout() {
+    this.authorizationService.logout().
+      subscribe(
+        () => this.navigateToLogin(),
+        (error) => this.navigateToLogin()
+      );
   }
 }

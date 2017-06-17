@@ -2,10 +2,11 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HttpModule } from '@angular/http';
 
 import { VogonMaterialModule } from './material.module';
 
-import { AlertService, AuthService } from './service/auth.service';
+import { AlertService, AuthorizationService, HTTPService } from './service/auth.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
@@ -24,7 +25,8 @@ import { IntroComponent } from './components/intro.component';
     VogonRoutingModule,
     VogonMaterialModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    HttpModule
   ],
   declarations: [
     AppComponent,
@@ -37,7 +39,8 @@ import { IntroComponent } from './components/intro.component';
   ],
   providers: [
     AlertService,
-    AuthService
+    AuthorizationService,
+    HTTPService
   ],
   bootstrap: [ AppComponent ]
 })

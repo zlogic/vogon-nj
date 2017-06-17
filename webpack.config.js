@@ -15,8 +15,8 @@ I18nPlugin.prototype.apply = function(compiler) {
   compiler.plugin("compilation", function(compilation, data) {
     data.normalModuleFactory.plugin("parser", function(parser, options) {
       parser.plugin("call __", function (expr) {
-        var args = expr.arguments.map(function(argument) { return parser.evaluateExpression(argument).string; });
-        var result = i18n.__.apply(null, args);
+        var format = parser.evaluateExpression(expr.arguments[0]).string;
+        var result = i18n.__.apply(null, [format]);
         const dep = new ConstDependency(JSON.stringify(result), expr.range);
         dep.loc = expr.loc;
         this.state.current.addDependency(dep);

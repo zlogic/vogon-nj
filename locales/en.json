@@ -84,5 +84,12 @@
 	"Vogon finance tracker": "Vogon finance tracker",
 	"Vogon": "Vogon",
 	"Fragment not found": "Fragment not found",
-	"Dismiss": "Dismiss"
+	"Dismiss": "Dismiss",
+	"resetAuthorization not properly initialized": "resetAuthorization not properly initialized",
+	"updateAccounts not properly initialized": "updateAccounts not properly initialized",
+	"updateTransactions not properly initialized": "updateTransactions not properly initialized",
+	"updateUser not properly initialized": "updateUser not properly initialized",
+	"Unable to authenticate": "Unable to authenticate",
+	"Already logged out": "Already logged out",
+	"HTTP error: {0} ({1})": "HTTP error: {0} ({1})"
 }

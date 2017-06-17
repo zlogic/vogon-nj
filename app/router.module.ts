@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
-import { AuthService } from './service/auth.service';
+import { AuthorizationService } from './service/auth.service';
 
 import { LoginComponent } from './components/login.component';
 import { TransactionsComponent } from './components/transactions.component';
@@ -11,9 +11,9 @@ import { UsersettingsComponent } from './components/usersettings.component';
 import { IntroComponent } from './components/intro.component';
 
 export class AuthGuard implements CanActivate {
-  constructor(private router: Router, private authService: AuthService) { }
+  constructor(private router: Router, private authorizationService: AuthorizationService) { }
   canActivate(destination: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
-    if(this.authService.isAuthorized()){
+    if(this.authorizationService.isAuthorized()){
       if(destination.component === LoginComponent) {
         this.router.navigate(['/transactions']);
         return false;

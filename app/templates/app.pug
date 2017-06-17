@@ -17,11 +17,11 @@ md-sidenav-container(fullscreen)
           md-icon(md-list-icon) settings
           | #{__('User settings')}
         md-divider
-        a(md-list-item, routerLink)
+        a(md-list-item, (click)="logout()")
           md-icon(md-list-icon) exit_to_app
           | #{__('Logout')}
       ng-template([ngIf]="!isAuthorized()")
-        a(md-list-item, routerLink)
+        a(md-list-item, routerLink="login")
           md-icon(md-list-icon) open_in_browser
           | #{__('Login')}
       md-divider
@@ -35,6 +35,4 @@ md-sidenav-container(fullscreen)
       | #{__('Vogon')}
     span(style='flex: 1 1 auto;')
     md-icon(*ngIf="isLoading()") sync
-    button(md-icon-button, aria-label="#{__('Open menu')}", (click)="test()")
-      md-icon more_vert
   router-outlet
