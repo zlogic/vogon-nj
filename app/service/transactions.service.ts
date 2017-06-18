@@ -41,7 +41,7 @@ export class Transaction {
 
 @Injectable()
 export class TransactionsService {
-  transactions: Array<any> = [];
+  transactions: Transaction[] = [];
   private readonly transactionTypes = [{name: __("Expense/income"), value: "expenseincome"}, {name: __("Transfer"), value: "transfer"}];
   private readonly defaultTransactionType = this.transactionTypes[0];
   private currentPage: number = 0;
@@ -239,17 +239,17 @@ export class TransactionsService {
           params['filterTags'] = JSON.stringify(tags);
       }
       return this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
-          .map((res: Response) => {
-            this.loadingNextPage = false;
-            if (res.json().length !== 0)
-              this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
-            else
-              this.lastPage = true;
-            this.currentPage++;
-          }, function () {
-            this.reset();
+        .map((res: Response) => {
+          this.loadingNextPage = false;
+          if (res.json().length !== 0)
+            this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
+          else
             this.lastPage = true;
-          });
+          this.currentPage++;
+        }, function () {
+          this.reset();
+          this.lastPage = true;
+        });
     });
     this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());
     this.accountsService.accountsObservable.subscribe(() => this.update().subscribe());

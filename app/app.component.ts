@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthorizationService } from './service/auth.service';
 import { AlertService } from './service/http.service';
+import { UpdateService } from './service/update.service';
 
 @Component({
   selector: 'vogon-app',
@@ -12,7 +13,8 @@ export class AppComponent {
   constructor(
     private alertService: AlertService,
     private authorizationService: AuthorizationService,
-    private router: Router
+    private router: Router,
+    private updateService: UpdateService
   ){ }
   
   isLoading(): boolean { 

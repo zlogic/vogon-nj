@@ -13,6 +13,7 @@ import { AlertService, HTTPService } from './service/http.service';
 import { TransactionsService } from './service/transactions.service';
 import { AccountsService } from './service/accounts.service';
 import { CurrencyService } from './service/currency.service';
+import { UpdateService } from './service/update.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
@@ -50,7 +51,8 @@ import { IntroComponent } from './components/intro.component';
     HTTPService,
     TransactionsService,
     AccountsService,
-    CurrencyService
+    CurrencyService,
+    UpdateService
   ],
   bootstrap: [ AppComponent ]
 })

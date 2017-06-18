@@ -1,0 +1,25 @@
+form(autocomplete="off", novalidate)
+  div(class="card-container")
+    ng-container(*ngFor="let account of accountsService.accounts")
+      md-card(class="small-card", *ngIf="account.showInList")
+        md-card-title
+          div(style="display: flex; align-items: center;")
+            span(style="align-self: center;") {{account.name}}
+            span(style="flex: 1 1 auto;")
+            button(md-icon-button, style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+              md-icon more_vert
+        md-card-content
+          div(style="display: flex; align-items: top;")
+            span(style="display: block;") {{account.currency}}
+            span(style="flex: 1 1 auto;")
+            span(style="display: block;") {{account.balance | number:"1.2"}}
+div(class="card-container")
+  ng-container(*ngFor="let currencyTotals of accountsService.getTotalsForCurrencies()")
+    md-card(class="small-card")
+      md-card-title
+        | #{__('Total for %s', '{{currencyTotals.currency}}')}
+      md-card-content
+        div(style="display: flex; align-items: top;")
+          span(style="display: block;") {{currencyTotals.currency}}
+          span(style="flex: 1 1 auto;")
+          span(style="display: block;") {{currencyTotals.total | number:"1.2"}}

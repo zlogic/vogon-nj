@@ -1,8 +1,12 @@
 import { Component } from '@angular/core';
 
-//TODO: migrate Angular code and template here
+import { AccountsService } from '../service/accounts.service'
+import { CurrencyService } from '../service/currency.service'
+
 @Component({
-  template: `!Accounts!`
+  templateUrl: '../templates/components/accounts.pug'
 })
 
-export class AccountsComponent { }
+export class AccountsComponent {
+  constructor(public accountsService: AccountsService, public currencyService: CurrencyService) { }
+}

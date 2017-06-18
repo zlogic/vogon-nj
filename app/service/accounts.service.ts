@@ -8,14 +8,17 @@ import { CurrencyService } from './currency.service';
 
 export class Account {
   id: number;
+  version: number;
   name: string;
   currency: string;
   balance: number;
+  showInList: boolean;
+  includeInTotal: boolean;
 }
 
 @Injectable()
 export class AccountsService {
-  private accounts: Account[] = [];
+  accounts: Account[] = [];
   private doUpdate: UpdateHelper;
 
   accountsObservable: EventEmitter<any> = new EventEmitter();
@@ -30,21 +33,24 @@ export class AccountsService {
     this.accounts.sort(function (a, b) {
       return a.id - b.id;
     });
-    this.updateTotalsForCurrencies();
     this.accountsObservable.emit();
   };
-  updateTotalsForCurrencies() {
+  getTotalsForCurrencies(): {total: number, currency: string}[] {
     var totals = {};
     //Compute totals for currencies
     this.accounts.forEach((account: Account) => {
       if (totals[account.currency] === undefined) {
         var currency = this.currencyService.findCurrency(account.currency);
         currency = currency !== undefined ? currency.currencyCode : undefined;
-        totals[account.currency] = {total: 0, name: currency};
+        totals[account.currency] = 0;
       }
-      totals[account.currency].total += account.balance;
+      totals[account.currency] += account.balance;
     });
-    return totals;
+    var result = [];
+    for(var currency in totals) {
+      result.push({currency: currency, total: totals[currency]});
+    }
+    return result;
   };
   update(): Observable<any> {
     return this.doUpdate.update();
@@ -76,6 +82,5 @@ export class AccountsService {
       }
     });
     this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());
-    this.update().subscribe();
   }
 }
