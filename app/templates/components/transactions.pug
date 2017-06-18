@@ -25,10 +25,11 @@ div(class="card-container", infiniteScroll, (scrolled)="transactionsService.next
             div(*ngFor="let account of transactionsService.getAccounts(transaction, transactionsService.toAccountsPredicate); last as last; first as first")
               | {{first && !last ? '(' : ''}}{{account.name}}{{last ? '' : ', '}}{{last && !first ? ')' : ''}}
         span(style="flex: 1 1 auto;")
-        div(*ngFor="let currencyAmount of totalsByCurrency(transaction)", style="text-align: right")
-          span(*ngIf="transactionsService.isTransferTransaction(transaction)")
-            | &sum;
-          | {{currencyAmount.amount | number:"1.2-2"}} {{currencyAmount.currency}}
+        div(style="display: block;")
+          div(*ngFor="let currencyAmount of totalsByCurrency(transaction)", style="text-align: right")
+            span(*ngIf="transactionsService.isTransferTransaction(transaction)")
+              | &sum;
+            | {{currencyAmount.amount | number:"1.2-2"}} {{currencyAmount.currency}}
 div(*ngIf="transactionsService.isLoadingNextPage()", class="card-container")
   md-card(class="large-card")
     md-card-content

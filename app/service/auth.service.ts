@@ -10,7 +10,7 @@ export class AuthorizationService {
   readonly postHeaders = new Headers({"Content-Type": "application/x-www-form-urlencoded"});
 
   private access_token: string;
-  private authorizationObservable: EventEmitter<any> = new EventEmitter();
+  authorizationObservable: EventEmitter<any> = new EventEmitter();
   
   isAuthorized(): boolean {
     return this.access_token !== undefined;
@@ -65,10 +65,6 @@ export class AuthorizationService {
     if (message !== undefined)
       this.alertService.addAlert(message);
   };
-
-  authorizedObservable(): Observable<boolean> {
-    return this.authorizationObservable;
-  }
 
   constructor(private alertService:AlertService, private httpService: HTTPService) {
     this.httpService.resetAuthorization = () => this.resetAuthorization;

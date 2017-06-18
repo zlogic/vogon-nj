@@ -100,20 +100,6 @@ export class HTTPService {
     else
       this.authorizationHeaders = new Headers();
   }
-  updateAllData() {
-    this.updateAccounts();
-    this.updateTransactions();
-    this.updateUser();
-  }
-  updateAccounts(): Observable<Response> {
-    return Observable.throw(__("updateAccounts not properly initialized"));
-  }
-  updateTransactions(): Observable<Response> {
-    return Observable.throw(__("updateTransactions not properly initialized"));
-  }
-  updateUser(): Observable<Response> {
-    return Observable.throw(__("updateUser not properly initialized"));
-  }
 
   constructor(private alertService:AlertService, private http: Http) {}
 }

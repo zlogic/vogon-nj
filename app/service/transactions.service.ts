@@ -251,7 +251,7 @@ export class TransactionsService {
             this.lastPage = true;
           });
     });
-    this.accountsService.updateTransactions = this.update;
-    this.httpService.updateTransactions = this.update;
+    this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());
+    this.accountsService.accountsObservable.subscribe(() => this.update().subscribe());
   }
 }

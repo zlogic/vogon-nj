@@ -68,7 +68,5 @@ export class TransactionsComponent {
   }
 
   constructor(public transactionsService: TransactionsService, private authorizationService: AuthorizationService) {
-    this.authorizationService.authorizedObservable().subscribe(() => this.transactionsService.update().subscribe());
-    this.transactionsService.update().subscribe();
   }
 }

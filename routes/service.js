@@ -3,7 +3,6 @@ var dbService = require('../services/dbservice');
 var analyticsService = require('../services/analytics');
 var passport = require('passport');
 var multer = require('multer');
-var currencies = require('country-data').currencies;
 var i18n = require('i18n');
 var logger = require('../services/logger');
 var router = express.Router();
@@ -275,19 +274,6 @@ router.post('/user', function(req, res, next) {
   }).then(function(response){
     res.send(response);
   }).catch(next);
-});
-
-/* GET currencies. */
-router.get('/currencies', function(req, res, next) {
-  res.send(currencies.all.map(function(currency){
-    return { currencyCode: currency.code, displayName: currency.name };
-  }).sort(function(a, b){
-    return a.displayName.localeCompare(b.displayName);
-  }).filter(function(currency){
-    //TODO: migrate to a better currency code library?
-    //This excludes a really ugly currency name
-    return currency.currencyCode !== "USS";
-  }));
 });
 
 /* GET analytics tags. */
