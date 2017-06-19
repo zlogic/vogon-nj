@@ -68,6 +68,8 @@ export class TransactionEditorComponent implements OnInit {
   cancelEditing() {
     if(this.transaction.id !== undefined)
       this.transactionsService.updateTransaction(this.transaction.id).subscribe();
+    else
+      this.transactionsService.update().subscribe();
     this.done.emit();
   }
 

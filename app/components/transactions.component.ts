@@ -49,7 +49,7 @@ export class TransactionsComponent {
   duplicateTransaction(transaction: Transaction) {
     var newTransaction = transaction.clone();
     newTransaction.date = this.transactionsService.getDate();
-    this.transactionsService.transactions.unshift(transaction);
+    this.transactionsService.transactions.unshift(newTransaction);
     this.startEditing(newTransaction);
   }
   deleteTransaction(transaction: Transaction) {

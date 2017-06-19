@@ -118,7 +118,7 @@ export class TransactionsService {
   submitTransaction(transaction: Transaction) {
     transaction.date = dateToJson(transaction.date);
     return this.httpService.post("service/transactions", transaction)
-      .map((res: Response) => {
+      .mergeMap((res: Response) => {
         var transaction: Transaction = Transaction.fromJson(res.json());
         this.accountsService.update();
         if (!this.updateTransactionLocal(transaction))
