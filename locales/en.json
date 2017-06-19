@@ -61,7 +61,6 @@
 	"Select all tags": "Select all tags",
 	"Select currency:": "Select currency:",
 	"Show in accounts list": "Show in accounts list",
-	"Signed in as %s": "Signed in as %s",
 	"Start date": "Start date",
 	"Tag": "Tag",
 	"Tags chart": "Tags chart",
@@ -86,5 +85,6 @@
 	"Already logged out": "Already logged out",
 	"HTTP error: {0} ({1})": "HTTP error: {0} ({1})",
 	"Expense/income": "Expense/income",
-	"Transfer": "Transfer"
+	"Transfer": "Transfer",
+	"Vogon for %s": "Vogon for %s"
 }

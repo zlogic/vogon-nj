@@ -1,40 +1,36 @@
-md-sidenav-container(fullscreen, class="sidenav-fab-container")
-  md-sidenav(#sidenav, mode="side")
-    md-toolbar(color="accent")
-      //TODO: provide the actual username here
-      | #{__("Signed in as %s", "User")}
-    md-nav-list
-      ng-template([ngIf]="isAuthorized()")
-        a(md-list-item, [routerLinkActive]="['active']", routerLink="transactions")
-          md-icon(md-list-icon) list
-          | #{__('Transactions')}
-        a(md-list-item, [routerLinkActive]="['active']", routerLink="accounts")
-          md-icon(md-list-icon) account_balance_wallet
-          | #{__('Accounts')}
-        a(md-list-item, [routerLinkActive]="['active']", routerLink="analytics")
-          md-icon(md-list-icon) multiline_chart
-          | #{__('Analytics')}
-        a(md-list-item, [routerLinkActive]="['active']", routerLink="usersettings")
-          md-icon(md-list-icon) settings
-          | #{__('User settings')}
-        md-divider
-        a(md-list-item, (click)="logout()")
-          md-icon(md-list-icon) exit_to_app
-          | #{__('Logout')}
-      ng-template([ngIf]="!isAuthorized()")
-        a(md-list-item, routerLink="login")
-          md-icon(md-list-icon) open_in_browser
-          | #{__('Login')}
-      md-divider
-      a(md-list-item, [routerLinkActive]="['active']", routerLink="intro")
-        md-icon(md-list-icon) help
-        | #{__('Help/Info')}
-  md-toolbar(color="primary")
-    button(md-icon-button, aria-label="#{__('Toggle sidebar')}")
-      md-icon((click)="sidenav.toggle()") menu
-    span
-      | #{__('Vogon')}
-    span(style='flex: 1 1 auto;')
-    md-icon(*ngIf="isLoading()", class="rotate") sync
-  div(class="sidenav-content")
-    router-outlet
+md-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 1;")
+  span(*ngIf="!isAuthorized()")
+    | #{__('Vogon')}
+  span(*ngIf="isAuthorized()")
+    //TODO: provide the actual username here
+    | #{__("Vogon for %s", "User")}
+  span(style='flex: 1 1 auto;')
+  md-icon(*ngIf="isLoading()", class="rotate") sync
+  button(md-icon-button, aria-label="#{__('Toggle sidebar')}", [mdMenuTriggerFor]="navMenu")
+    md-icon more_vert
+  md-menu(#navMenu="mdMenu")
+    ng-template([ngIf]="isAuthorized()")
+      button(md-menu-item, [routerLinkActive]="['active']", routerLink="transactions")
+        md-icon(md-list-icon) list
+        | #{__('Transactions')}
+      button(md-menu-item, [routerLinkActive]="['active']", routerLink="accounts")
+        md-icon(md-list-icon) account_balance_wallet
+        | #{__('Accounts')}
+      button(md-menu-item, [routerLinkActive]="['active']", routerLink="analytics")
+        md-icon(md-list-icon) multiline_chart
+        | #{__('Analytics')}
+      button(md-menu-item, [routerLinkActive]="['active']", routerLink="usersettings")
+        md-icon(md-list-icon) settings
+        | #{__('User settings')}
+      button(md-menu-item, (click)="logout()")
+        md-icon(md-list-icon) exit_to_app
+        | #{__('Logout')}
+    ng-template([ngIf]="!isAuthorized()")
+      button(md-menu-item, routerLink="login")
+        md-icon(md-list-icon) open_in_browser
+        | #{__('Login')}
+    button(md-menu-item, [routerLinkActive]="['active']", routerLink="intro")
+      md-icon(md-list-icon) help
+      | #{__('Help/Info')}
+div(class="app-content")
+  router-outlet
