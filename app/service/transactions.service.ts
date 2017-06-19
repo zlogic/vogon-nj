@@ -104,7 +104,7 @@ export class TransactionsService {
     if (id === undefined)
       return this.update();
     return this.httpService.get("service/transactions/transaction/" + id)
-      .map((res: Response) => {
+      .mergeMap((res: Response) => {
         var transaction = Transaction.fromJson(res.json());
         if (!this.updateTransactionLocal(transaction))
           return this.update();
@@ -120,7 +120,7 @@ export class TransactionsService {
     return this.httpService.post("service/transactions", transaction)
       .mergeMap((res: Response) => {
         var transaction: Transaction = Transaction.fromJson(res.json());
-        this.accountsService.update();
+        this.accountsService.update().subscribe();
         if (!this.updateTransactionLocal(transaction))
           return this.update();
         return Observable.of(res);
@@ -137,7 +137,7 @@ export class TransactionsService {
     return this.httpService.delete("service/transactions/transaction/" + transaction.id)
         .mergeMap(afterDeletion)
         .catch((err) => {
-          afterDeletion(undefined);
+          afterDeletion(undefined).subscribe();
           return err;
         });
   }
@@ -265,6 +265,7 @@ export class TransactionsService {
           else
             this.lastPage = true;
           this.currentPage++;
+          return res;
         })
         .catch((err) => {
           this.reset();

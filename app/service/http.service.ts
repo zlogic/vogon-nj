@@ -48,7 +48,7 @@ export class HTTPService {
   private isTokenURL(url:string): boolean {
     return this.tokenRegex.test(url);
   }
-  private errorHandler(data: any) {
+  private errorHandler(data: any): any {
     this.alertService.endLoadingRequest();
     if (data.status === 401)
       this.resetAuthorization();
@@ -121,11 +121,12 @@ export class UpdateHelper {
     this.updateFunctionObservable = this.updateFunction();
     if(this.updateFunctionObservable !== undefined)
       return this.updateFunctionObservable
-        .map((res) => {
+        .mergeMap((res) => {
           return this.updateCompleted(res);
         })
         .catch((err) => {
-          return this.updateCompleted(undefined);
+          this.updateCompleted(undefined).subscribe();
+          return Observable.throw(err);
         });
     else
       return Observable.of(undefined);

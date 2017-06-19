@@ -65,7 +65,7 @@ export class AccountsService {
   }
   submitAccounts(accounts: Account[]) {
     return this.httpService.post("service/accounts", accounts)
-      .map((res: Response) => {
+      .mergeMap((res: Response) => {
         var accounts = res.json().map((account: any) => Account.fromJson(account));
         this.setAccounts(accounts);
         return Observable.of(res);

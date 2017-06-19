@@ -1,5 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Response, Headers } from '@angular/http';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 
 import { AlertService, HTTPService } from './http.service';
@@ -64,10 +65,11 @@ export class AuthorizationService {
     if (message !== undefined)
       this.alertService.addAlert(message);
     this.authorizationObservable.emit(undefined);
+    this.router.navigate(['/login']);
   };
 
-  constructor(private alertService:AlertService, private httpService: HTTPService) {
-    this.httpService.resetAuthorization = () => this.resetAuthorization;
+  constructor(private alertService:AlertService, private httpService: HTTPService, private router: Router) {
+    this.httpService.resetAuthorization = () => this.resetAuthorization();
     try {
       this.access_token = localStorage["vogon_access_token"];
     } catch (err) {
