@@ -35,6 +35,6 @@ md-sidenav-container(fullscreen, class="sidenav-fab-container")
     span
       | #{__('Vogon')}
     span(style='flex: 1 1 auto;')
-    md-icon(*ngIf="isLoading()") hourglass_full
+    md-icon(*ngIf="isLoading()", class="rotate") sync
   div(class="sidenav-content")
     router-outlet

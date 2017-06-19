@@ -49,5 +49,5 @@ div(*ngIf="transactionsService.isLoadingNextPage()", class="card-container")
   md-card(class="large-card")
     md-card-content
       div(style="display: flex; align-items: center;")
-        md-icon sync
+        md-icon(class="rotate") sync
         span(style="align-self: center;") #{__('Loading...')}
