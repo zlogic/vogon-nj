@@ -35,7 +35,7 @@ export class AuthorizationService {
         })
         .catch((err) => {
           this.resetAuthorization(__("Unable to authenticate"));
-          throw err;
+          return Observable.throw(err);
         });
   };
   logout(): Observable<Response> {
@@ -48,7 +48,7 @@ export class AuthorizationService {
           })
           .catch((err) => {
             this.resetAuthorization();
-            throw err;
+            return Observable.throw(err);
           });
     } else {
       this.resetAuthorization();

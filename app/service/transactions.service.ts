@@ -138,7 +138,7 @@ export class TransactionsService {
         .mergeMap(afterDeletion)
         .catch((err) => {
           afterDeletion(undefined).subscribe();
-          return err;
+          return Observable.throw(err);
         });
   }
   getDate(): string {
@@ -270,7 +270,7 @@ export class TransactionsService {
         .catch((err) => {
           this.reset();
           this.lastPage = true;
-          throw err;
+          return Observable.throw(err);
         });
     });
     this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());

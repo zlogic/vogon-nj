@@ -54,7 +54,7 @@ export class HTTPService {
       this.resetAuthorization();
     if (data.status === 401 && this.isTokenURL(data.url)){
       return Observable.throw(new Response({
-        body: {error_description: data.text()},
+        body: JSON.stringify({error_description: data.text()}),
         status: null, headers: null, url: null, merge: null
       }));
     } else {
@@ -83,7 +83,7 @@ export class HTTPService {
         this.alertService.endLoadingRequest();
         return res;
       })
-      .catch((err:any) => this.errorHandler(err));
+      .catch((err) => this.errorHandler(err));
   }
   get(url:string, extraHeaders?:Headers): Observable<Response> {
     return this.request(RequestMethod.Get, url, undefined, extraHeaders);
