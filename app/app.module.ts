@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
+import { TagInputModule } from 'ng2-tag-input';
 
 import { VogonMaterialModule } from './material.module';
 
@@ -13,6 +14,7 @@ import { AlertService, HTTPService } from './service/http.service';
 import { TransactionsService } from './service/transactions.service';
 import { AccountsService } from './service/accounts.service';
 import { CurrencyService } from './service/currency.service';
+import { TagsService } from './service/tags.service';
 import { UpdateService } from './service/update.service';
 
 import { AppComponent } from './app.component';
@@ -24,6 +26,7 @@ import { AccountsComponent } from './components/accounts.component';
 import { AnalyticsComponent } from './components/analytics.component';
 import { UsersettingsComponent } from './components/usersettings.component';
 import { IntroComponent } from './components/intro.component';
+import { TransactionEditorComponent } from './components/transactioneditor.component';
 
 @NgModule({
   imports: [ 
@@ -34,12 +37,14 @@ import { IntroComponent } from './components/intro.component';
     FormsModule,
     ReactiveFormsModule,
     HttpModule,
-    InfiniteScrollModule
+    InfiniteScrollModule,
+    TagInputModule
   ],
   declarations: [
     AppComponent,
     LoginComponent,
     TransactionsComponent,
+    TransactionEditorComponent,
     AccountsComponent,
     AnalyticsComponent,
     UsersettingsComponent,
@@ -52,6 +57,7 @@ import { IntroComponent } from './components/intro.component';
     TransactionsService,
     AccountsService,
     CurrencyService,
+    TagsService,
     UpdateService
   ],
   bootstrap: [ AppComponent ]

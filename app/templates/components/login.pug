@@ -13,10 +13,10 @@ div(class="card-container")
       form([formGroup]="loginForm", (ngSubmit)="onSubmit()", autocomplete="off", novalidate)
         p
           md-input-container
-            input(mdInput, type="text", placeholder=__('Enter username'), formControlName="username")
+            input(mdInput, type="text", placeholder=__('Username'), formControlName="username")
           |  
           md-input-container
-            input(mdInput, type="password", placeholder=__('Enter password'), formControlName="password")
+            input(mdInput, type="password", placeholder=__('Password'), formControlName="password")
         p
           md-checkbox(checked, formControlName="rememberToken") #{__('Remember me')}
         p

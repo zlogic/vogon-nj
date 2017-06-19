@@ -36,11 +36,21 @@
   font-feature-settings: 'liga';
 }
 
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
 html, body {
   margin: 0;
   width: 100%;
   height: 100%;
 }
+
+/* TODO: remove this once https://github.com/angular/material2/issues/2124 is fixed */
+.mat-select {
+  padding-top: 5px;
+}
+/* End TODO */
 
 .active {
   background-color:rgba(0,0,0,.06);

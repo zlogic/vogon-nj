@@ -1,0 +1,45 @@
+md-card(class="large-card", #elseBlock)
+  form([formGroup]="transactionForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
+    md-card-title
+      div(style="display: flex; align-items: center;")
+        span(style="align-self: center;")
+          md-input-container
+            textarea(mdInput, placeholder=__('Description'), formControlName="description")
+    md-card-content
+      md-button-toggle-group(formControlName="type")
+        md-button-toggle(value="expenseincome")
+          span #{__('Expense/income')}
+        md-button-toggle(value="transfer")
+          span #{__('Transfer')}
+    md-card-content
+      md-input-container
+        input(mdInput, [mdDatepicker]="picker", placeholder=__("Date"), formControlName="date")
+        button(mdSuffix, type="button", [mdDatepickerToggle]="picker")
+      md-datepicker(#picker)
+    md-card-content
+      tag-input(formControlName="tags", placeholder=__("Tags"))
+        tag-input-dropdown([showDropdownIfEmpty]="true",[autocompleteItems]="tagsService.tags")
+    md-card-content(formArrayName="FinanceTransactionComponents")
+      div(*ngFor="let component of getComponentsGroup().controls; let i=index", [formGroupName]="i")
+        div(style="display: flex;")
+          md-select(placeholder="Account", formControlName="AccountId")
+            md-option(*ngFor="let account of visibleAccounts", [value]="account.id")
+              | {{account.name}}
+          span &nbsp;
+          md-input-container
+            input(mdInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount")
+          span(style="align-self: center;padding-left: 5px;")
+            |  {{getCurrency(i)}}
+          span(style="flex: 1 1 auto;")
+          button(md-icon-button, type="button", [mdMenuTriggerFor]="componentMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+            md-icon more_vert
+          md-menu(#componentMenu="mdMenu")
+            button(md-menu-item, type="button", (click)="deleteTransactionComponent(i)")
+              md-icon delete_forever
+              span #{__("Delete")}
+    md-card-content
+      button(md-mini-fab, type="button", (click)="addTransactionComponent()")
+        md-icon add
+    md-card-actions
+      button(md-button, type="submit", [disabled]="!transactionForm.valid") #{__('Apply')}
+      button(md-button, type="button", (click)="cancelEditing()") #{__('Cancel')}

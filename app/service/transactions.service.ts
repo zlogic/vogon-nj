@@ -17,8 +17,15 @@ export class TransactionComponent {
     var clone = new TransactionComponent();
     clone.AccountId = this.AccountId;
     clone.amount = this.amount;
-    return clone
+    return clone;
   }
+  static fromJson(json: any): TransactionComponent {
+    var component = new TransactionComponent();
+    for(var property in json)
+      component[property] = json[property];
+    return component;
+  }
+  constructor(){ }
 }
 
 export class Transaction {
@@ -31,19 +38,31 @@ export class Transaction {
   FinanceTransactionComponents: TransactionComponent[];
   clone(): Transaction {
     var clone = new Transaction();
+    clone.description = this.description;
     clone.date = this.date;
     clone.type = this.type;
     clone.tags = this.tags.map(function(tag){ return tag; });
     clone.FinanceTransactionComponents = this.FinanceTransactionComponents.map(function(component){ return component.clone(); });
     return clone;
   }
+  static fromJson(json: any): Transaction {
+    var transaction = new Transaction();
+    for(var property in json)
+      transaction[property] = json[property];
+    if(json.FinanceTransactionComponents !== undefined)
+      transaction.FinanceTransactionComponents = json.FinanceTransactionComponents.map(function(component: any) {
+        return TransactionComponent.fromJson(component);
+      })
+    return transaction;
+  }
+  constructor(){ }
 }
 
 @Injectable()
 export class TransactionsService {
   transactions: Transaction[] = [];
   private readonly transactionTypes = [{name: __("Expense/income"), value: "expenseincome"}, {name: __("Transfer"), value: "transfer"}];
-  private readonly defaultTransactionType = this.transactionTypes[0];
+  readonly defaultTransactionType = this.transactionTypes[0];
   private currentPage: number = 0;
   private loadingNextPage: boolean = false;
   private lastPage: boolean = false;
@@ -59,9 +78,9 @@ export class TransactionsService {
     this.lastPage = false;
     this.loadingNextPage = this.doUpdate.inProgress();
   }
-  private processReceivedTransaction(transaction: Transaction): Transaction {
-    transaction.date = dateToJson(new Date(transaction.date));
-    return transaction;
+  private processReceivedTransaction(transactionJson: any): Transaction {
+    transactionJson.date = dateToJson(new Date(transactionJson.date));
+    return Transaction.fromJson(transactionJson);
   }
   update(): Observable<Response> {
     this.reset();
@@ -81,12 +100,12 @@ export class TransactionsService {
         });
     return found;
   }
-  private updateTransaction(id: number): Observable<Response> {
+  updateTransaction(id: number): Observable<Response> {
     if (id === undefined)
       return this.update();
     return this.httpService.get("service/transactions/transaction/" + id)
       .map((res: Response) => {
-        var transaction: Transaction = Object.assign(new Transaction(), res.json());
+        var transaction = Transaction.fromJson(res.json());
         if (!this.updateTransactionLocal(transaction))
           return this.update();
         return Observable.of(res);
@@ -100,7 +119,7 @@ export class TransactionsService {
     transaction.date = dateToJson(transaction.date);
     return this.httpService.post("service/transactions", transaction)
       .map((res: Response) => {
-        var transaction: Transaction = Object.assign(new Transaction(), res.json());
+        var transaction: Transaction = Transaction.fromJson(res.json());
         this.accountsService.update();
         if (!this.updateTransactionLocal(transaction))
           return this.update();
@@ -111,14 +130,14 @@ export class TransactionsService {
   deleteTransaction(transaction: Transaction): Observable<Response> {
     if (transaction === undefined || transaction.id === undefined)
       return this.update();
-    var afterDeletion = () => {
-      this.accountsService.update();
-      return this.update();
+    var afterDeletion = (res: Response) => {
+      // transactions will be reloaded after accounts are updated
+      return this.accountsService.update();
     };
     return this.httpService.delete("service/transactions/transaction/" + transaction.id)
-        .map(afterDeletion)
+        .mergeMap(afterDeletion)
         .catch((err) => {
-          afterDeletion();
+          afterDeletion(undefined);
           return err;
         });
   }
@@ -246,9 +265,11 @@ export class TransactionsService {
           else
             this.lastPage = true;
           this.currentPage++;
-        }, function () {
+        })
+        .catch((err) => {
           this.reset();
           this.lastPage = true;
+          throw err;
         });
     });
     this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());

@@ -26,7 +26,6 @@ I18nPlugin.prototype.apply = function(compiler) {
   });
 };
 
-
 module.exports = {
   entry: {
     'app': './app/main.ts',
@@ -36,10 +35,10 @@ module.exports = {
     alias: {
       views: path.resolve(__dirname, 'app', 'templates/'),
     },
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.js', '.scss']
   },
   output: {
-    path: path.join(__dirname, 'public', 'js'),
+    path: path.resolve(__dirname, 'public', 'js'),
     filename: '[name].bundle.js'
   },
   module: {
@@ -58,6 +57,27 @@ module.exports = {
             locals: {__ : i18n.__}
           }
         }
+      },
+      {
+        test: /\.html$/,
+        use: [ {
+          loader: 'html-loader',
+          options: {
+            minimize: true,
+            removeComments: true,
+            collapseWhitespace: true,
+
+            // angular 2 templates break if these are omitted
+            removeAttributeQuotes: false,
+            keepClosingSlash: true,
+            caseSensitive: true,
+            conservativeCollapse: true,
+          }
+        }],
+      },
+      {
+        test: /\.(css|scss)$/,
+        loaders: ['to-string-loader', 'css-loader', 'sass-loader']
       }
     ]
   },
@@ -65,7 +85,7 @@ module.exports = {
     // Workaround for angular/angular#11580
     new webpack.ContextReplacementPlugin(
       /angular(\\|\/)core(\\|\/)@angular/,
-      path.join(__dirname, 'public', 'js'),
+      path.resolve(__dirname, 'public', 'js'),
       {}
     ),
     new I18nPlugin(),
@@ -74,7 +94,7 @@ module.exports = {
     }),
     new AotPlugin({
       tsConfigPath: './tsconfig.json',
-      entryModule: path.join(__dirname, 'app', 'app.module#AppModule')
+      entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
     }),
     new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
     new webpack.LoaderOptionsPlugin({ minimize: true })

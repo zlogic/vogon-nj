@@ -14,6 +14,14 @@ export class Account {
   balance: number;
   showInList: boolean;
   includeInTotal: boolean;
+
+  static fromJson(json: any): Account {
+    var account = new Account();
+    for(var property in json)
+      account[property] = json[property];
+    return account;
+  }
+  constructor(){ }
 }
 
 @Injectable()
@@ -58,7 +66,7 @@ export class AccountsService {
   submitAccounts(accounts: Account[]) {
     return this.httpService.post("service/accounts", accounts)
       .map((res: Response) => {
-        var accounts = res.json().map((account: any) => Object.assign(new Account(), account));
+        var accounts = res.json().map((account: any) => Account.fromJson(account));
         this.setAccounts(accounts);
         return Observable.of(res);
       })
@@ -74,7 +82,7 @@ export class AccountsService {
       if(authorizationService.isAuthorized())
         return this.httpService.get("service/accounts")
           .map((res: Response) => {
-            var accounts = res.json().map((account: any) => Object.assign(new Account(), account));
+            var accounts = res.json().map((account: any) => Account.fromJson(account));
             this.setAccounts(accounts);
           });
       else {

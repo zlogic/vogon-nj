@@ -8,10 +8,14 @@ import {
   MdInputModule,
   MdCheckboxModule,
   MdButtonToggleModule,
+  MdDatepickerModule,
+  MdMenuModule,
+  MdSelectModule,
   MdSidenavModule,
   MdToolbarModule,
   MdSnackBarModule,
   MdChipsModule,
+  MdNativeDateModule,
   MaterialModule
 } from '@angular/material';
 
@@ -24,10 +28,14 @@ import {
     MdInputModule,
     MdCheckboxModule,
     MdButtonToggleModule,
+    MdDatepickerModule,
+    MdMenuModule,
+    MdSelectModule,
     MdSidenavModule,
     MdToolbarModule,
     MdChipsModule,
     MdSnackBarModule,
+    MdNativeDateModule
   ],
   exports: [
     MdButtonModule,
@@ -37,11 +45,14 @@ import {
     MdInputModule,
     MdCheckboxModule,
     MdButtonToggleModule,
+    MdDatepickerModule,
+    MdMenuModule,
+    MdSelectModule,
     MdSidenavModule,
     MdToolbarModule,
     MdChipsModule,
-    MdSnackBarModule
-  ],
-  providers: [MdSnackBarModule]
+    MdSnackBarModule,
+    MdNativeDateModule
+  ]
 })
 export class VogonMaterialModule { }

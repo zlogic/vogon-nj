@@ -18,7 +18,7 @@ export class TransactionsComponent {
     }
     return totals;
   }
-  addTransaction = function () {
+  addTransaction() {
     var transaction = new Transaction();
     transaction.FinanceTransactionComponents = [];
     transaction.date = this.transactionsService.getDate();
@@ -26,6 +26,9 @@ export class TransactionsComponent {
     transaction.type = this.transactionsService.defaultTransactionType.value;
     this.transactionsService.transactions.unshift(transaction);
     this.startEditing(transaction);
+  }
+  isEditing(transaction: Transaction): boolean {
+    return this.editingTransaction === transaction;
   }
   startEditing(transaction: Transaction) {
     this.editingTransaction = transaction;
@@ -40,15 +43,17 @@ export class TransactionsComponent {
       */
     }
   }
+  stopEditing() {
+    this.editingTransaction = undefined;
+  }
   duplicateTransaction(transaction: Transaction) {
     var newTransaction = transaction.clone();
     newTransaction.date = this.transactionsService.getDate();
-    newTransaction.FinanceTransactionComponents.forEach(function (component: TransactionComponent) {
-      component.id = undefined;
-      component.version = undefined;
-    });
-    this.transactionsService.removeTransaction(newTransaction);
+    this.transactionsService.transactions.unshift(transaction);
     this.startEditing(newTransaction);
+  }
+  deleteTransaction(transaction: Transaction) {
+    this.transactionsService.deleteTransaction(transaction).subscribe();
   }
   applyFilter() {
     //TODO: implement a proper filter with debounceTime: https://stackoverflow.com/a/34656612/2401011

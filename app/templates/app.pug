@@ -1,6 +1,7 @@
 md-sidenav-container(fullscreen)
   md-sidenav(#sidenav, mode="side")
     md-toolbar(color="accent")
+      //TODO: provide the actual username here
       | #{__("Signed in as %s", "User")}
     md-nav-list
       ng-template([ngIf]="isAuthorized()")
@@ -34,5 +35,5 @@ md-sidenav-container(fullscreen)
     span
       | #{__('Vogon')}
     span(style='flex: 1 1 auto;')
-    md-icon(*ngIf="isLoading()") sync
+    md-icon(*ngIf="isLoading()") hourglass_full
   router-outlet
