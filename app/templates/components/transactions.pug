@@ -1,6 +1,6 @@
 button(md-fab, class="my-fab", (click)="addTransaction()")
   md-icon add
-div(id="transactionsTableStart")
+div(id="transactionsStart")
 div(class="card-container", infiniteScroll, (scrolled)="transactionsService.nextPage()", [infiniteScrollDisabled]="transactionsService.isLoadingNextPage() || transactionsService.isLastPage()", [immediateCheck]="true")
   ng-container(*ngFor="let transaction of transactionsService.transactions")
     transaction-editor(*ngIf="isEditing(transaction); else elseBlock", [transaction]="transaction", (done)="stopEditing()")

@@ -1,4 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
+import { DOCUMENT } from '@angular/platform-browser';
+
+import { PageScrollService, PageScrollInstance } from 'ng2-page-scroll';
 
 import { AuthorizationService } from '../service/auth.service';
 import { Transaction, TransactionComponent, TransactionsService } from '../service/transactions.service';
@@ -33,14 +36,8 @@ export class TransactionsComponent {
   startEditing(transaction: Transaction) {
     this.editingTransaction = transaction;
     if (transaction.id === undefined) {
-      //TODO: scroll to edited item https://stackoverflow.com/a/43553080/2401011
-      /*
-      var transactionsTableStart = $("div[id='transactionsTableStart']");
-      var docViewTop = $(window).scrollTop();
-      var docViewBottom = docViewTop + $(window).height();
-      if (transactionsTableStart.position().top < docViewTop || transactionsTableStart.position().top > docViewBottom)
-        $('html, body').animate({scrollTop: transactionsTableStart.position().top}, "slow");
-      */
+      let pageScrollInstance: PageScrollInstance = PageScrollInstance.simpleInstance(this.document, '#transactionsStart');
+      this.pageScrollService.start(pageScrollInstance);
     }
   }
   stopEditing() {
@@ -72,6 +69,10 @@ export class TransactionsComponent {
     */
   }
 
-  constructor(public transactionsService: TransactionsService, private authorizationService: AuthorizationService) {
-  }
+  constructor(
+    public transactionsService: TransactionsService,
+    private authorizationService: AuthorizationService,
+    private pageScrollService: PageScrollService,
+    @Inject(DOCUMENT) private document: any
+  ) { }
 }
