@@ -33,7 +33,7 @@ export class HTTPService {
   readonly tokenRegex = /^oauth\/token$/;
   private authorizationHeaders: Headers = new Headers();
 
-  resetAuthorization = function(): void {
+  resetAuthorization(): void {
     throw __("resetAuthorization not properly initialized");
   }
 
@@ -129,7 +129,7 @@ export class UpdateHelper {
           return Observable.throw(err);
         });
     else
-      return Observable.of(undefined);
+      return Observable.of();
   };
   update(): Observable<any> {
     this.updateRequested = true;

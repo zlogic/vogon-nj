@@ -23,7 +23,7 @@ export class AuthorizationService {
       if (rememberToken)
         localStorage.setItem("vogon_access_token", access_token);
       this.httpService.setAccessToken(access_token);
-      this.authorizationObservable.emit(undefined);
+      this.authorizationObservable.emit();
     }
   };
   performAuthorization(username:string, password:string, rememberToken:boolean): Observable<Response> {
@@ -64,7 +64,7 @@ export class AuthorizationService {
     localStorage.removeItem("vogon_access_token");
     if (message !== undefined)
       this.alertService.addAlert(message);
-    this.authorizationObservable.emit(undefined);
+    this.authorizationObservable.emit();
     this.router.navigate(['/login']);
   };
 

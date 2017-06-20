@@ -239,7 +239,7 @@ export class TransactionsService {
         if(!this.authorizationService.isAuthorized())
           this.reset();
         this.loadingNextPage = false;
-        return Observable.throw(undefined);
+        return Observable.of();
       }
       this.loadingNextPage = true;
       var params = {
