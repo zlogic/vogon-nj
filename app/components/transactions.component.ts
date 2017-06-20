@@ -22,6 +22,14 @@ export class TransactionsComponent {
     return totals;
   }
   addTransaction() {
+    if(this.editingTransaction !== undefined) {
+      this.editingTransaction = undefined;
+      var prepare = () => {
+        this.addTransaction();
+      }
+      this.transactionsService.update().subscribe(prepare, prepare);
+      return;
+    }
     var transaction = new Transaction();
     transaction.FinanceTransactionComponents = [];
     transaction.date = this.transactionsService.getDate();
