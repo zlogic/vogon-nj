@@ -1,18 +1,44 @@
-form(autocomplete="off", novalidate)
+button(md-fab, class="my-fab", (click)="createAccount()")
+  md-icon add
+md-toolbar
+  md-slide-toggle([(ngModel)]="showAllAccounts") #{__("Show all accounts")}
+form([formGroup]="accountForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
   div(class="card-container")
     ng-container(*ngFor="let account of accountsService.accounts")
-      md-card(class="small-card", *ngIf="account.showInList")
+      div(*ngIf="isEditing(account)", id="accountEditor")
+      md-card(class="small-card", *ngIf="account.showInList || showAllAccounts")
         md-card-title
           div(style="display: flex; align-items: center;")
-            span(style="align-self: center;") {{account.name}}
+            span(*ngIf="!isEditing(account)", style="align-self: center;") {{account.name}}
+            md-input-container(*ngIf="isEditing(account)")
+              input(mdInput, placeholder=__("Account name"), formControlName="name", [(ngModel)]="account.name")
             span(style="flex: 1 1 auto;")
-            button(md-icon-button, style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+            button(md-icon-button, type="button", *ngIf="!isEditing(account)", [mdMenuTriggerFor]="accountMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
               md-icon more_vert
+            md-menu(#accountMenu="mdMenu")
+              button(md-menu-item, type="button", (click)="startEditing(account)")
+                md-icon edit
+                span #{__("Edit")}
+              button(md-menu-item, type="button", (click)="deleteAccount(account)")
+                md-icon delete_forever
+                span #{__("Delete")}
+        md-card-content(*ngIf="isEditing(account)")
+          p
+            md-select(placeholder=__("Currency"), formControlName="currency", [(ngModel)]="account.currency")
+              md-option(*ngFor="let currency of currencyService.currencies", [value]="currency.currencyCode")
+                | {{currency.displayName}}
+          p
+            md-slide-toggle(formControlName="includeInTotal", [(ngModel)]="account.includeInTotal") #{__("Include in total")}
+          p
+            md-slide-toggle(formControlName="showInList") #{__("Show in accounts list")}
         md-card-content
           div(style="display: flex; align-items: top;")
             span(style="display: block;") {{account.currency}}
             span(style="flex: 1 1 auto;")
             span(style="display: block;") {{account.balance | number:"1.2"}}
+        md-card-actions(*ngIf="isEditing(account)")
+          button(md-button, type="submit", [disabled]="!accountForm.valid") #{__('Apply')}
+          button(md-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
 div(class="card-container")
   ng-container(*ngFor="let currencyTotals of accountsService.getTotalsForCurrencies()")
     md-card(class="small-card")

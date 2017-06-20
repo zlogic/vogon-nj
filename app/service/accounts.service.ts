@@ -48,8 +48,6 @@ export class AccountsService {
     //Compute totals for currencies
     this.accounts.forEach((account: Account) => {
       if (totals[account.currency] === undefined) {
-        var currency = this.currencyService.findCurrency(account.currency);
-        currency = currency !== undefined ? currency.currencyCode : undefined;
         totals[account.currency] = 0;
       }
       totals[account.currency] += account.balance;
@@ -63,8 +61,8 @@ export class AccountsService {
   update(): Observable<any> {
     return this.doUpdate.update();
   }
-  submitAccounts(accounts: Account[]) {
-    return this.httpService.post("service/accounts", accounts)
+  submitAccounts() {
+    return this.httpService.post("service/accounts", this.accounts)
       .mergeMap((res: Response) => {
         var accounts = res.json().map((account: any) => Account.fromJson(account));
         this.setAccounts(accounts);

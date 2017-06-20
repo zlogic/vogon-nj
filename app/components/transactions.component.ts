@@ -71,7 +71,7 @@ export class TransactionsComponent {
     });
     this.filterForm.valueChanges.debounceTime(1000).subscribe(() => {
       this.transactionsService.update().subscribe();
-    })
+    });
   }
 
   constructor(

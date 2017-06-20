@@ -8,7 +8,7 @@ export class Currency {
 
 @Injectable()
 export class CurrencyService {
-  private currencies = require('country-data/data/currencies.json');
+  readonly currencies: {currencyCode: string, displayName: string}[];
 
   findCurrency(currencyCode: string) {
     var result = this.currencies.filter(

@@ -22,7 +22,7 @@ md-card(class="large-card", #elseBlock)
     md-card-content(formArrayName="FinanceTransactionComponents")
       div(*ngFor="let component of getComponentsGroup().controls; let i=index", [formGroupName]="i")
         div(style="display: flex;")
-          md-select(placeholder="Account", formControlName="AccountId")
+          md-select(placeholder=__("Account"), formControlName="AccountId")
             md-option(*ngFor="let account of visibleAccounts", [value]="account.id")
               | {{account.name}}
           span &nbsp;
