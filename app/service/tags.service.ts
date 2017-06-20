@@ -5,13 +5,6 @@ import { Observable } from 'rxjs/Observable';
 import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
 
-export function tagsToJson(tags: any): string[] {
-  var tagsJson = [];
-  for (var tag in tags)
-    tagsJson.push(tags[tag].text);
-  return tagsJson;
-};
-
 @Injectable()
 export class TagsService {
   tags: string[] = [];

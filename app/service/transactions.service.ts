@@ -6,7 +6,6 @@ import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
 import { AccountsService, Account } from './accounts.service'
 import { dateToJson } from '../utils';
-import { tagsToJson } from './tags.service';
 
 export class TransactionComponent {
   id: number;
@@ -66,11 +65,11 @@ export class TransactionsService {
   private currentPage: number = 0;
   private loadingNextPage: boolean = false;
   private lastPage: boolean = false;
-  private sortColumn: string = "date";
-  private sortAsc: boolean = false;
-  private filterDescription: string = undefined;
-  private filterDate: string = undefined;
-  private filterTags: string = undefined;
+  sortColumn: string = "date";
+  sortAsc: boolean = false;
+  filterDescription: string = undefined;
+  filterDate: Date = undefined;
+  filterTags: string[] = [];
   private doUpdate: UpdateHelper;
   reset() {
     this.currentPage = 0;
@@ -226,7 +225,7 @@ export class TransactionsService {
       this.sortAsc = column === "description";
       this.sortColumn = column;
     }
-    this.update();
+    this.update().subscribe();
   }
   isLoadingNextPage(): boolean {
     return this.loadingNextPage;
@@ -248,14 +247,13 @@ export class TransactionsService {
         sortColumn: this.sortColumn,
         sortDirection: this.sortAsc ? "ASC" : "DESC"
       };
-      if (this.filterDate !== undefined && this.filterDate !== null && this.filterDate !== "")
+      if (this.filterDate !== undefined && this.filterDate !== null)
         params['filterDate'] = dateToJson(this.filterDate);
       if (this.filterDescription !== undefined && this.filterDescription !== "")
         params['filterDescription'] = this.filterDescription;
-      if (this.filterTags !== undefined) {
-        var tags = tagsToJson(this.filterTags);
-        if (tags.length > 0)
-          params['filterTags'] = JSON.stringify(tags);
+      if (this.filterTags !== undefined && this.filterTags !== null) {
+        if (this.filterTags.length > 0)
+          params['filterTags'] = JSON.stringify(this.filterTags);
       }
       return this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
         .map((res: Response) => {

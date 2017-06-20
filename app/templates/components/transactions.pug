@@ -1,6 +1,32 @@
 button(md-fab, class="my-fab", (click)="addTransaction()")
   md-icon add
 div(id="transactionsStart")
+div(class="card-container")
+  md-card(class="large-card")
+    md-card-title #{__('Filter and sorting')}
+    md-card-content
+      form([formGroup]="filterForm", autocomplete="off", novalidate)
+        div
+          button(md-icon-button, type="button", aria-label="#{__('Sort by description')}", (click)="transactionsService.applySort('description')")
+            md-icon(*ngIf="transactionsService.sortColumn !== 'description'; else sortDescription") sort
+            ng-template(#sortDescription)
+              md-icon(*ngIf="transactionsService.sortAsc") arrow_drop_up
+              md-icon(*ngIf="!transactionsService.sortAsc") arrow_drop_down
+          md-input-container
+            input(mdInput, type="text", placeholder=__('Description filter'), formControlName="filterDescription", [(ngModel)]="transactionsService.filterDescription")
+        div
+          button(md-icon-button,type="button",  aria-label="#{__('Sort by date')}", (click)="transactionsService.applySort('date')")
+            md-icon(*ngIf="transactionsService.sortColumn !== 'date'; else sortDate") sort
+            ng-template(#sortDate)
+              md-icon(*ngIf="transactionsService.sortAsc") arrow_drop_up
+              md-icon(*ngIf="!transactionsService.sortAsc") arrow_drop_down
+          md-input-container
+            input(mdInput, [mdDatepicker]="picker", placeholder=__("Date filter"), formControlName="filterDate", [(ngModel)]="transactionsService.filterDate")
+            button(mdSuffix, type="button", [mdDatepickerToggle]="picker")
+          md-datepicker(#picker)
+        div
+          tag-input(placeholder=__("Tags filter"), secondaryPlaceholder=__("Tags filter"), formControlName="filterTags", [(ngModel)]="transactionsService.filterTags", [modelAsStrings]="true")
+            tag-input-dropdown([showDropdownIfEmpty]="true", [autocompleteItems]="tagsService.tags")
 div(class="card-container", infiniteScroll, (scrolled)="transactionsService.nextPage()", [infiniteScrollDisabled]="transactionsService.isLoadingNextPage() || transactionsService.isLastPage()", [immediateCheck]="true")
   ng-container(*ngFor="let transaction of transactionsService.transactions")
     transaction-editor(*ngIf="isEditing(transaction); else elseBlock", [transaction]="transaction", (done)="stopEditing()")

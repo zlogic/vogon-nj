@@ -1,10 +1,12 @@
 import { Component, Inject } from '@angular/core';
+import { FormGroup, FormBuilder } from '@angular/forms';
 import { DOCUMENT } from '@angular/platform-browser';
 
 import { PageScrollService, PageScrollInstance } from 'ng2-page-scroll';
 
 import { AuthorizationService } from '../service/auth.service';
 import { Transaction, TransactionComponent, TransactionsService } from '../service/transactions.service';
+import { TagsService } from '../service/tags.service';
 
 @Component({
   templateUrl: '../templates/components/transactions.pug'
@@ -12,6 +14,7 @@ import { Transaction, TransactionComponent, TransactionsService } from '../servi
 
 export class TransactionsComponent {
   private editingTransaction: Transaction;
+  filterForm: FormGroup;
 
   totalsByCurrency(transaction: Transaction): {currency: string; amount: any;}[] {
     var totals = [];
@@ -60,26 +63,22 @@ export class TransactionsComponent {
   deleteTransaction(transaction: Transaction) {
     this.transactionsService.deleteTransaction(transaction).subscribe();
   }
-  applyFilter() {
-    //TODO: implement a proper filter with debounceTime: https://stackoverflow.com/a/34656612/2401011
-    /*
-    $scope.filterDirty = true;
-    if ($scope.filterTimer === undefined) {
-      $scope.filterTimer = $interval(function () {
-        $scope.filterDirty = false;
-        TransactionsService.update().then(function () {
-          $scope.filterTimer = undefined;
-          if ($scope.filterDirty)
-            $scope.applyFilter();
-        });
-      }, 1000, 1);
-    }
-    */
+  ngOnInit() {
+    this.filterForm = this.formBuilder.group({
+      'filterDescription': '',
+      'filterDate': '',
+      'filterTags': ''
+    });
+    this.filterForm.valueChanges.debounceTime(1000).subscribe(() => {
+      this.transactionsService.update().subscribe();
+    })
   }
 
   constructor(
     public transactionsService: TransactionsService,
     private authorizationService: AuthorizationService,
+    public tagsService: TagsService,
+    private formBuilder: FormBuilder,
     private pageScrollService: PageScrollService,
     @Inject(DOCUMENT) private document: any
   ) { }
