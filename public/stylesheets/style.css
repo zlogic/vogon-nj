@@ -63,10 +63,6 @@ button.my-fab {
   z-index: 3;
 }
 
-.active {
-  background-color:rgba(0,0,0,.06);
-}
-
 .card-container {
   display: -webkit-flex;
   display: flex;
@@ -95,14 +91,6 @@ button.my-fab {
 }
 @-webkit-keyframes rotate{ to{-webkit-transform: rotate(360deg); } }
 @keyframes         rotate{ to{        transform: rotate(360deg); } }
-
-.clickable {
-	cursor: pointer
-}
-
-.total-amount {
-	font-style: italic;
-}
 
 input[type=file].form-control-file {
 	display: inline-block;

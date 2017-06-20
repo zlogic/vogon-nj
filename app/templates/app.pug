@@ -10,16 +10,16 @@ md-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 1;")
     md-icon more_vert
   md-menu(#navMenu="mdMenu")
     ng-template([ngIf]="isAuthorized()")
-      button(md-menu-item, [routerLinkActive]="['active']", routerLink="transactions")
+      button(md-menu-item, routerLink="transactions")
         md-icon(md-list-icon) list
         | #{__('Transactions')}
-      button(md-menu-item, [routerLinkActive]="['active']", routerLink="accounts")
+      button(md-menu-item, routerLink="accounts")
         md-icon(md-list-icon) account_balance_wallet
         | #{__('Accounts')}
-      button(md-menu-item, [routerLinkActive]="['active']", routerLink="analytics")
+      button(md-menu-item, routerLink="analytics")
         md-icon(md-list-icon) multiline_chart
         | #{__('Analytics')}
-      button(md-menu-item, [routerLinkActive]="['active']", routerLink="usersettings")
+      button(md-menu-item, routerLink="usersettings")
         md-icon(md-list-icon) settings
         | #{__('User settings')}
       button(md-menu-item, (click)="logout()")
@@ -29,7 +29,7 @@ md-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 1;")
       button(md-menu-item, routerLink="login")
         md-icon(md-list-icon) open_in_browser
         | #{__('Login')}
-    button(md-menu-item, [routerLinkActive]="['active']", routerLink="intro")
+    button(md-menu-item, routerLink="intro")
       md-icon(md-list-icon) help
       | #{__('Help/Info')}
 div(class="app-content")
