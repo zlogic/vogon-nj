@@ -84,14 +84,6 @@ button.my-fab {
   width: 300px;
 }
 
-/* Rotation animation */
-.rotate {
-  -webkit-animation: rotate 1.5s linear infinite;
-          animation: rotate 1.5s linear infinite;
-}
-@-webkit-keyframes rotate{ to{-webkit-transform: rotate(360deg); } }
-@keyframes         rotate{ to{        transform: rotate(360deg); } }
-
 input[type=file].form-control-file {
 	display: inline-block;
 }

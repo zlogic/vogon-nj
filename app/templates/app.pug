@@ -4,8 +4,10 @@ md-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 1;")
   span(*ngIf="isAuthorized()")
     //TODO: provide the actual username here
     | #{__("Vogon for %s", "User")}
-  span(style='flex: 1 1 auto;')
-  md-icon(*ngIf="isLoading()", class="rotate") sync
+  span(style="width: 64px;")
+  span(*ngIf="!isLoading()", style='flex: 1 1 auto;')
+  md-progress-bar(*ngIf="isLoading()", mode="indeterminate", color="accent")
+  span(style="width: 64px;")
   button(md-icon-button, aria-label="#{__('Toggle sidebar')}", [mdMenuTriggerFor]="navMenu")
     md-icon more_vert
   md-menu(#navMenu="mdMenu")

@@ -74,6 +74,7 @@ div(class="card-container", infiniteScroll, (scrolled)="transactionsService.next
 div(*ngIf="transactionsService.isLoadingNextPage()", class="card-container")
   md-card(class="large-card")
     md-card-content
-      div(style="display: flex; align-items: center;")
-        md-icon(class="rotate") sync
-        span(style="align-self: center;") #{__('Loading...')}
+      section
+        span #{__('Loading...')}
+      section
+        md-progress-bar(mode="indeterminate")

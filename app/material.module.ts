@@ -16,6 +16,7 @@ import {
   MdToolbarModule,
   MdSnackBarModule,
   MdChipsModule,
+  MdProgressBarModule,
   MdNativeDateModule,
   MaterialModule
 } from '@angular/material';
@@ -36,6 +37,7 @@ import {
     MdSidenavModule,
     MdToolbarModule,
     MdChipsModule,
+    MdProgressBarModule,
     MdSnackBarModule,
     MdNativeDateModule
   ],
@@ -54,6 +56,7 @@ import {
     MdSidenavModule,
     MdToolbarModule,
     MdChipsModule,
+    MdProgressBarModule,
     MdSnackBarModule,
     MdNativeDateModule
   ]
