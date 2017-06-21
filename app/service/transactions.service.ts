@@ -271,7 +271,7 @@ export class TransactionsService {
           return Observable.throw(err);
         });
     });
-    this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());
+    // transactions will be reloaded after accounts are updated
     this.accountsService.accountsObservable.subscribe(() => this.update().subscribe());
   }
 }

@@ -65,12 +65,13 @@ export class TransactionsComponent {
   }
   ngOnInit() {
     this.filterForm = this.formBuilder.group({
-      'filterDescription': '',
-      'filterDate': '',
-      'filterTags': ''
+      'filterDescription': undefined,
+      'filterDate': undefined,
+      'filterTags': undefined
     });
     this.filterForm.valueChanges.debounceTime(1000).subscribe(() => {
-      this.transactionsService.update().subscribe();
+      if(this.filterForm.dirty)
+        this.transactionsService.update().subscribe();
     });
   }
 
