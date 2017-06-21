@@ -49,7 +49,6 @@ export class HTTPService {
     return this.tokenRegex.test(url);
   }
   private errorHandler(data: any): any {
-    this.alertService.endLoadingRequest();
     if (data.status === 401)
       this.resetAuthorization();
     if (data.status === 401 && this.isTokenURL(data.url)){
@@ -65,9 +64,6 @@ export class HTTPService {
     }
     return Observable.throw(data);
   };
-  private successHandler() {
-    this.alertService.endLoadingRequest();
-  }
   encodeForm(data: any): string{
     var buffer = [];
     for (var name in data)
@@ -75,15 +71,12 @@ export class HTTPService {
     return buffer.join("&");
   }
   request(method: RequestMethod, url: string, data?:any, extraHeaders?:any): Observable<Response>{
-    this.alertService.startLoadingRequest();
     var headers = this.isTokenURL(url) ? new Headers(extraHeaders) : this.mergeHeaders(extraHeaders);
     var request = new Request({ method: method, headers: headers, url: url, body: data});
+    this.alertService.startLoadingRequest();
     return this.http.request(request)
-      .map((res:Response) => {
-        this.alertService.endLoadingRequest();
-        return res;
-      })
-      .catch((err) => this.errorHandler(err));
+      .catch((err) => this.errorHandler(err))
+      .finally(() => this.alertService.endLoadingRequest());
   }
   get(url:string, extraHeaders?:Headers): Observable<Response> {
     return this.request(RequestMethod.Get, url, undefined, extraHeaders);

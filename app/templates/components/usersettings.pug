@@ -1,0 +1,25 @@
+div(class="card-container")
+  form([formGroup]="usersettingsForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
+    md-card(class="large-card")
+      md-card-title
+        | #{__('User settings')}
+      md-card-content
+        section
+          md-input-container
+            input(mdInput, type="text", placeholder=__('Username'), formControlName="username")
+        section
+          md-input-container
+            input(mdInput, type="password", placeholder=__('Password'), formControlName="password")
+        section
+          p
+            button(md-raised-button, type="button", (click)="importData()") #{__('Import data')}
+            span &nbsp;
+            input(type="file" #fileInput)
+          p
+            button(md-raised-button, type="button", (click)="exportData()") #{__('Export data')}
+      md-card-actions
+        button(md-button, type="submit", [disabled]="!usersettingsForm.valid") #{__('Apply')}
+        button(md-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
+div(style="display: none;")
+  form(method="post", action="service/export", #exportForm)
+    input(type="hidden", name="access_token", [value]="authorizationService.getAccessToken()")

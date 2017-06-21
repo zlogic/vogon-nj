@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthorizationService } from './service/auth.service';
 import { AlertService } from './service/http.service';
 import { UpdateService } from './service/update.service';
+import { UserService } from './service/user.service';
 
 @Component({
   selector: 'vogon-app',
@@ -13,10 +14,18 @@ export class AppComponent {
   constructor(
     private alertService: AlertService,
     private authorizationService: AuthorizationService,
+    private userService: UserService,
     private router: Router,
     private updateService: UpdateService
   ){ }
   
+  getAppTitle(): string {
+    if(this.authorizationService.isAuthorized()){
+      return __("Vogon for {0}").replace('{0}', this.userService.username);
+    }
+    return __("Vogon");
+  }
+
   isLoading(): boolean { 
     return this.alertService.isLoading();
   }

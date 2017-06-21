@@ -4,6 +4,7 @@ import { Observable } from 'rxjs/Observable';
 
 import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
+import { UserService } from './user.service';
 
 @Injectable()
 export class TagsService {
@@ -24,18 +25,21 @@ export class TagsService {
 
   constructor(
     private httpService: HTTPService,
-    private authorizationService: AuthorizationService
+    private authorizationService: AuthorizationService,
+    private userService: UserService
   ) {
     this.doUpdate = new UpdateHelper(() => {
-      if(authorizationService.isAuthorized())
+      if(this.authorizationService.isAuthorized())
         return this.httpService.get("service/analytics/tags")
           .map((res: Response) => {
             this.tags = res.json();
+            return res;
           });
       else {
         this.tags = [];
       }
     });
     this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());
+    this.userService.userObservable.subscribe(() => this.update().subscribe());
   }
 }

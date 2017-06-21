@@ -83,7 +83,3 @@ button.my-fab {
   margin-bottom: 24px;
   width: 300px;
 }
-
-input[type=file].form-control-file {
-	display: inline-block;
-}

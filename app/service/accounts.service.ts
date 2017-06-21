@@ -77,7 +77,7 @@ export class AccountsService {
     private currencyService: CurrencyService
   ) {
     this.doUpdate = new UpdateHelper(() => {
-      if(authorizationService.isAuthorized())
+      if(this.authorizationService.isAuthorized())
         return this.httpService.get("service/accounts")
           .map((res: Response) => {
             var accounts = res.json().map((account: any) => Account.fromJson(account));

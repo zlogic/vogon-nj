@@ -16,7 +16,9 @@ export class AuthorizationService {
   isAuthorized(): boolean {
     return this.access_token !== undefined;
   }
-
+  getAccessToken(): string {
+    return this.access_token;
+  }
   private setToken(access_token:string, rememberToken:boolean) {
     if (access_token !== undefined) {
       this.access_token = access_token;
@@ -59,6 +61,8 @@ export class AuthorizationService {
     }
   };
   resetAuthorization(message?:string) {
+    if(this.access_token === undefined)
+      return;
     this.access_token = undefined;
     this.httpService.setAccessToken();
     localStorage.removeItem("vogon_access_token");

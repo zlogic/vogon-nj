@@ -16,6 +16,7 @@ import { TransactionsService } from './service/transactions.service';
 import { AccountsService } from './service/accounts.service';
 import { CurrencyService } from './service/currency.service';
 import { TagsService } from './service/tags.service';
+import { UserService } from './service/user.service';
 import { UpdateService } from './service/update.service';
 
 import { AppComponent } from './app.component';
@@ -60,6 +61,7 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     AccountsService,
     CurrencyService,
     TagsService,
+    UserService,
     UpdateService
   ],
   bootstrap: [ AppComponent ]

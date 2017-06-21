@@ -86,7 +86,7 @@
 	"HTTP error: {0} ({1})": "HTTP error: {0} ({1})",
 	"Expense/income": "Expense/income",
 	"Transfer": "Transfer",
-	"Vogon for %s": "Vogon for %s",
+	"Vogon for {0}": "Vogon for {0}",
 	"Tags filter": "Tags filter",
 	"Filter and sorting": "Filter and sorting",
 	"Sort by date": "Sort by date",
