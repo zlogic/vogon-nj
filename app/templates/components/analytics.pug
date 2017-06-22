@@ -36,12 +36,23 @@ div(class="card-container")
         md-checkbox([(ngModel)]="transactionTypeEnabled.income") #{__('Income transactions')}
       section
         md-checkbox([(ngModel)]="transactionTypeEnabled.expense") #{__('Expense transactions')}
-div(#report)
+div(id="report")
 ng-template([ngIf]="reports !== undefined")
   md-toolbar()
     md-select(placeholder=__("Select currency"), [(ngModel)]="selectedCurrency", (change)="currencyChanged()")
       md-option(*ngFor="let currency of currencies", [value]="currency")
         | {{currencyService.findCurrency(currency).displayName}}
+  div(class="card-container")
+    md-card(class="giant-card")
+      md-card-title #{__('Tags chart')}
+      md-card-content
+        div(style="width: 100%; height: 400px;")
+          ngx-charts-pie-chart([results]="tagsChart", labels="true")
+    md-card(class="giant-card")
+      md-card-title #{__('Balance chart')}
+      md-card-content
+        div(style="width: 100%; height: 400px;")
+          ngx-charts-line-chart([results]="balanceChart", xAxis="true", yAxis="true", autoScale="false")
   div(class="card-container")
     md-card(class="large-card")
       md-card-title #{__('Report by transactions')}
@@ -63,11 +74,3 @@ ng-template([ngIf]="reports !== undefined")
             p(md-line)
               span(style="float: right;")
                 | {{tagExpense.amount | number : "1.2"}} {{selectedCurrency}}
-    md-card(class="giant-card")
-      md-card-title #{__('Tags chart')}
-      md-card-content
-        canvas(baseChart, width="700", height="400", chartType="pie", [data]="tagsChart.data", [labels]="tagsChart.labels")
-    md-card(class="giant-card")
-      md-card-title #{__('Balance chart')}
-      md-card-content
-        canvas(baseChart, width="700", height="400", chartType="line", [data]="balanceChart.data", [labels]="balanceChart.labels", [options]="balanceChartOptions")

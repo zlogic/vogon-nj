@@ -39,7 +39,7 @@ bower_components
 test/tmp
 
 # TypeScript generated sources
-public/js/*.bundle.js
+public/js
 
 # Visual Studio Code configuration
 .vscode

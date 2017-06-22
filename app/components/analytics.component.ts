@@ -25,8 +25,8 @@ export class AnalyticsComponent {
   reports: any;
   selectedCurrency: string;
   currencies: string[];
-  tagsChart: {data: number[], labels: string[]} = {data: [], labels: []};
-  balanceChart: {data: number[], labels: string[]} = {data: [], labels: []};
+  tagsChart: {name: string, value: number}[];
+  balanceChart: {name: string, series: {name: string, value: number}[]}[];
   balanceChartOptions = { elements: { line: { tension: 0 } } }
 
   updateTags() {
@@ -97,31 +97,24 @@ export class AnalyticsComponent {
     this.updateBalanceChart();
   }
   updateTagsChart() {
-    var data: number[] = [];
-    var labels: string[] = [];
+    this.tagsChart = [];
     var tagExpenses = this.reports[this.selectedCurrency].tagExpenses;
     if(tagExpenses !== undefined)
-      tagExpenses.forEach(function (tagExpense: {tag: string, amount: number}) {
+      tagExpenses.forEach((tagExpense: {tag: string, amount: number}) => {
         var amount = tagExpense.amount;
         if (amount !== 0) {
-          data.push(tagExpense.amount);
-          labels.push(tagExpense.tag);
+          this.tagsChart.push({name: tagExpense.tag, value: Math.abs(tagExpense.amount)});
         }
       });
-    this.tagsChart.data = data;
-    this.tagsChart.labels = labels;
   }
   updateBalanceChart() {
-    var data: number[] = [];
-    var labels: string[] = [];
+    var data: {name: string, value: number}[] = [];
     var accountGraph = this.reports[this.selectedCurrency].accountsBalanceGraph;
     if (accountGraph !== undefined)
       for (var date in accountGraph) {
-        data.push(accountGraph[date]);
-        labels.push(date);
+        data.push({name: date, value: accountGraph[date]});
       }
-    this.balanceChart.data = data;
-    this.balanceChart.labels = labels;
+    this.balanceChart = [{name: __("Balance"), series: data}]
   }
 
   constructor(

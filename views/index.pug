@@ -2,12 +2,12 @@ doctype html
 html
   head
     title=__('Vogon finance tracker')
+    base(href="/")
     link(rel='stylesheet', type='text/css', href='js/@angular/material/prebuilt-themes/indigo-pink.css')
     link(rel='stylesheet', type='text/css', href='stylesheets/style.css')
     link(rel='icon', type='image/png', href='images/vogon-favicon.png')
     meta(name='viewport', content='width=device-width, initial-scale=1, maximum-scale=1')
-    script(type='text/javascript')
-      | var allowRegistration = #{allowRegistration};
+    script(type='text/javascript') var allowRegistration = #{allowRegistration};
   body
     vogon-app
       | #{__('Loading...')}

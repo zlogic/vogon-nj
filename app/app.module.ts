@@ -7,7 +7,7 @@ import { HttpModule } from '@angular/http';
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TagInputModule } from 'ng2-tag-input';
 import { Ng2PageScrollModule } from 'ng2-page-scroll';
-import { ChartsModule } from 'ng2-charts';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { VogonMaterialModule } from './material.module';
 
@@ -43,7 +43,7 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     InfiniteScrollModule,
     TagInputModule,
     Ng2PageScrollModule.forRoot(),
-    ChartsModule
+    NgxChartsModule
   ],
   declarations: [
     AppComponent,

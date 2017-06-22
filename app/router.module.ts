@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { LocationStrategy, APP_BASE_HREF, PathLocationStrategy, HashLocationStrategy } from '@angular/common';
 
 import { AuthorizationService } from './service/auth.service';
 
@@ -41,7 +42,7 @@ export const appRoutes: Routes = [
 
 @NgModule({
   imports: [
-    RouterModule.forRoot(appRoutes, { useHash: true })
+    RouterModule.forRoot(appRoutes)
   ],
   exports: [
     RouterModule
