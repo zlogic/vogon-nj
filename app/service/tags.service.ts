@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { Response } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
@@ -11,6 +11,8 @@ export class TagsService {
   tags: string[] = [];
   private doUpdate: UpdateHelper;
 
+  tagsObservable: EventEmitter<any> = new EventEmitter();
+
   update(): Observable<any> {
     return this.doUpdate.update();
   }
@@ -18,8 +20,10 @@ export class TagsService {
     newTags.forEach((newTag: string) => {
       if (!this.tags.some(function (tag) {
         return tag === newTag;
-      }))
+      })) {
         this.tags.push(newTag);
+        this.tagsObservable.emit();
+      }
     });
   };
 
@@ -33,10 +37,12 @@ export class TagsService {
         return this.httpService.get("service/analytics/tags")
           .map((res: Response) => {
             this.tags = res.json();
+            this.tagsObservable.emit();
             return res;
           });
       else {
         this.tags = [];
+        this.tagsObservable.emit();
       }
     });
     this.authorizationService.authorizationObservable.subscribe(() => this.update().subscribe());

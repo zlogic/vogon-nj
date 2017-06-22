@@ -59,7 +59,7 @@
 	"Report by transactions": "Report by transactions",
 	"Select all accounts": "Select all accounts",
 	"Select all tags": "Select all tags",
-	"Select currency:": "Select currency:",
+	"Select currency": "Select currency",
 	"Show in accounts list": "Show in accounts list",
 	"Start date": "Start date",
 	"Tag": "Tag",
@@ -90,5 +90,6 @@
 	"Tags filter": "Tags filter",
 	"Filter and sorting": "Filter and sorting",
 	"Sort by date": "Sort by date",
-	"Show all accounts": "Show all accounts"
+	"Show all accounts": "Show all accounts",
+	"Report configuration": "Report configuration"
 }

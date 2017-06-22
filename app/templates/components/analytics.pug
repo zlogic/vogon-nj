@@ -1,0 +1,73 @@
+button(md-fab, class="my-fab", (click)="buildReport()")
+  md-icon assistant
+div(class="card-container")
+  md-card(class="large-card")
+    md-card-title #{__('Tags')}
+    md-card-content
+      p
+        button(md-button, (click)="selectAllTags()") #{__('Select all tags')}
+        button(md-button, (click)="deselectAllTags()") #{__('Deselect all tags')}
+      section(*ngFor="let tag of tags")
+        md-checkbox([(ngModel)]="tag.selected") {{tag.tag.length&gt;0?tag.tag:"&nbsp;"}}
+  md-card(class="large-card")
+    md-card-title #{__('Accounts')}
+    md-card-content
+      p
+        button(md-button, (click)="selectAllAccounts()") #{__('Select all accounts')}
+        button(md-button, (click)="deselectAllAccounts()") #{__('Deselect all accounts')}
+      section(*ngFor="let account of accounts")
+        md-checkbox([(ngModel)]="account.selected") {{accountsService.getAccount(account.id).name}}
+  md-card(class="large-card")
+    md-card-title #{__('Report configuration')}
+    md-card-content
+      section
+        md-input-container
+          input(mdInput, [mdDatepicker]="startDatePicker", placeholder=__("Start date"), [(ngModel)]="startDate")
+          button(mdSuffix, type="button", [mdDatepickerToggle]="startDatePicker")
+        md-datepicker(#startDatePicker)
+      section
+        md-input-container
+          input(mdInput, [mdDatepicker]="endDatePicker", placeholder=__("End date"), [(ngModel)]="endDate")
+          button(mdSuffix, type="button", [mdDatepickerToggle]="endDatePicker")
+        md-datepicker(#endDatePicker)
+      section
+        md-checkbox([(ngModel)]="transactionTypeEnabled.transfer") #{__('Transfer transactions')}
+      section
+        md-checkbox([(ngModel)]="transactionTypeEnabled.income") #{__('Income transactions')}
+      section
+        md-checkbox([(ngModel)]="transactionTypeEnabled.expense") #{__('Expense transactions')}
+div(#report)
+ng-template([ngIf]="reports !== undefined")
+  md-toolbar()
+    md-select(placeholder=__("Select currency"), [(ngModel)]="selectedCurrency", (change)="currencyChanged()")
+      md-option(*ngFor="let currency of currencies", [value]="currency")
+        | {{currencyService.findCurrency(currency).displayName}}
+  div(class="card-container")
+    md-card(class="large-card")
+      md-card-title #{__('Report by transactions')}
+      md-card-content
+        md-list
+          md-list-item(*ngFor="let transaction of getReportTransactions()")
+            h4(md-line) {{transaction.description}}
+            p(md-line)
+              span(style="float: left;") {{transaction.date | date}}
+              span(style="float: right;")
+                ng-template([ngIf]="transactionsService.isTransferTransaction(transaction)") &sum; 
+                | {{transaction.amount | number:"1.2"}} {{selectedCurrency}}
+    md-card(class="large-card")
+      md-card-title #{__('Report by tags')}
+      md-card-content
+        md-list
+          md-list-item(*ngFor="let tagExpense of getReportTagExpenses()")
+            h4(md-line) {{tagExpense.tag}}
+            p(md-line)
+              span(style="float: right;")
+                | {{tagExpense.amount | number : "1.2"}} {{selectedCurrency}}
+    md-card(class="giant-card")
+      md-card-title #{__('Tags chart')}
+      md-card-content
+        canvas(baseChart, width="700", height="400", chartType="pie", [data]="tagsChart.data", [labels]="tagsChart.labels")
+    md-card(class="giant-card")
+      md-card-title #{__('Balance chart')}
+      md-card-content
+        canvas(baseChart, width="700", height="400", chartType="line", [data]="balanceChart.data", [labels]="balanceChart.labels", [options]="balanceChartOptions")

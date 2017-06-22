@@ -12,9 +12,9 @@ export class CurrencyService {
 
   findCurrency(currencyCode: string) {
     var result = this.currencies.filter(
-        function (currency: any) {
-          return currency.code === currencyCode;
-        });
+      function (currency) {
+        return currency.currencyCode === currencyCode;
+      });
     if (result.length > 0)
       return result[0];
   }
