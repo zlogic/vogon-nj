@@ -25,21 +25,21 @@ export class TransactionEditorComponent implements OnInit {
 
   private createComponentControl(component: TransactionComponent) {
     return this.formBuilder.group({
-      'id': [component.id],
-      'version': [component.version],
-      'AccountId': [component.AccountId, Validators.required],
-      'amount': [component.amount.toFixed(2), [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/)]]
+      'AccountId': [undefined, Validators.required],
+      'amount': [undefined, [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/)]]
     });
   }
   addTransactionComponent(component?: TransactionComponent) {
     if(component === undefined) {
       component = new TransactionComponent();
       component.amount = 0;
+      this.transaction.FinanceTransactionComponents.push(component);
     }
     this.getComponentsGroup().push(this.createComponentControl(component));
   }
   deleteTransactionComponent(i: number) {
     this.getComponentsGroup().removeAt(i);
+    this.transaction.FinanceTransactionComponents.splice(i);
   }
   getCurrency(i: number): string{
     var selectedAccount = (<FormArray>this.getComponentsGroup().controls[i]).controls['AccountId'].value;
@@ -53,16 +53,7 @@ export class TransactionEditorComponent implements OnInit {
     if(!this.transactionForm.valid)
       return;
     this.tagsService.mergeTags(this.transaction.tags);
-    var updatedTransaction = Transaction.fromJson(this.transactionForm.value);
-    updatedTransaction.id = this.transaction.id;
-    updatedTransaction.version = this.transaction.version;
-    updatedTransaction.FinanceTransactionComponents.forEach(function(component){
-      if(component.id === null || component.id === undefined)
-        delete component.id;
-      if(component.version === null || component.version === undefined)
-        delete component.version;
-    });
-    this.transactionsService.submitTransaction(updatedTransaction).subscribe();
+    this.transactionsService.submitTransaction(this.transaction).subscribe();
     this.done.emit();
   }
   cancelEditing() {
@@ -75,10 +66,10 @@ export class TransactionEditorComponent implements OnInit {
 
   ngOnInit() {
     this.transactionForm = this.formBuilder.group({
-      'description': [this.transaction.description, Validators.required],
-      'type': [this.transaction.type, Validators.required],
-      'date': [this.transaction.date, Validators.required],
-      'tags': [this.transaction.tags],
+      'description': [undefined, Validators.required],
+      'type': [undefined, Validators.required],
+      'date': [undefined, Validators.required],
+      'tags': [undefined],
       'FinanceTransactionComponents': this.formBuilder.array([])
     });
     this.transaction.FinanceTransactionComponents.forEach((component) => this.addTransactionComponent(component));

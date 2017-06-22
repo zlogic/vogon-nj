@@ -4,30 +4,30 @@ md-card(class="large-card")
       div(style="display: flex; align-items: center;")
         span(style="align-self: center;")
           md-input-container
-            textarea(mdInput, placeholder=__('Description'), formControlName="description")
+            textarea(mdInput, placeholder=__('Description'), formControlName="description", [(ngModel)]="transaction.description")
     md-card-content
-      md-button-toggle-group(formControlName="type")
+      md-button-toggle-group(formControlName="type", [(ngModel)]="transaction.type")
         md-button-toggle(value="expenseincome")
           span #{__('Expense/income')}
         md-button-toggle(value="transfer")
           span #{__('Transfer')}
     md-card-content
       md-input-container
-        input(mdInput, [mdDatepicker]="picker", placeholder=__("Date"), formControlName="date")
+        input(mdInput, [mdDatepicker]="picker", placeholder=__("Date"), formControlName="date", [(ngModel)]="transaction.date")
         button(mdSuffix, type="button", [mdDatepickerToggle]="picker")
       md-datepicker(#picker)
     md-card-content
-      tag-input(formControlName="tags", placeholder=__("Tags"))
-        tag-input-dropdown([showDropdownIfEmpty]="true",[autocompleteItems]="tagsService.tags")
+      tag-input(placeholder=__("Tags"), formControlName="tags", [(ngModel)]="transaction.tags", [modelAsStrings]="true")
+        tag-input-dropdown([autocompleteItems]="tagsService.tags")
     md-card-content(formArrayName="FinanceTransactionComponents")
       div(*ngFor="let component of getComponentsGroup().controls; let i=index", [formGroupName]="i")
         div(style="display: flex;")
-          md-select(placeholder=__("Account"), formControlName="AccountId")
+          md-select(placeholder=__("Account"), formControlName="AccountId", [(ngModel)]="transaction.FinanceTransactionComponents[i].AccountId")
             md-option(*ngFor="let account of visibleAccounts", [value]="account.id")
               | {{account.name}}
           span &nbsp;
           md-input-container
-            input(mdInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount")
+            input(mdInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount", [(ngModel)]="transaction.FinanceTransactionComponents[i].amount")
           span(style="align-self: center;padding-left: 5px;")
             |  {{getCurrency(i)}}
           span(style="flex: 1 1 auto;")
