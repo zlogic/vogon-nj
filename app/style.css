@@ -1,0 +1,69 @@
+@import '~material-design-icons/iconfont/material-icons.css';
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+body {
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+html, body {
+  margin: 0;
+}
+
+.app-content {
+  position: absolute;
+  top: 64px;
+  width: 100%;
+}
+
+/* TODO: remove this once https://github.com/angular/material2/issues/2124 is fixed */
+.mat-select {
+  padding-top: 5px;
+}
+/* End TODO */
+
+button.my-fab {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 3;
+}
+
+.card-container {
+  display: -webkit-flex;
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.large-card, .small-card, .giant-card {
+  margin-right: 24px;
+  margin-bottom: 24px;
+}
+
+.large-card {
+  width: 400px;
+}
+
+.small-card {
+  width: 300px;
+}
+
+.giant-card {
+  width: 700px;
+}
+
+@media screen and (max-width: 750px) {
+  transaction-editor, transaction-editor form {
+    width: 100%;
+    margin: 0px;
+    display: flex;
+  }
+  .large-card, .small-card, .giant-card {
+    width: 100%;
+    margin-right: 24px;
+    margin-left: 24px;
+    margin-bottom: 24px;
+  }
+}

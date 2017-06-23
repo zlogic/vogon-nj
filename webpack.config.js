@@ -78,7 +78,11 @@ module.exports = {
       {
         test: /\.(css|scss)$/,
         loaders: ['to-string-loader', 'css-loader', 'sass-loader']
-      }
+      },
+      { test: /\.woff$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff' },
+      { test: /\.woff2$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff2' },
+      { test: /\.[ot]tf$/, loader: 'url-loader?limit=262144&mimetype=application/octet-stream' },
+      { test: /\.eot$/, loader: 'url-loader?limit=262144&mimetype=application/vnd.ms-fontobject' }
     ]
   },
   plugins: [

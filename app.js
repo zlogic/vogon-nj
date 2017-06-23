@@ -31,13 +31,6 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-[
-  "@angular/material",
-  "material-design-icons"
-].forEach(function(component){
-  app.use('/js/' + component, express.static(path.join(__dirname , '/node_modules/' + component)));
-})
-
 
 app.use('/', routes);
 app.use('/register', register);

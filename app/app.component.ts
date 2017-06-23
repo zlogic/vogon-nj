@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthorizationService } from './service/auth.service';
 import { AlertService } from './service/http.service';
@@ -7,7 +7,9 @@ import { UserService } from './service/user.service';
 
 @Component({
   selector: 'vogon-app',
-  templateUrl: './templates/app.pug'
+  templateUrl: './templates/app.pug',
+  styleUrls: ['./style.css'],
+  encapsulation: ViewEncapsulation.None
 })
 
 export class AppComponent {
