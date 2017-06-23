@@ -1,5 +1,5 @@
-div(class="card-container")
-  form([formGroup]="usersettingsForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
+form([formGroup]="usersettingsForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
+  div(class="card-container")
     md-card(class="large-card")
       md-card-title
         | #{__('User settings')}

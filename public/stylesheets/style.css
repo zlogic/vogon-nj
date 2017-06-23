@@ -72,20 +72,33 @@ button.my-fab {
   margin-top: 24px;
 }
 
-.large-card {
+.large-card, .small-card, .giant-card {
   margin-right: 24px;
   margin-bottom: 24px;
+}
+
+.large-card {
   width: 400px;
 }
 
 .small-card {
-  margin-right: 24px;
-  margin-bottom: 24px;
   width: 300px;
 }
 
 .giant-card {
-  margin-right: 24px;
-  margin-bottom: 24px;
   width: 700px;
+}
+
+@media screen and (max-width: 750px) {
+  transaction-editor, transaction-editor form {
+    width: 100%;
+    margin: 0px;
+    display: flex;
+  }
+  .large-card, .small-card, .giant-card {
+    width: 100%;
+    margin-right: 24px;
+    margin-left: 24px;
+    margin-bottom: 24px;
+  }
 }
