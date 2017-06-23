@@ -8,7 +8,7 @@ import { UserService } from './service/user.service';
 @Component({
   selector: 'vogon-app',
   templateUrl: './templates/app.pug',
-  styleUrls: ['./style.css'],
+  styleUrls: ['./style.scss'],
   encapsulation: ViewEncapsulation.None
 })
 

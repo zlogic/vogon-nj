@@ -77,7 +77,7 @@ module.exports = {
       },
       {
         test: /\.(css|scss)$/,
-        loaders: ['to-string-loader', 'css-loader', 'sass-loader']
+        loaders: ['to-string-loader', 'css-loader', {loader: 'sass-loader', options:{includePaths:['node_modules']}}],
       },
       { test: /\.woff$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff' },
       { test: /\.woff2$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff2' },
