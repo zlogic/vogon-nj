@@ -63,7 +63,6 @@ export class TransactionsService {
   private readonly transactionTypes = [{name: __("Expense/income"), value: "expenseincome"}, {name: __("Transfer"), value: "transfer"}];
   readonly defaultTransactionType = this.transactionTypes[0];
   private currentPage: number = 0;
-  private loadingNextPage: boolean = false;
   private lastPage: boolean = false;
   sortColumn: string = "date";
   sortAsc: boolean = false;
@@ -75,7 +74,6 @@ export class TransactionsService {
     this.currentPage = 0;
     this.transactions = [];
     this.lastPage = false;
-    this.loadingNextPage = this.doUpdate.inProgress();
   }
   private processReceivedTransaction(transactionJson: any): Transaction {
     transactionJson.date = dateToJson(new Date(transactionJson.date));
@@ -106,7 +104,7 @@ export class TransactionsService {
       .mergeMap((res: Response) => {
         var transaction = Transaction.fromJson(res.json());
         if (!this.updateTransactionLocal(transaction))
-          return this.update();
+          this.reset();// infinite scroll will automatically call update()
         return Observable.of(res);
       })
       .catch(() => this.update());
@@ -121,7 +119,7 @@ export class TransactionsService {
         var transaction: Transaction = Transaction.fromJson(res.json());
         this.accountsService.update().subscribe();
         if (!this.updateTransactionLocal(transaction))
-          return this.update();
+          this.reset();// infinite scroll will automatically call update()
         return Observable.of(res);
       })
       .catch(() => this.update());
@@ -228,7 +226,7 @@ export class TransactionsService {
     this.update().subscribe();
   }
   isLoadingNextPage(): boolean {
-    return this.loadingNextPage;
+    return this.doUpdate.inProgress();
   }
   isLastPage(): boolean {
     return this.lastPage;
@@ -238,10 +236,8 @@ export class TransactionsService {
       if (this.lastPage || !this.authorizationService.isAuthorized()) {
         if(!this.authorizationService.isAuthorized())
           this.reset();
-        this.loadingNextPage = false;
         return;
       }
-      this.loadingNextPage = true;
       var params = {
         page: this.currentPage,
         sortColumn: this.sortColumn,
@@ -257,11 +253,12 @@ export class TransactionsService {
       }
       return this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
         .map((res: Response) => {
-          this.loadingNextPage = false;
-          if (res.json().length !== 0)
+          if (res.json().length !== 0) {
+            this.reset();
             this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
-          else
+          } else {
             this.lastPage = true;
+          }
           this.currentPage++;
           return res;
         })

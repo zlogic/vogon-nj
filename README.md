@@ -10,7 +10,7 @@ See [details](#getting-started-on-heroku) below.
 
 Simple web-based personal finance tracker using
 
-* AngularJS on client-side
+* Angular 4 on client-side, with Angular Material controls
 * Node.js on the server side
 * Pug for page generation
 * Sequelize for entity management
