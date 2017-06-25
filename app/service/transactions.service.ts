@@ -239,7 +239,7 @@ export class TransactionsService {
         return;
       }
       var params = {
-        page: this.currentPage,
+        page: this.currentPage++,
         sortColumn: this.sortColumn,
         sortDirection: this.sortAsc ? "ASC" : "DESC"
       };
@@ -254,12 +254,10 @@ export class TransactionsService {
       return this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
         .map((res: Response) => {
           if (res.json().length !== 0) {
-            this.reset();
             this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
           } else {
             this.lastPage = true;
           }
-          this.currentPage++;
           return res;
         })
         .catch((err) => {
