@@ -2,6 +2,8 @@ var path = require('path');
 var webpack = require('webpack');
 var i18n = require('i18n');
 var AotPlugin = require('@ngtools/webpack').AotPlugin;
+var HtmlWebpackPlugin = require('html-webpack-plugin');
+var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
 i18n.configure({
@@ -38,7 +40,7 @@ module.exports = {
     extensions: ['.ts', '.js', '.scss']
   },
   output: {
-    path: path.resolve(__dirname, 'public', 'js'),
+    path: path.resolve(__dirname, 'app', 'output'),
     filename: '[name].bundle.js'
   },
   module: {
@@ -101,6 +103,11 @@ module.exports = {
       entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
     }),
     new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
-    new webpack.LoaderOptionsPlugin({ minimize: true })
+    new webpack.LoaderOptionsPlugin({ minimize: true }),
+    new HtmlWebpackPlugin({
+      template: 'app/templates/index.pug',
+      inlineSource: '.(js)$'
+    }),
+    new HtmlWebpackInlineSourcePlugin()
   ]
 };

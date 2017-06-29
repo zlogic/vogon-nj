@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
 import { AuthorizationService } from '../service/auth.service';
 import { HTTPService } from '../service/http.service';
+import { ConfigurationService } from '../service/configuration.service';
 
 @Component({
   templateUrl: '../templates/components/login.pug'
@@ -21,7 +22,8 @@ export class LoginComponent {
     private formBuilder: FormBuilder,
     private httpService: HTTPService,
     private authorizationService: AuthorizationService,
-    private router: Router
+    private router: Router,
+    private configurationService: ConfigurationService
   ){
     this.loginForm = formBuilder.group({
       'username': [null, Validators.required],
@@ -33,7 +35,7 @@ export class LoginComponent {
   modeIsLogin(): boolean { return this.mode == "login"; }
   modeIsRegister(): boolean { return this.mode == "register"; }
   
-  isAllowRegistration():boolean { return allowRegistration; }
+  isAllowRegistration():boolean { return this.configurationService.isAllowRegistration(); }
 
   private onSuccess() {
     this.router.navigate(['/transactions']);

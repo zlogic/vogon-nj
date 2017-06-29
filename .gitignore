@@ -38,8 +38,8 @@ bower_components
 # Tests temporary directory
 test/tmp
 
-# TypeScript generated sources
-public/js
+# TypeScript and Webpack generated sources
+app/output
 
 # Visual Studio Code configuration
 .vscode
