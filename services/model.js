@@ -230,8 +230,8 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionComponent, options){
     var previousAccount = financeTransactionComponent.previous("AccountId");
     var newAccount = financeTransactionComponent.AccountId;
-    var previousAmount = financeTransactionComponent.previous("amount");
-    var newAmount = financeTransactionComponent.getDataValue("amount");
+    var previousAmount = parseInt(financeTransactionComponent.previous("amount"), 10);
+    var newAmount = parseInt(financeTransactionComponent.getDataValue("amount"), 10);
 
     if(financeTransactionComponent.AccountId === undefined && previousAccount === undefined)
       return sequelize.Promise.resolve();
@@ -249,7 +249,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       if(!financeTransactionComponent.changed("AccountId"))
         return sequelize.Promise.resolve();
       return Account.findById(previousAccount, {transaction: transaction}).then(function(account){
-        return account.decrement("balance", {by: previousAmount, transaction: transaction});
+        return account.increment("balance", {by: -previousAmount, transaction: transaction});
       });
     };
     var updateNewAccount = function(){
@@ -274,7 +274,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
     var transaction = options.transaction;
     return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
-      return account.decrement("balance", {by: financeTransactionComponent.getDataValue("amount"), transaction: transaction});
+      return account.increment("balance", {by: -parseInt(financeTransactionComponent.getDataValue("amount"), 10), transaction: transaction});
     });
   });
 
