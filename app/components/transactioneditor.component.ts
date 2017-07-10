@@ -39,7 +39,7 @@ export class TransactionEditorComponent implements OnInit {
   }
   deleteTransactionComponent(i: number) {
     this.getComponentsGroup().removeAt(i);
-    this.transaction.FinanceTransactionComponents.splice(i);
+    this.transaction.FinanceTransactionComponents.splice(i, 1);
   }
   getCurrency(i: number): string{
     var selectedAccount = (<FormArray>this.getComponentsGroup().controls[i]).controls['AccountId'].value;
