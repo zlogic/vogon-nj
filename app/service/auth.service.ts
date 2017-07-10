@@ -2,6 +2,8 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { Response, Headers } from '@angular/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/merge';
+import 'rxjs/add/operator/catch';
 
 import { AlertService, HTTPService } from './http.service';
 
@@ -35,9 +37,9 @@ export class AuthorizationService {
           this.setToken(data.json().access_token, rememberToken);
           return data;
         })
-        .catch((err) => {
+        .catch((error: Response | any) => {
           this.resetAuthorization(__("Unable to authenticate"));
-          return Observable.throw(err);
+          return Observable.throw(error);
         });
   };
   logout(): Observable<Response> {
@@ -48,9 +50,9 @@ export class AuthorizationService {
             this.resetAuthorization();
             return res;
           })
-          .catch((err) => {
+          .catch((error: Response | any) => {
             this.resetAuthorization();
-            return Observable.throw(err);
+            return Observable.throw(error);
           });
     } else {
       this.resetAuthorization();

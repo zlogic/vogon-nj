@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { MdSnackBar } from '@angular/material';
 import { Http, Response, Request, RequestOptions, RequestMethod, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/merge';
+import 'rxjs/add/operator/catch';
+import 'rxjs/add/operator/finally';
 
 @Injectable()
 export class AlertService {
@@ -48,7 +51,7 @@ export class HTTPService {
   private isTokenURL(url:string): boolean {
     return this.tokenRegex.test(url);
   }
-  private errorHandler(data: any): any {
+  private errorHandler(data: Response | any): Observable<Response | any> {
     if (data.status === 401)
       this.resetAuthorization();
     if (data.status === 401 && this.isTokenURL(data.url)){
@@ -75,7 +78,7 @@ export class HTTPService {
     var request = new Request({ method: method, headers: headers, url: url, body: data});
     this.alertService.startLoadingRequest();
     return this.http.request(request)
-      .catch((err) => this.errorHandler(err))
+      .catch((error: Response | any) => this.errorHandler(error))
       .finally(() => this.alertService.endLoadingRequest());
   }
   get(url:string, extraHeaders?:Headers): Observable<Response> {
@@ -117,9 +120,9 @@ export class UpdateHelper {
         .mergeMap((res) => {
           return this.updateCompleted(res);
         })
-        .catch((err) => {
+        .catch((error: Response | any) => {
           this.updateCompleted(undefined).subscribe();
-          return Observable.throw(err);
+          return Observable.throw(error);
         });
     else
       return Observable.of();

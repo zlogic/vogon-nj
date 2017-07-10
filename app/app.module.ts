@@ -5,7 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { TagInputModule } from 'ng2-tag-input';
+import { TagInputModule } from 'ngx-chips';
 import { Ng2PageScrollModule } from 'ng2-page-scroll';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
