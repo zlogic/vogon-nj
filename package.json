@@ -51,6 +51,7 @@
     "@angular/router": "~4.2.6",
     "@ngtools/webpack": "~1.5.0",
     "@swimlane/ngx-charts": "~6.0.0",
+    "ajv": "~5.2.2",
     "core-js": "~2.4.1",
     "country-data": "~0.0.31",
     "css-loader": "~0.28.4",
@@ -72,7 +73,7 @@
     "to-string-loader": "~1.1.5",
     "typescript": "~2.4.1",
     "url-loader": "~0.5.9",
-    "webpack": "~2.6.1",
+    "webpack": "~3.2.0",
     "zone.js": "~0.8.13"
   },
   "engines": {
