@@ -10,7 +10,7 @@
     "nodemon": "nodemon ./bin/www",
     "test": "mocha test/*.js",
     "maintenance": "node ./bin/maintenance",
-    "heroku-prebuild": "npm install --only=dev",
+    "heroku-prebuild": "npm install --ignore-scripts --only=development && npm rebuild",
     "heroku-postbuild": "npm prune --production"
   },
   "dependencies": {
