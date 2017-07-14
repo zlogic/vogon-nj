@@ -266,6 +266,122 @@ describe('Service', function() {
         });
       }).catch(done);
     });
+    it('should result in a full tag match if a tag begins with a quote', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var newTransactions = [
+        {description: "test transaction 4", type: "expenseincome", date: "2014-06-07", tags: ["prefix\"\"quote_start","world"]},
+        {description: "test transaction 5", type: "expenseincome", date: "2014-06-07", tags: [" hello","\"quote_middle"]},
+      ];
+      var cleanTransactions = function(financeTransactions){
+        financeTransactions.forEach(function(financeTransaction) {
+          delete financeTransaction.id;
+          delete financeTransaction.version;
+          delete financeTransaction.FinanceTransactionComponents;
+        });
+      };
+      prepopulate().then(function(){
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
+        });
+      }).then(function(financeTransactions){
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.User.find({where: {username:"user01"}, transaction:transaction}).then(function(user){
+            return dbService.sequelize.Promise.all(financeTransactions.map(function(financeTransaction){
+              return financeTransaction.setUser(user, {transaction:transaction});
+            }));
+          });
+        });
+      }).then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_start\"]").set(tokenHeader(token)).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, []);
+              superagent.get(baseUrl + "/service/transactions?filterTags=[\"prefix\\\"\\\"quote_start\"]").set(tokenHeader(token)).end(function(err, result){
+                if(err) return done(err);
+                try {
+                  assert.ok(result);
+                  assert.equal(result.status, 200);
+                  cleanTransactions(result.body);
+                  assert.deepEqual(result.body, [newTransactions[0]]);
+                  superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_middle\"]").set(tokenHeader(token)).end(function(err, result){
+                    if(err) return done(err);
+                    try {
+                      assert.ok(result);
+                      assert.equal(result.status, 200);
+                      cleanTransactions(result.body);
+                      assert.deepEqual(result.body, [newTransactions[1]]);
+                      done();
+                    } catch(err) {done(err);}
+                  });
+                } catch(err) {done(err);}
+              });
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
+    it('should result in a full tag match if a tag ends with a quote', function (done) {
+      var userData = {username: "user01", password: "mypassword"};
+      var newTransactions = [
+        {description: "test transaction 4", type: "expenseincome", date: "2014-06-07", tags: [" hello","prefix\"\"quote_middle"]},
+        {description: "test transaction 6", type: "expenseincome", date: "2014-06-07", tags: ["hello","quote_end\""]},
+      ];
+      var cleanTransactions = function(financeTransactions){
+        financeTransactions.forEach(function(financeTransaction) {
+          delete financeTransaction.id;
+          delete financeTransaction.version;
+          delete financeTransaction.FinanceTransactionComponents;
+        });
+      };
+      prepopulate().then(function(){
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
+        });
+      }).then(function(financeTransactions){
+        return dbService.sequelize.transaction(function(transaction){
+          return dbService.User.find({where: {username:"user01"}, transaction:transaction}).then(function(user){
+            return dbService.sequelize.Promise.all(financeTransactions.map(function(financeTransaction){
+              return financeTransaction.setUser(user, {transaction:transaction});
+            }));
+          });
+        });
+      }).then(function(){
+        authenticateUser(userData, function(err, token, result){
+          if(err) return done(err);
+          superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_middle\"]").set(tokenHeader(token)).end(function(err, result){
+            if(err) return done(err);
+            try {
+              assert.ok(result);
+              assert.equal(result.status, 200);
+              assert.deepEqual(result.body, []);
+              superagent.get(baseUrl + "/service/transactions?filterTags=[\"prefix\\\"\\\"quote_middle\"]").set(tokenHeader(token)).end(function(err, result){
+                if(err) return done(err);
+                try {
+                  assert.ok(result);
+                  assert.equal(result.status, 200);
+                  cleanTransactions(result.body);
+                  assert.deepEqual(result.body, [newTransactions[0]]);
+                  superagent.get(baseUrl + "/service/transactions?filterTags=[\"quote_end\\\"\"]").set(tokenHeader(token)).end(function(err, result){
+                    if(err) return done(err);
+                    try {
+                      assert.ok(result);
+                      assert.equal(result.status, 200);
+                      cleanTransactions(result.body);
+                      assert.deepEqual(result.body, [newTransactions[1]]);
+                      done();
+                    } catch(err) {done(err);}
+                  });
+                } catch(err) {done(err);}
+              });
+            } catch(err) {done(err);}
+          });
+        });
+      }).catch(done);
+    });
     it('should get a list of transactions for an authenticated user with a description filter for a non-existing description', function (done) {
       var userData = {username: "user01", password: "mypassword"};
       prepopulate().then(function(){
@@ -299,7 +415,7 @@ describe('Service', function() {
             return dbService.FinanceTransaction.findAll({transaction:transaction}).then(function(financeTransactions){
               return dbService.sequelize.Promise.all(financeTransactions.map(function(financeTransaction){
                 return financeTransaction.setUser(user, {transaction:transaction});
-              }));;
+              }));
             });
           });
         });
