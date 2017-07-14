@@ -177,6 +177,7 @@ export class TransactionsService {
             return;
           if (totals[account.currency] === undefined)
             totals[account.currency] = {positiveAmount: 0, negativeAmount: 0};
+          var amount = Number(component.amount);
           if (component.amount > 0 || this.isExpenseIncomeTransaction(transaction))
             totals[account.currency].positiveAmount += component.amount;
           else if (component.amount < 0)

@@ -64,7 +64,7 @@ ng-template([ngIf]="reports !== undefined")
               span(style="float: left;") {{transaction.date | date}}
               span(style="float: right;")
                 ng-template([ngIf]="transactionsService.isTransferTransaction(transaction)") &sum; 
-                | {{transaction.amount | number:"1.2"}} {{selectedCurrency}}
+                | {{transaction.amount | number:"1.2-2"}} {{selectedCurrency}}
     md-card(class="large-card")
       md-card-title #{__('Report by tags')}
       md-card-content

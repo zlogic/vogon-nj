@@ -35,7 +35,7 @@ form([formGroup]="accountForm", (ngSubmit)="submitEditing()", autocomplete="off"
           div(style="display: flex; align-items: top;")
             span(style="display: block;") {{account.currency}}
             span(style="flex: 1 1 auto;")
-            span(style="display: block;") {{account.balance | number:"1.2"}}
+            span(style="display: block;") {{account.balance | number:"1.2-2"}}
         md-card-actions(*ngIf="isEditing(account)")
           button(md-button, type="submit", [disabled]="!accountForm.valid") #{__('Apply')}
           button(md-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
@@ -48,4 +48,4 @@ div(class="card-container")
         div(style="display: flex; align-items: top;")
           span(style="display: block;") {{currencyTotals.currency}}
           span(style="flex: 1 1 auto;")
-          span(style="display: block;") {{currencyTotals.total | number:"1.2"}}
+          span(style="display: block;") {{currencyTotals.total | number:"1.2-2"}}
