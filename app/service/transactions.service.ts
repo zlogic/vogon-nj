@@ -177,11 +177,11 @@ export class TransactionsService {
             return;
           if (totals[account.currency] === undefined)
             totals[account.currency] = {positiveAmount: 0, negativeAmount: 0};
-          var amount = Number(component.amount);
-          if (component.amount > 0 || this.isExpenseIncomeTransaction(transaction))
-            totals[account.currency].positiveAmount += component.amount;
-          else if (component.amount < 0)
-            totals[account.currency].negativeAmount -= component.amount;
+          var amount = +component.amount;
+          if (amount > 0 || this.isExpenseIncomeTransaction(transaction))
+            totals[account.currency].positiveAmount += amount;
+          else if (amount < 0)
+            totals[account.currency].negativeAmount -= amount;
         });
     return totals;
   }
