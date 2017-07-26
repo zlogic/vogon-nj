@@ -51,14 +51,19 @@ module.exports = {
       },
       {
         test: /\.pug$/,
-        use: {
-          loader: 'pug-static-loader',
-          options: {
-            pretty: false,
-            doctype: 'html',
-            locals: {__ : i18n.__}
-          }
-        }
+        use: [{
+            loader: 'apply-loader',
+            options: {
+              obj: {__: i18n.__}
+            }
+          }, {
+            loader: 'pug-loader',
+            options: {
+              pretty: false,
+              doctype: 'html',
+              globals: ['__']
+            }
+        }]
       },
       {
         test: /\.html$/,
