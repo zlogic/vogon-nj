@@ -2,6 +2,7 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { Response, Headers } from '@angular/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/observable/throw';
 import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/catch';
 
