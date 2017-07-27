@@ -43,7 +43,7 @@ div(class="card-container")
   ng-container(*ngFor="let currencyTotals of accountsService.getTotalsForCurrencies()")
     md-card(class="small-card")
       md-card-title
-        | #{__('Total for %s', '{{currencyTotals.currency}}')}
+        | #{__('Total for {0}').replace('{0}',"{{currencyTotals.currency}}")}
       md-card-content
         div(style="display: flex; align-items: top;")
           span(style="display: block;") {{currencyTotals.currency}}

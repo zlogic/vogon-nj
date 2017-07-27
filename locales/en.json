@@ -66,7 +66,7 @@
 	"Tags chart": "Tags chart",
 	"Tags": "Tags",
 	"Toggle navigation": "Toggle navigation",
-	"Total for %s": "Total for %s",
+	"Total for {0}": "Total for {0}",
 	"Transaction %s does not exist": "Transaction %s does not exist",
 	"Transaction name": "Transaction name",
 	"Transaction": "Transaction",

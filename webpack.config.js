@@ -52,16 +52,13 @@ module.exports = {
       {
         test: /\.pug$/,
         use: [{
-            loader: 'apply-loader',
-            options: {
-              obj: {__: i18n.__}
-            }
+            loader: 'apply-loader'
           }, {
             loader: 'pug-loader',
             options: {
               pretty: false,
               doctype: 'html',
-              globals: ['__']
+              self: {__: i18n.__}
             }
         }]
       },
