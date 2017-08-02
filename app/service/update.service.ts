@@ -11,8 +11,8 @@ import 'rxjs/add/observable/merge';
 export class UpdateService {
   update(): Observable<any> {
     return Observable.merge(
-      this.accountsService.update(),
-      this.userService.update()
+      this.accountsService.update().catch((err) => Observable.of(err)),
+      this.userService.update().catch((err) => Observable.of(err))
     );  
     //No need to update transactions, since they automatically update if accounts change
     //No need to update tags, since they automatically update if user data changes

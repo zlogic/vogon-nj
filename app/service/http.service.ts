@@ -122,7 +122,8 @@ export class UpdateHelper {
           return this.updateCompleted(res);
         })
         .catch((error: Response | any) => {
-          this.updateCompleted(undefined).subscribe();
+          this.updateRequested = false;
+          this.updateFunctionObservable = undefined;
           return Observable.throw(error);
         });
     else

@@ -64,11 +64,11 @@ export class AuthorizationService {
     }
   };
   resetAuthorization(message?:string) {
+    this.httpService.setAccessToken();
+    localStorage.removeItem("vogon_access_token");
     if(this.access_token === undefined)
       return;
     this.access_token = undefined;
-    this.httpService.setAccessToken();
-    localStorage.removeItem("vogon_access_token");
     if (message !== undefined)
       this.alertService.addAlert(message);
     this.authorizationObservable.emit();
