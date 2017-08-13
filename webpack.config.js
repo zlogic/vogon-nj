@@ -28,88 +28,93 @@ I18nPlugin.prototype.apply = function(compiler) {
   });
 };
 
-module.exports = {
-  entry: {
-    'app': './app/main.ts',
-    'polyfills': './app/polyfills.ts'
-  },
-  resolve: {
-    alias: {
-      views: path.resolve(__dirname, 'app', 'templates/'),
+module.exports = function(env){
+  return {
+    entry: {
+      'app': './app/main.ts',
+      'polyfills': './app/polyfills.ts'
     },
-    extensions: ['.ts', '.js', '.scss']
-  },
-  output: {
-    path: path.resolve(__dirname, 'app', 'output'),
-    filename: '[name].bundle.js'
-  },
-  module: {
-    rules: [
-      {
-        test: /\.ts$/,
-        loader: '@ngtools/webpack'
+    resolve: {
+      alias: {
+        views: path.resolve(__dirname, 'app', 'templates/'),
       },
-      {
-        test: /\.pug$/,
-        use: [{
-            loader: 'apply-loader'
-          }, {
-            loader: 'pug-loader',
+      extensions: ['.ts', '.js', '.scss']
+    },
+    output: {
+      path: path.resolve(__dirname, 'app', 'output'),
+      filename: '[name].bundle.js'
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          loader: '@ngtools/webpack'
+        },
+        {
+          test: /\.pug$/,
+          use: [{
+              loader: 'apply-loader'
+            }, {
+              loader: 'pug-loader',
+              options: {
+                pretty: false,
+                doctype: 'html',
+                self: {__: i18n.__}
+              }
+          }]
+        },
+        {
+          test: /\.html$/,
+          use: [ {
+            loader: 'html-loader',
             options: {
-              pretty: false,
-              doctype: 'html',
-              self: {__: i18n.__}
-            }
-        }]
-      },
-      {
-        test: /\.html$/,
-        use: [ {
-          loader: 'html-loader',
-          options: {
-            minimize: true,
-            removeComments: true,
-            collapseWhitespace: true,
+              minimize: true,
+              removeComments: true,
+              collapseWhitespace: true,
 
-            // angular 2 templates break if these are omitted
-            removeAttributeQuotes: false,
-            keepClosingSlash: true,
-            caseSensitive: true,
-            conservativeCollapse: true,
-          }
-        }],
-      },
-      {
-        test: /\.(css|scss)$/,
-        loaders: ['to-string-loader', 'css-loader', {loader: 'sass-loader', options:{includePaths:['node_modules']}}],
-      },
-      { test: /\.woff$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff' },
-      { test: /\.woff2$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff2' },
-      { test: /\.[ot]tf$/, loader: 'url-loader?limit=262144&mimetype=application/octet-stream' },
-      { test: /\.eot$/, loader: 'url-loader?limit=262144&mimetype=application/vnd.ms-fontobject' }
+              // angular 2 templates break if these are omitted
+              removeAttributeQuotes: false,
+              keepClosingSlash: true,
+              caseSensitive: true,
+              conservativeCollapse: true,
+            }
+          }],
+        },
+        {
+          test: /\.(css|scss)$/,
+          loaders: ['to-string-loader', 'css-loader', {loader: 'sass-loader', options:{includePaths:['node_modules']}}],
+        },
+        { test: /\.woff$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff' },
+        { test: /\.woff2$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff2' },
+        { test: /\.[ot]tf$/, loader: 'url-loader?limit=262144&mimetype=application/octet-stream' },
+        { test: /\.eot$/, loader: 'url-loader?limit=262144&mimetype=application/vnd.ms-fontobject' }
+      ]
+    },
+    plugins: [
+      new webpack.DefinePlugin({
+        STANDALONE: JSON.stringify(env !== undefined && env.standalone)
+      }),
+      // Workaround for angular/angular#11580
+      new webpack.ContextReplacementPlugin(
+        /angular(\\|\/)core(\\|\/)@angular/,
+        path.resolve(__dirname, 'public', 'js'),
+        {}
+      ),
+      new I18nPlugin(),
+      new webpack.optimize.CommonsChunkPlugin({
+        name: ['app', 'polyfills']
+      }),
+      new AotPlugin({
+        tsConfigPath: './tsconfig.json',
+        entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
+      }),
+      new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
+      new webpack.LoaderOptionsPlugin({ minimize: true }),
+      new HtmlWebpackPlugin({
+        template: 'app/templates/index.pug',
+        inlineSource: '.(js)$'
+      }),
+      new HtmlWebpackInlineSourcePlugin()
     ]
-  },
-  plugins: [
-    // Workaround for angular/angular#11580
-    new webpack.ContextReplacementPlugin(
-      /angular(\\|\/)core(\\|\/)@angular/,
-      path.resolve(__dirname, 'public', 'js'),
-      {}
-    ),
-    new I18nPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: ['app', 'polyfills']
-    }),
-    new AotPlugin({
-      tsConfigPath: './tsconfig.json',
-      entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
-    }),
-    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
-    new webpack.LoaderOptionsPlugin({ minimize: true }),
-    new HtmlWebpackPlugin({
-      template: 'app/templates/index.pug',
-      inlineSource: '.(js)$'
-    }),
-    new HtmlWebpackInlineSourcePlugin()
-  ]
+  };
 };

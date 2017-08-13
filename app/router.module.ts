@@ -40,15 +40,23 @@ export const appRoutes: Routes = [
   { path: '**', redirectTo: '/login' }
 ];
 
+export function appBaseHrefFactory() {
+  if(STANDALONE)
+    return document.location.href;
+  else
+    return '/';
+}
+
 @NgModule({
   imports: [
-    RouterModule.forRoot(appRoutes)
+    RouterModule.forRoot(appRoutes, { useHash: true })
   ],
   exports: [
     RouterModule
   ],
   providers: [
-    AuthGuard
+    AuthGuard,
+    { provide: APP_BASE_HREF, useFactory: appBaseHrefFactory }
   ]
 })
 export class VogonRoutingModule {}

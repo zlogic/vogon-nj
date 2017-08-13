@@ -6,6 +6,7 @@
     "start": "node ./bin/www",
     "build": "npm run build:webpack",
     "build:webpack": "webpack",
+    "build:standalone": "webpack --env.standalone",
     "postinstall": "npm run build",
     "nodemon": "nodemon ./bin/www",
     "test": "mocha test/*.js",
