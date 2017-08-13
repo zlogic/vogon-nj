@@ -1,9 +1,10 @@
-import { Http, Response, Request, RequestOptions, RequestMethod, Headers } from '@angular/http';
+import { Response, Request, RequestOptions, RequestMethod } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 
+import { VogonDB } from './vogondb';
 import { Transaction } from '../transactions.service';
 
-export class VogonDBService {
+export class VogonDBService implements VogonDB {
 
   private prepareStorage(): void {
     //TODO: remove this code and import data provided by the user

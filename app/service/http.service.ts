@@ -7,7 +7,7 @@ import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/finally';
 
-import { VogonDBService } from './localstorage/vogondb.service';
+import { VogonDB } from './localstorage/vogondb';
 
 @Injectable()
 export class AlertService {
@@ -39,6 +39,8 @@ export class HTTPService {
   readonly tokenRegex = /^oauth\/token$/;
   private authorizationHeaders: Headers = new Headers();
 
+  private vogondb: VogonDB;
+  
   resetAuthorization(): void {
     throw __("resetAuthorization not properly initialized");
   }
@@ -105,7 +107,12 @@ export class HTTPService {
       this.authorizationHeaders = new Headers();
   }
 
-  constructor(private alertService:AlertService, private http: Http, private vogondb: VogonDBService) {}
+  constructor(private alertService:AlertService, private http: Http) {
+    if(STANDALONE) {
+      var vogonDBClass = require('./localstorage/vogondb.service').VogonDBService;
+      this.vogondb = new vogonDBClass();
+    }
+  }
 }
 
 export class UpdateHelper {

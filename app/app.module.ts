@@ -21,7 +21,6 @@ import { TagsService } from './service/tags.service';
 import { UserService } from './service/user.service';
 import { UpdateService } from './service/update.service';
 import { ConfigurationService } from './service/configuration.service';
-import { VogonDBService } from './service/localstorage/vogondb.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
@@ -69,7 +68,6 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     UserService,
     UpdateService,
     ConfigurationService,
-    VogonDBService,
     { provide: LocationStrategy, useClass: HashLocationStrategy },
   ],
   bootstrap: [ AppComponent ]
