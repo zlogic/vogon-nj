@@ -7,6 +7,8 @@ import 'rxjs/add/operator/merge';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/finally';
 
+import { VogonDBService } from './localstorage/vogondb.service';
+
 @Injectable()
 export class AlertService {
   private loadingRequests: number;
@@ -78,7 +80,12 @@ export class HTTPService {
     var headers = this.isTokenURL(url) ? new Headers(extraHeaders) : this.mergeHeaders(extraHeaders);
     var request = new Request({ method: method, headers: headers, url: url, body: data});
     this.alertService.startLoadingRequest();
-    return this.http.request(request)
+    var requestObservable;
+    if(STANDALONE)
+      requestObservable = this.vogondb.request(request);
+    else
+      requestObservable = this.http.request(request);
+    return requestObservable
       .catch((error: Response | any) => this.errorHandler(error))
       .finally(() => this.alertService.endLoadingRequest());
   }
@@ -98,7 +105,7 @@ export class HTTPService {
       this.authorizationHeaders = new Headers();
   }
 
-  constructor(private alertService:AlertService, private http: Http) {}
+  constructor(private alertService:AlertService, private http: Http, private vogondb: VogonDBService) {}
 }
 
 export class UpdateHelper {

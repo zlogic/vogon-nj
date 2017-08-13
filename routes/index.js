@@ -4,7 +4,7 @@ var path = require('path');
 var router = express.Router();
 
 /* GET home page. */
-router.get(['/', '/login', '/transactions', '/accounts', '/analytics', '/usersettings', '/intro'], function(req, res, next) {
+router.get('/', function(req, res, next) {
   res.sendFile(path.join(__dirname, '..', 'app', 'output', 'index.html'));
 });
 

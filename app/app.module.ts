@@ -3,6 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
+import { LocationStrategy, HashLocationStrategy } from '@angular/common';
 
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TagInputModule } from 'ngx-chips';
@@ -20,6 +21,7 @@ import { TagsService } from './service/tags.service';
 import { UserService } from './service/user.service';
 import { UpdateService } from './service/update.service';
 import { ConfigurationService } from './service/configuration.service';
+import { VogonDBService } from './service/localstorage/vogondb.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
@@ -66,7 +68,9 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     TagsService,
     UserService,
     UpdateService,
-    ConfigurationService
+    ConfigurationService,
+    VogonDBService,
+    { provide: LocationStrategy, useClass: HashLocationStrategy },
   ],
   bootstrap: [ AppComponent ]
 })

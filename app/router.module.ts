@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes, Router, CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { LocationStrategy, APP_BASE_HREF, PathLocationStrategy, HashLocationStrategy } from '@angular/common';
 
 import { AuthorizationService } from './service/auth.service';
 
@@ -40,13 +39,6 @@ export const appRoutes: Routes = [
   { path: '**', redirectTo: '/login' }
 ];
 
-export function appBaseHrefFactory() {
-  if(STANDALONE)
-    return document.location.href;
-  else
-    return '/';
-}
-
 @NgModule({
   imports: [
     RouterModule.forRoot(appRoutes, { useHash: true })
@@ -55,8 +47,7 @@ export function appBaseHrefFactory() {
     RouterModule
   ],
   providers: [
-    AuthGuard,
-    { provide: APP_BASE_HREF, useFactory: appBaseHrefFactory }
+    AuthGuard
   ]
 })
 export class VogonRoutingModule {}
