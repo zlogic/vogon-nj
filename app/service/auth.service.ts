@@ -78,10 +78,7 @@ export class AuthorizationService {
   constructor(private alertService:AlertService, private httpService: HTTPService, private router: Router) {
     this.httpService.resetAuthorization = () => this.resetAuthorization();
     try {
-      if(STANDALONE)
-        this.access_token = '';
-      else
-        this.access_token = localStorage["vogon_access_token"];
+      this.access_token = localStorage["vogon_access_token"];
     } catch (err) {
       this.access_token = undefined;
       alertService.addAlert(err);
