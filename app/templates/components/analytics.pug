@@ -21,12 +21,12 @@ div(class="card-container")
     mat-card-title #{__('Report configuration')}
     mat-card-content
       section
-        mat-input-container
+        mat-form-field
           input(matInput, [matDatepicker]="startDatePicker", placeholder=__("Start date"), [(ngModel)]="startDate")
           mat-datepicker-toggle(matSuffix, type="button", [for]="startDatePicker")
         mat-datepicker(#startDatePicker)
-      section
-        mat-input-container
+        span &nbsp;
+        mat-form-field
           input(matInput, [matDatepicker]="endDatePicker", placeholder=__("End date"), [(ngModel)]="endDate")
           mat-datepicker-toggle(matSuffix, type="button", [for]="endDatePicker")
         mat-datepicker(#endDatePicker)

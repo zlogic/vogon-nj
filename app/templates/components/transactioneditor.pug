@@ -22,14 +22,15 @@ form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEdi
     mat-card-content(formArrayName="FinanceTransactionComponents")
       div(*ngFor="let component of getComponentsGroup().controls; let i=index", [formGroupName]="i")
         div(style="display: flex;")
-          mat-select(placeholder=__("Account"), formControlName="AccountId", [(ngModel)]="transaction.FinanceTransactionComponents[i].AccountId")
-            mat-option(*ngFor="let account of visibleAccounts", [value]="account.id")
-              | {{account.name}}
+          mat-form-field
+            mat-select(placeholder=__("Account"), formControlName="AccountId", [(ngModel)]="transaction.FinanceTransactionComponents[i].AccountId")
+              mat-option(*ngFor="let account of visibleAccounts", [value]="account.id")
+                | {{account.name}}
           span &nbsp;
           mat-input-container
             input(matInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount", [(ngModel)]="transaction.FinanceTransactionComponents[i].amount")
-          span(style="align-self: center;padding-left: 5px;")
-            |  {{getCurrency(i)}}
+            span(matSuffix)
+              | &nbsp;{{getCurrency(i)}}
           span(style="flex: 1 1 auto;")
           button(mat-icon-button, type="button", [matMenuTriggerFor]="componentMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
             mat-icon more_vert

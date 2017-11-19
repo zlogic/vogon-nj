@@ -23,12 +23,6 @@ html, body {
   color: mat-color($accent);
 }
 
-/* TODO: remove this once https://github.com/angular/material2/issues/2124 is fixed */
-.mat-select {
-  padding-top: 10px;
-}
-/* End TODO */
-
 button.my-fab {
   position: fixed;
   right: 32px;
@@ -51,7 +45,7 @@ button.my-fab {
 }
 
 .large-card {
-  width: 400px;
+  width: 420px;
 }
 
 .small-card {
