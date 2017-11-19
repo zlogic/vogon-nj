@@ -1,7 +1,7 @@
 var path = require('path');
 var webpack = require('webpack');
 var i18n = require('i18n');
-var AotPlugin = require('@ngtools/webpack').AotPlugin;
+var AngularCompilerPlugin = require('@ngtools/webpack').AngularCompilerPlugin;
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
@@ -100,7 +100,7 @@ module.exports = {
     new webpack.optimize.CommonsChunkPlugin({
       name: ['app', 'polyfills']
     }),
-    new AotPlugin({
+    new AngularCompilerPlugin({
       tsConfigPath: './tsconfig.json',
       entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
     }),

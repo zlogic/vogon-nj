@@ -1,50 +1,50 @@
-button(md-fab, class="my-fab", (click)="createAccount()")
-  md-icon add
-md-toolbar
-  md-slide-toggle([(ngModel)]="showAllAccounts") #{__("Show all accounts")}
+button(mat-fab, class="my-fab", (click)="createAccount()")
+  mat-icon add
+mat-toolbar
+  mat-slide-toggle([(ngModel)]="showAllAccounts") #{__("Show all accounts")}
 form([formGroup]="accountForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
   div(class="card-container")
     ng-container(*ngFor="let account of accountsService.accounts")
       div(*ngIf="isEditing(account)", id="accountEditor")
-      md-card(class="small-card", *ngIf="account.showInList || showAllAccounts")
-        md-card-title
+      mat-card(class="small-card", *ngIf="account.showInList || showAllAccounts")
+        mat-card-title
           div(style="display: flex; align-items: center;")
             span(*ngIf="!isEditing(account)", style="align-self: center;") {{account.name}}
-            md-input-container(*ngIf="isEditing(account)")
-              input(mdInput, placeholder=__("Account name"), formControlName="name", [(ngModel)]="account.name")
+            mat-input-container(*ngIf="isEditing(account)")
+              input(matInput, placeholder=__("Account name"), formControlName="name", [(ngModel)]="account.name")
             span(style="flex: 1 1 auto;")
-            button(md-icon-button, type="button", *ngIf="!isEditing(account)", [mdMenuTriggerFor]="accountMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
-              md-icon more_vert
-            md-menu(#accountMenu="mdMenu")
-              button(md-menu-item, type="button", (click)="startEditing(account)")
-                md-icon edit
+            button(mat-icon-button, type="button", *ngIf="!isEditing(account)", [matMenuTriggerFor]="accountMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+              mat-icon more_vert
+            mat-menu(#accountMenu="matMenu")
+              button(mat-menu-item, type="button", (click)="startEditing(account)")
+                mat-icon edit
                 span #{__("Edit")}
-              button(md-menu-item, type="button", (click)="deleteAccount(account)")
-                md-icon delete_forever
+              button(mat-menu-item, type="button", (click)="deleteAccount(account)")
+                mat-icon delete_forever
                 span #{__("Delete")}
-        md-card-content(*ngIf="isEditing(account)")
+        mat-card-content(*ngIf="isEditing(account)")
           p
-            md-select(placeholder=__("Currency"), formControlName="currency", [(ngModel)]="account.currency")
-              md-option(*ngFor="let currency of currencyService.currencies", [value]="currency.currencyCode")
+            mat-select(placeholder=__("Currency"), formControlName="currency", [(ngModel)]="account.currency")
+              mat-option(*ngFor="let currency of currencyService.currencies", [value]="currency.currencyCode")
                 | {{currency.displayName}}
           p
-            md-slide-toggle(formControlName="includeInTotal", [(ngModel)]="account.includeInTotal") #{__("Include in total")}
+            mat-slide-toggle(formControlName="includeInTotal", [(ngModel)]="account.includeInTotal") #{__("Include in total")}
           p
-            md-slide-toggle(formControlName="showInList") #{__("Show in accounts list")}
-        md-card-content
+            mat-slide-toggle(formControlName="showInList") #{__("Show in accounts list")}
+        mat-card-content
           div(style="display: flex; align-items: top;")
             span(style="display: block;") {{account.currency}}
             span(style="flex: 1 1 auto;")
             span(style="display: block;") {{account.balance | number:"1.2-2"}}
-        md-card-actions(*ngIf="isEditing(account)")
-          button(md-button, type="submit", [disabled]="!accountForm.valid") #{__('Apply')}
-          button(md-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
+        mat-card-actions(*ngIf="isEditing(account)")
+          button(mat-button, type="submit", [disabled]="!accountForm.valid") #{__('Apply')}
+          button(mat-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
 div(class="card-container")
   ng-container(*ngFor="let currencyTotals of accountsService.getTotalsForCurrencies()")
-    md-card(class="small-card")
-      md-card-title
+    mat-card(class="small-card")
+      mat-card-title
         | #{__('Total for {0}').replace('{0}',"{{currencyTotals.currency}}")}
-      md-card-content
+      mat-card-content
         div(style="display: flex; align-items: top;")
           span(style="display: block;") {{currencyTotals.currency}}
           span(style="flex: 1 1 auto;")

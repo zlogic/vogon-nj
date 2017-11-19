@@ -1,29 +1,29 @@
-button(md-fab, class="my-fab", (click)="addTransaction()")
-  md-icon add
+button(mat-fab, class="my-fab", (click)="addTransaction()")
+  mat-icon add
 div(id="transactionsStart")
 div(class="card-container")
-  md-card(class="large-card")
-    md-card-title #{__('Filter and sorting')}
-    md-card-content
+  mat-card(class="large-card")
+    mat-card-title #{__('Filter and sorting')}
+    mat-card-content
       form([formGroup]="filterForm", autocomplete="off", novalidate)
         div
-          button(md-icon-button, type="button", aria-label="#{__('Sort by description')}", (click)="transactionsService.applySort('description')")
-            md-icon(*ngIf="transactionsService.sortColumn !== 'description'; else sortDescription") sort
+          button(mat-icon-button, type="button", aria-label="#{__('Sort by description')}", (click)="transactionsService.applySort('description')")
+            mat-icon(*ngIf="transactionsService.sortColumn !== 'description'; else sortDescription") sort
             ng-template(#sortDescription)
-              md-icon(*ngIf="transactionsService.sortAsc") arrow_drop_up
-              md-icon(*ngIf="!transactionsService.sortAsc") arrow_drop_down
-          md-input-container
-            input(mdInput, type="text", placeholder=__('Description filter'), formControlName="filterDescription", [(ngModel)]="transactionsService.filterDescription")
+              mat-icon(*ngIf="transactionsService.sortAsc") arrow_drop_up
+              mat-icon(*ngIf="!transactionsService.sortAsc") arrow_drop_down
+          mat-input-container
+            input(matInput, type="text", placeholder=__('Description filter'), formControlName="filterDescription", [(ngModel)]="transactionsService.filterDescription")
         div
-          button(md-icon-button,type="button",  aria-label="#{__('Sort by date')}", (click)="transactionsService.applySort('date')")
-            md-icon(*ngIf="transactionsService.sortColumn !== 'date'; else sortDate") sort
+          button(mat-icon-button,type="button",  aria-label="#{__('Sort by date')}", (click)="transactionsService.applySort('date')")
+            mat-icon(*ngIf="transactionsService.sortColumn !== 'date'; else sortDate") sort
             ng-template(#sortDate)
-              md-icon(*ngIf="transactionsService.sortAsc") arrow_drop_up
-              md-icon(*ngIf="!transactionsService.sortAsc") arrow_drop_down
-          md-input-container
-            input(mdInput, [mdDatepicker]="picker", placeholder=__("Date filter"), formControlName="filterDate", [(ngModel)]="transactionsService.filterDate")
-            button(mdSuffix, type="button", [mdDatepickerToggle]="picker")
-          md-datepicker(#picker)
+              mat-icon(*ngIf="transactionsService.sortAsc") arrow_drop_up
+              mat-icon(*ngIf="!transactionsService.sortAsc") arrow_drop_down
+          mat-input-container
+            input(matInput, [matDatepicker]="picker", placeholder=__("Date filter"), formControlName="filterDate", [(ngModel)]="transactionsService.filterDate")
+            mat-datepicker-toggle(matSuffix, type="button", [for]="picker")
+          mat-datepicker(#picker)
         div
           tag-input(placeholder=__("Tags filter"), secondaryPlaceholder=__("Tags filter"), formControlName="filterTags", [(ngModel)]="transactionsService.filterTags", [modelAsStrings]="true")
             tag-input-dropdown([showDropdownIfEmpty]="true", [autocompleteItems]="tagsService.tags")
@@ -31,29 +31,29 @@ div(class="card-container", infiniteScroll, (scrolled)="transactionsService.next
   ng-container(*ngFor="let transaction of transactionsService.transactions")
     transaction-editor(*ngIf="isEditing(transaction); else elseBlock", [transaction]="transaction", (done)="stopEditing()")
     ng-template(#elseBlock)
-      md-card(class="small-card")
-        md-card-title
+      mat-card(class="small-card")
+        mat-card-title
           div(style="display: flex; align-items: center;")
             span(style="align-self: center;") {{transaction.description}}
             span(style="flex: 1 1 auto;")
-            button(md-icon-button, [mdMenuTriggerFor]="transactionMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
-              md-icon more_vert
-            md-menu(#transactionMenu="mdMenu")
-              button(md-menu-item, (click)="duplicateTransaction(transaction)")
-                md-icon content_copy
+            button(mat-icon-button, [matMenuTriggerFor]="transactionMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+              mat-icon more_vert
+            mat-menu(#transactionMenu="matMenu")
+              button(mat-menu-item, (click)="duplicateTransaction(transaction)")
+                mat-icon content_copy
                 span #{__("Duplicate")}
-              button(md-menu-item, (click)="startEditing(transaction)")
-                md-icon edit
+              button(mat-menu-item, (click)="startEditing(transaction)")
+                mat-icon edit
                 span #{__("Edit")}
-              button(md-menu-item, (click)="deleteTransaction(transaction)")
-                md-icon delete_forever
+              button(mat-menu-item, (click)="deleteTransaction(transaction)")
+                mat-icon delete_forever
                 span #{__("Delete")}
-        md-card-subtitle
+        mat-card-subtitle
           | {{transaction.date | date}}
-        md-card-content
-          md-chip-list
-            md-chip(*ngFor="let tag of transaction.tags", selectable="false") {{tag}}
-        md-card-content([ngClass]="{'mat-input-error': !transactionsService.isAmountOk(transaction)}")
+        mat-card-content
+          mat-chip-list
+            mat-chip(*ngFor="let tag of transaction.tags", selectable="false") {{tag}}
+        mat-card-content([ngClass]="{'mat-input-error': !transactionsService.isAmountOk(transaction)}")
           div(style="display: flex; align-items: top;")
             div(style="display: block;")
               ng-template([ngIf]="transactionsService.isExpenseIncomeTransaction(transaction)")
@@ -62,7 +62,7 @@ div(class="card-container", infiniteScroll, (scrolled)="transactionsService.next
               ng-template([ngIf]="transactionsService.isTransferTransaction(transaction)")
                 div(*ngFor="let account of transactionsService.getAccounts(transaction, transactionsService.fromAccountsPredicate); last as last; first as first")
                   | {{first && !last ? '(' : ''}}{{account.name}}{{last ? '' : ', '}}{{last && !first ? ')' : ''}}
-                md-icon arrow_downward
+                mat-icon arrow_downward
                 div(*ngFor="let account of transactionsService.getAccounts(transaction, transactionsService.toAccountsPredicate); last as last; first as first")
                   | {{first && !last ? '(' : ''}}{{account.name}}{{last ? '' : ', '}}{{last && !first ? ')' : ''}}
             span(style="flex: 1 1 auto;")
@@ -72,9 +72,9 @@ div(class="card-container", infiniteScroll, (scrolled)="transactionsService.next
                   | &sum;
                 | {{currencyAmount.amount | number:"1.2-2"}} {{currencyAmount.currency}}
 div(*ngIf="transactionsService.isLoadingNextPage()", class="card-container")
-  md-card(class="large-card")
-    md-card-content
+  mat-card(class="large-card")
+    mat-card-content
       section
         span #{__('Loading...')}
       section
-        md-progress-bar(mode="indeterminate")
+        mat-progress-bar(mode="indeterminate")

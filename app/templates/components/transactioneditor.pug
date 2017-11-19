@@ -1,45 +1,45 @@
 form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
-  md-card(class="large-card")
-    md-card-title
+  mat-card(class="large-card")
+    mat-card-title
       div(style="display: flex; align-items: center;")
         span(style="align-self: center;")
-          md-input-container
-            textarea(mdInput, placeholder=__('Description'), formControlName="description", [(ngModel)]="transaction.description")
-    md-card-content
-      md-button-toggle-group(formControlName="type", [(ngModel)]="transaction.type")
-        md-button-toggle(value="expenseincome")
+          mat-input-container
+            textarea(matInput, placeholder=__('Description'), formControlName="description", [(ngModel)]="transaction.description")
+    mat-card-content
+      mat-button-toggle-group(formControlName="type", [(ngModel)]="transaction.type")
+        mat-button-toggle(value="expenseincome")
           span #{__('Expense/income')}
-        md-button-toggle(value="transfer")
+        mat-button-toggle(value="transfer")
           span #{__('Transfer')}
-    md-card-content
-      md-input-container
-        input(mdInput, [mdDatepicker]="picker", placeholder=__("Date"), formControlName="date", [(ngModel)]="transaction.date")
-        button(mdSuffix, type="button", [mdDatepickerToggle]="picker")
-      md-datepicker(#picker)
-    md-card-content
+    mat-card-content
+      mat-input-container
+        input(matInput, [matDatepicker]="picker", placeholder=__("Date"), formControlName="date", [(ngModel)]="transaction.date")
+        mat-datepicker-toggle(matSuffix, type="button", [for]="picker")
+      mat-datepicker(#picker)
+    mat-card-content
       tag-input(placeholder=__("Tags"), formControlName="tags", [(ngModel)]="transaction.tags", [modelAsStrings]="true")
         tag-input-dropdown([autocompleteItems]="tagsService.tags")
-    md-card-content(formArrayName="FinanceTransactionComponents")
+    mat-card-content(formArrayName="FinanceTransactionComponents")
       div(*ngFor="let component of getComponentsGroup().controls; let i=index", [formGroupName]="i")
         div(style="display: flex;")
-          md-select(placeholder=__("Account"), formControlName="AccountId", [(ngModel)]="transaction.FinanceTransactionComponents[i].AccountId")
-            md-option(*ngFor="let account of visibleAccounts", [value]="account.id")
+          mat-select(placeholder=__("Account"), formControlName="AccountId", [(ngModel)]="transaction.FinanceTransactionComponents[i].AccountId")
+            mat-option(*ngFor="let account of visibleAccounts", [value]="account.id")
               | {{account.name}}
           span &nbsp;
-          md-input-container
-            input(mdInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount", [(ngModel)]="transaction.FinanceTransactionComponents[i].amount")
+          mat-input-container
+            input(matInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount", [(ngModel)]="transaction.FinanceTransactionComponents[i].amount")
           span(style="align-self: center;padding-left: 5px;")
             |  {{getCurrency(i)}}
           span(style="flex: 1 1 auto;")
-          button(md-icon-button, type="button", [mdMenuTriggerFor]="componentMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
-            md-icon more_vert
-          md-menu(#componentMenu="mdMenu")
-            button(md-menu-item, type="button", (click)="deleteTransactionComponent(i)")
-              md-icon delete_forever
+          button(mat-icon-button, type="button", [matMenuTriggerFor]="componentMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+            mat-icon more_vert
+          mat-menu(#componentMenu="matMenu")
+            button(mat-menu-item, type="button", (click)="deleteTransactionComponent(i)")
+              mat-icon delete_forever
               span #{__("Delete")}
-    md-card-content
-      button(md-mini-fab, type="button", (click)="addTransactionComponent()")
-        md-icon add
-    md-card-actions
-      button(md-button, type="submit", [disabled]="!transactionForm.valid") #{__('Apply')}
-      button(md-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
+    mat-card-content
+      button(mat-mini-fab, type="button", (click)="addTransactionComponent()")
+        mat-icon add
+    mat-card-actions
+      button(mat-button, type="submit", [disabled]="!transactionForm.valid") #{__('Apply')}
+      button(mat-button, type="button", (click)="cancelEditing()") #{__('Cancel')}

@@ -6,6 +6,7 @@ import { AccountsService } from './accounts.service';
 import { TagsService } from './tags.service';
 import { UserService } from './user.service';
 import 'rxjs/add/observable/merge';
+import 'rxjs/add/operator/mergeMap';
 
 @Injectable()
 export class UpdateService {

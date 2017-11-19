@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { MdSnackBar } from '@angular/material';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Http, Response, Request, RequestOptions, RequestMethod, Headers } from '@angular/http';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/observable/throw';
-import 'rxjs/add/operator/merge';
+import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/finally';
 
@@ -11,7 +11,7 @@ import 'rxjs/add/operator/finally';
 export class AlertService {
   private loadingRequests: number;
 
-  constructor(private snackBar: MdSnackBar) {
+  constructor(private snackBar: MatSnackBar) {
     this.loadingRequests = 0;
   }
 

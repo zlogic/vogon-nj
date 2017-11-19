@@ -1,34 +1,34 @@
-md-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 2;")
+mat-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 2;")
   span {{getAppTitle()}}
   span(style="width: 64px;")
   span(style='flex: 1 1 auto;')
-    md-progress-bar(*ngIf="isLoading()", mode="indeterminate", color="accent")
+    mat-progress-bar(*ngIf="isLoading()", mode="indeterminate", color="accent")
   span(style="width: 64px;")
-  button(md-icon-button, aria-label="#{__('Toggle sidebar')}", [mdMenuTriggerFor]="navMenu")
-    md-icon more_vert
-  md-menu(#navMenu="mdMenu")
+  button(mat-icon-button, aria-label="#{__('Toggle sidebar')}", [matMenuTriggerFor]="navMenu")
+    mat-icon more_vert
+  mat-menu(#navMenu="matMenu")
     ng-template([ngIf]="isAuthorized()")
-      button(md-menu-item, routerLink="transactions", [routerLinkActive]="['nav-selected']")
-        md-icon(md-list-icon) list
+      button(mat-menu-item, routerLink="transactions", [routerLinkActive]="['nav-selected']")
+        mat-icon(mat-list-icon) list
         | #{__('Transactions')}
-      button(md-menu-item, routerLink="accounts", [routerLinkActive]="['nav-selected']")
-        md-icon(md-list-icon) account_balance_wallet
+      button(mat-menu-item, routerLink="accounts", [routerLinkActive]="['nav-selected']")
+        mat-icon(mat-list-icon) account_balance_wallet
         | #{__('Accounts')}
-      button(md-menu-item, routerLink="analytics", [routerLinkActive]="['nav-selected']")
-        md-icon(md-list-icon) multiline_chart
+      button(mat-menu-item, routerLink="analytics", [routerLinkActive]="['nav-selected']")
+        mat-icon(mat-list-icon) multiline_chart
         | #{__('Analytics')}
-      button(md-menu-item, routerLink="usersettings", [routerLinkActive]="['nav-selected']")
-        md-icon(md-list-icon) settings
+      button(mat-menu-item, routerLink="usersettings", [routerLinkActive]="['nav-selected']")
+        mat-icon(mat-list-icon) settings
         | #{__('User settings')}
-      button(md-menu-item, (click)="logout()")
-        md-icon(md-list-icon) exit_to_app
+      button(mat-menu-item, (click)="logout()")
+        mat-icon(mat-list-icon) exit_to_app
         | #{__('Logout')}
     ng-template([ngIf]="!isAuthorized()")
-      button(md-menu-item, routerLink="login", [routerLinkActive]="['nav-selected']")
-        md-icon(md-list-icon) open_in_browser
+      button(mat-menu-item, routerLink="login", [routerLinkActive]="['nav-selected']")
+        mat-icon(mat-list-icon) open_in_browser
         | #{__('Login')}
-    button(md-menu-item, routerLink="intro", [routerLinkActive]="['nav-selected']")
-      md-icon(md-list-icon) help
+    button(mat-menu-item, routerLink="intro", [routerLinkActive]="['nav-selected']")
+      mat-icon(mat-list-icon) help
       | #{__('Help/Info')}
 div(class="app-content")
   router-outlet

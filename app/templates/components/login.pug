@@ -1,26 +1,26 @@
 div(class="card-container")
-  md-card(class="large-card")
-    md-card-content
+  mat-card(class="large-card")
+    mat-card-content
       h3
         | #{__('Vogon authorization')}
       section
       p(*ngIf="isAllowRegistration()")
-        md-button-toggle-group([(ngModel)]="mode")
-          md-button-toggle(value="login")
+        mat-button-toggle-group([(ngModel)]="mode")
+          mat-button-toggle(value="login")
             span #{__('Login')}
-          md-button-toggle(value="register")
+          mat-button-toggle(value="register")
             span #{__('Register')}
       form([formGroup]="loginForm", (ngSubmit)="onSubmit()", autocomplete="off", novalidate)
         p
-          md-input-container
-            input(mdInput, type="text", placeholder=__('Username'), formControlName="username")
+          mat-input-container
+            input(matInput, type="text", placeholder=__('Username'), formControlName="username")
           |  
-          md-input-container
-            input(mdInput, type="password", placeholder=__('Password'), formControlName="password")
+          mat-input-container
+            input(matInput, type="password", placeholder=__('Password'), formControlName="password")
         p
-          md-checkbox(checked, formControlName="rememberToken") #{__('Remember me')}
+          mat-checkbox(checked, formControlName="rememberToken") #{__('Remember me')}
         p
-          md-error(*ngIf="errorMessage") {{errorMessage}}
+          mat-error(*ngIf="errorMessage") {{errorMessage}}
         p
-          button(md-raised-button, type="submit", color="primary", *ngIf="modeIsLogin()", [disabled]="!loginForm.valid") #{__('Login')}
-          button(md-raised-button, type="submit", color="primary", *ngIf="modeIsRegister()", [disabled]="!loginForm.valid") #{__('Register')}
+          button(mat-raised-button, type="submit", color="primary", *ngIf="modeIsLogin()", [disabled]="!loginForm.valid") #{__('Login')}
+          button(mat-raised-button, type="submit", color="primary", *ngIf="modeIsRegister()", [disabled]="!loginForm.valid") #{__('Register')}
