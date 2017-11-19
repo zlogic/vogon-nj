@@ -1,4 +1,5 @@
 var dbService = require('./dbservice');
+var Sequelize = require('sequelize');
 
 var calculateTransactionAmount = function(financeTransaction, real){
   var sumWithCondition = function(condition){
@@ -76,21 +77,22 @@ var buildReport = function(user, request){
   var buildTransactionsWhere = function(filterDate){
     var transactionsWhere = {UserId: user.id};
     if(filterDate === true)
-      transactionsWhere.date = {$between: [earliestDate, latestDate]};
+      transactionsWhere.date = {[Sequelize.Op.between]: [earliestDate, latestDate]};
     var transactionTypeCondition = [];
     if(enabledTransferTransactions)
       transactionTypeCondition.push("transfer");
     if(enabledIncomeTransactions || enabledExpenseTransactions)
       transactionTypeCondition.push("expenseincome");
-    transactionsWhere.type = {$in: transactionTypeCondition};
+    transactionsWhere.type = {[Sequelize.Op.in]: transactionTypeCondition};
     var realTags = selectedTags.filter(function(tag){
       return tag.length > 0;
     });
-    transactionsWhere.$or = realTags.map(function(tag){return {tags: {$like: '%' + JSON.stringify(tag) + '%'}}});
+    var tagsFilter = realTags.map(function(tag){return {tags: {[Sequelize.Op.like]: '%' + JSON.stringify(tag) + '%'}}});
     if(selectedTags.some(function(tag){ return tag.length === 0; }))
-      transactionsWhere.$or.push({tags: JSON.stringify([])});
+      tagsFilter.push({tags: JSON.stringify([])});
     if(selectedTags.length === 0)
-      transactionsWhere.$or = {tags: undefined};
+      tagsFilter = {tags: undefined};
+    transactionsWhere[Sequelize.Op.or] = tagsFilter;
     return transactionsWhere;
   };
 
@@ -100,7 +102,7 @@ var buildReport = function(user, request){
       || (financeTransaction.type === "expenseincome" && financeTransaction.rawAmount >= 0 && enabledIncomeTransactions);
   };
 
-  return dbService.Account.findAll({where: {UserId: user.id, id: {$in: selectedAccounts}}}).then(function(accounts){
+  return dbService.Account.findAll({where: {UserId: user.id, id: {[Sequelize.Op.in]: selectedAccounts}}}).then(function(accounts){
     //Find and validate accounts
     var currencies = {};
     accounts.forEach(function(account){
@@ -115,7 +117,7 @@ var buildReport = function(user, request){
       var accountsIds = currencies[currency].map(function(account){
         return account.id;
       });
-      return {AccountId: {$in: accountsIds}};
+      return {AccountId: {[Sequelize.Op.in]: accountsIds}};
     };
     return Promise.all(Object.keys(currencies).map(function(currency){
       return dbService.FinanceTransaction.findAll({

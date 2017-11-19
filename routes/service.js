@@ -1,4 +1,5 @@
 var express = require('express');
+var Sequelize = require('sequelize');
 var dbService = require('../services/dbservice');
 var analyticsService = require('../services/analytics');
 var passport = require('passport');
@@ -106,17 +107,17 @@ router.get('/transactions', function(req, res, next) {
   if(filterTags !== undefined && filterTags.length > 0)
     filterTags = JSON.parse(filterTags);
   if(filterTags !== undefined && filterTags.length > 0)
-    where.push({$or: filterTags.map(function(tag){
+    where.push({[Sequelize.Op.or]: filterTags.map(function(tag){
         return [
-          {tags: {$like: '[' + JSON.stringify(tag) + '%'}},
-          {tags: {$like: '%,' + JSON.stringify(tag) + ',%'}},
-          {tags: {$like: '%,' + JSON.stringify(tag) + ']'}}
+          {tags: {[Sequelize.Op.like]: '[' + JSON.stringify(tag) + '%'}},
+          {tags: {[Sequelize.Op.like]: '%,' + JSON.stringify(tag) + ',%'}},
+          {tags: {[Sequelize.Op.like]: '%,' + JSON.stringify(tag) + ']'}}
         ]
       }).reduce(function(a, b) {return a.concat(b);},[])
     });
   dbService.sequelize.transaction(function(transaction){
     return dbService.FinanceTransaction.findAll({
-      where: {$and: where},
+      where: {[Sequelize.Op.and]: where},
       include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
       attributes: {exclude: 'UserId'},
       transaction: transaction,

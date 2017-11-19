@@ -22,9 +22,9 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   if(databaseUrl && sequelizeOptions)
     sequelize = new Sequelize(databaseUrl, sequelizeOptions);
   else if(process.env.DATABASE_URL !== undefined)
-    sequelize = new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
+    sequelize = new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
   else
-    sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
+    sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
 
   var hashPassword = function(password, salt, options){
     if(options === null || options === undefined)
@@ -483,7 +483,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
   var deleteExpiredTokens = function(){
     return sequelize.transaction(function(transaction){
-      return Token.destroy({where: {expires: {lte: new Date()}}, transaction:transaction});
+      return Token.destroy({where: {expires: {[Sequelize.Op.lte]: new Date()}}, transaction:transaction});
     });
   };
 

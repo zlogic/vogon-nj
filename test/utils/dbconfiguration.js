@@ -8,7 +8,7 @@ var logger = require('../../services/logger');
 var reconfigureDb = function(inMemory){
   inMemory = inMemory !== undefined ? inMemory : (process.env.DOCKER_BUILD || true);
   var storage = inMemory === true ? ":memory:" : path.resolve(testdir.tmpdir, "vogon-nj.sqlite");
-  var currentDbService = model.model("sqlite:", {storage: storage, isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
+  var currentDbService = model.model("sqlite:", {storage: storage, isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
   var promise = dbService.sequelize.close();
   for(var k in currentDbService)
     dbService[k] = currentDbService[k];
