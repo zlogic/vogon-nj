@@ -107,10 +107,6 @@ Run webapp:
 
 `npm start`
 
-Run webapp (automatically reload changes):
-
-`npm run nodemon`
-
 Run tests:
 
 `npm test`
