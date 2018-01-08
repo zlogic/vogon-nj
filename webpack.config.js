@@ -6,6 +6,8 @@ var HtmlWebpackPlugin = require('html-webpack-plugin');
 var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
+var env_debug = process.env.NODE_ENV !== "production";
+
 i18n.configure({
   locales: ['en'],
   directory: __dirname + '/locales'
@@ -83,10 +85,9 @@ module.exports = {
         test: /\.(css|scss)$/,
         loaders: ['to-string-loader', 'css-loader', {loader: 'sass-loader', options:{includePaths:['node_modules']}}],
       },
-      { test: /\.woff$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff' },
-      { test: /\.woff2$/, loader: 'url-loader?limit=262144&mimetype=application/font-woff2' },
-      { test: /\.[ot]tf$/, loader: 'url-loader?limit=262144&mimetype=application/octet-stream' },
-      { test: /\.eot$/, loader: 'url-loader?limit=262144&mimetype=application/vnd.ms-fontobject' }
+      {
+        test: /\.(woff|woff2|[ot]tf|eot)/, loader: 'file-loader?name=fonts/[name].[hash].[ext]?'
+      }
     ]
   },
   plugins: [
@@ -103,13 +104,31 @@ module.exports = {
     new AngularCompilerPlugin({
       tsConfigPath: './tsconfig.json',
       entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
-    }),
-    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
-    new webpack.LoaderOptionsPlugin({ minimize: true }),
-    new HtmlWebpackPlugin({
-      template: 'app/templates/index.pug',
-      inlineSource: '.(js)$'
-    }),
-    new HtmlWebpackInlineSourcePlugin()
+    })
   ]
+};
+
+if(!env_debug) {
+  //Uglification and optimization only in production
+  module.exports.plugins.push(
+    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
+    new webpack.LoaderOptionsPlugin({ minimize: true })
+  );
+}
+
+module.exports.plugins.push(
+  new HtmlWebpackPlugin({
+    template: 'app/templates/index.pug'
+  })
+);
+
+module.exports.devServer = {
+  contentBase: './app/output',
+  proxy: [{
+    context: [
+      '/configuration', '/oauth', '/service', '/register', '/images',
+      '/', '/login', '/transactions', '/accounts', '/analytics', '/usersettings', '/intro'
+    ],
+    "target": "http://localhost:3000"
+  }]
 };
