@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { DOCUMENT } from '@angular/platform-browser';
+import 'rxjs/add/operator/debounceTime';
 
 import { PageScrollService, PageScrollInstance } from 'ng2-page-scroll';
 
