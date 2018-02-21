@@ -49,7 +49,9 @@ module.exports = {
     rules: [
       {
         test: /\.ts$/,
-        loader: '@ngtools/webpack'
+        use: env_debug ?
+          ['awesome-typescript-loader','angular2-template-loader'] :
+          ['@ngtools/webpack']
       },
       {
         test: /\.pug$/,
@@ -92,18 +94,20 @@ module.exports = {
   },
   plugins: [
     // Workaround for angular/angular#11580
+    // and for https://github.com/angular/angular/issues/20357#issuecomment-343683491
     new webpack.ContextReplacementPlugin(
-      /angular(\\|\/)core(\\|\/)@angular/,
-      path.resolve(__dirname, 'public', 'js'),
+      /\@angular(\\|\/)core(\\|\/)esm5/,
+      path.resolve(__dirname, 'app'),
       {}
     ),
     new I18nPlugin(),
     new webpack.optimize.CommonsChunkPlugin({
       name: ['app', 'polyfills']
     }),
-    new AngularCompilerPlugin({
-      tsConfigPath: './tsconfig.json',
-      entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
+    new webpack.DefinePlugin({
+      'process.env': {
+        'ENV': JSON.stringify(process.env.NODE_ENV)
+      }
     })
   ]
 };
@@ -111,6 +115,10 @@ module.exports = {
 if(!env_debug) {
   //Uglification and optimization only in production
   module.exports.plugins.push(
+    new AngularCompilerPlugin({
+      tsConfigPath: './tsconfig.json',
+      entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
+    }),
     new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
     new webpack.LoaderOptionsPlugin({ minimize: true })
   );
