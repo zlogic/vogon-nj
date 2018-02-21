@@ -1,5 +1,6 @@
 import { Component, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
+import { ObservableMedia } from '@angular/flex-layout';
 import { AuthorizationService } from './service/auth.service';
 import { AlertService } from './service/http.service';
 import { UpdateService } from './service/update.service';
@@ -18,7 +19,8 @@ export class AppComponent {
     private authorizationService: AuthorizationService,
     private userService: UserService,
     private router: Router,
-    private updateService: UpdateService
+    private updateService: UpdateService,
+    private media: ObservableMedia
   ){ }
   
   getAppTitle(): string {
@@ -34,6 +36,10 @@ export class AppComponent {
 
   isAuthorized(): boolean {
     return this.authorizationService.isAuthorized();
+  }
+
+  isSmallScreen(): boolean {
+    return this.media.isActive('smallscreen')
   }
 
   private navigateToLogin() {

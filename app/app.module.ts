@@ -24,6 +24,7 @@ import { ConfigurationService } from './service/configuration.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
+import { ResponsiveBreakpointsModule } from './resposivebreakpoints.module'
 
 import { LoginComponent } from './components/login.component';
 import { TransactionsComponent } from './components/transactions.component';
@@ -42,6 +43,7 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     FormsModule,
     ReactiveFormsModule,
     HttpModule,
+    ResponsiveBreakpointsModule,
     InfiniteScrollModule,
     TagInputModule,
     Ng2PageScrollModule.forRoot(),

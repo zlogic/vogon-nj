@@ -5,21 +5,36 @@
 @include angular-material-theme($theme);
 @include mat-core();
 
+$top-toolbar-height: 64px;
+$sidenav-content-background: mat-color(map-get($theme, "background"), "background");
+
 body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: $sidenav-content-background;
 }
 
 html, body {
   margin: 0;
 }
 
-.app-content {
-  position: absolute;
-  top: 64px;
-  width: 100%;
+.app-main-toolbar {
+  position: fixed;
+  top: 0px;
+  z-index: 2;
 }
 
-.nav-selected, button.nav-selected > mat-icon.mat-icon {
+.app-sidenav-container {
+  top: $top-toolbar-height;
+  bottom: 0px;
+}
+
+.app-sidenav.mat-drawer {
+  position: fixed;
+  top: $top-toolbar-height;
+  bottom: 0px;
+}
+
+a.mat-list-item.nav-selected {
   color: mat-color($accent);
 }
 

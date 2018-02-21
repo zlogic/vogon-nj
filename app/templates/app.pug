@@ -1,34 +1,36 @@
-mat-toolbar(color="primary", style="position: fixed; top: 0px; z-index: 2;")
+mat-toolbar(color="primary", class="app-main-toolbar")
+  button(mat-icon-button, aria-label="#{__('Toggle sidebar')}", (click)="sidenav.toggle()")
+    mat-icon menu
   span {{getAppTitle()}}
   span(style="width: 64px;")
   span(style='flex: 1 1 auto;')
     mat-progress-bar(*ngIf="isLoading()", mode="indeterminate", color="accent")
-  span(style="width: 64px;")
-  button(mat-icon-button, aria-label="#{__('Toggle sidebar')}", [matMenuTriggerFor]="navMenu")
-    mat-icon more_vert
-  mat-menu(#navMenu="matMenu")
-    ng-template([ngIf]="isAuthorized()")
-      button(mat-menu-item, routerLink="transactions", [routerLinkActive]="['nav-selected']")
-        mat-icon(mat-list-icon) list
-        | #{__('Transactions')}
-      button(mat-menu-item, routerLink="accounts", [routerLinkActive]="['nav-selected']")
-        mat-icon(mat-list-icon) account_balance_wallet
-        | #{__('Accounts')}
-      button(mat-menu-item, routerLink="analytics", [routerLinkActive]="['nav-selected']")
-        mat-icon(mat-list-icon) multiline_chart
-        | #{__('Analytics')}
-      button(mat-menu-item, routerLink="usersettings", [routerLinkActive]="['nav-selected']")
-        mat-icon(mat-list-icon) settings
-        | #{__('User settings')}
-      button(mat-menu-item, (click)="logout()")
-        mat-icon(mat-list-icon) exit_to_app
-        | #{__('Logout')}
-    ng-template([ngIf]="!isAuthorized()")
-      button(mat-menu-item, routerLink="login", [routerLinkActive]="['nav-selected']")
-        mat-icon(mat-list-icon) open_in_browser
-        | #{__('Login')}
-    button(mat-menu-item, routerLink="intro", [routerLinkActive]="['nav-selected']")
-      mat-icon(mat-list-icon) help
-      | #{__('Help/Info')}
-div(class="app-content")
-  router-outlet
+mat-sidenav-container(class="app-sidenav-container")
+  mat-toolbar(color="primary")
+  mat-sidenav(#sidenav, [mode]="isSmallScreen()?'over':'side'", fixedInViewport="false", class="app-sidenav")
+    mat-nav-list
+      ng-template([ngIf]="isAuthorized()")
+        a(mat-list-item, routerLink="transactions", [routerLinkActive]="['nav-selected']")
+          mat-icon(mat-list-icon) list
+          | #{__('Transactions')}
+        a(mat-list-item, routerLink="accounts", [routerLinkActive]="['nav-selected']")
+          mat-icon(mat-list-icon) account_balance_wallet
+          | #{__('Accounts')}
+        a(mat-list-item, routerLink="analytics", [routerLinkActive]="['nav-selected']")
+          mat-icon(mat-list-icon) multiline_chart
+          | #{__('Analytics')}
+        a(mat-list-item, routerLink="usersettings", [routerLinkActive]="['nav-selected']")
+          mat-icon(mat-list-icon) settings
+          | #{__('User settings')}
+        a(mat-list-item, (click)="logout()")
+          mat-icon(mat-list-icon) exit_to_app
+          | #{__('Logout')}
+      ng-template([ngIf]="!isAuthorized()")
+        a(mat-list-item, routerLink="login", [routerLinkActive]="['nav-selected']")
+          mat-icon(mat-list-icon) open_in_browser
+          | #{__('Login')}
+      a(mat-list-item, routerLink="intro", [routerLinkActive]="['nav-selected']")
+        mat-icon(mat-list-icon) help
+        | #{__('Help/Info')}
+  mat-sidenav-content
+    router-outlet
