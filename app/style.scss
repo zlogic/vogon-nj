@@ -10,7 +10,6 @@ $sidenav-content-background: mat-color(map-get($theme, "background"), "backgroun
 
 body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background: $sidenav-content-background;
 }
 
 html, body {
@@ -18,20 +17,17 @@ html, body {
 }
 
 .app-main-toolbar {
-  position: fixed;
-  top: 0px;
   z-index: 2;
 }
 
-.app-sidenav-container {
-  top: $top-toolbar-height;
-  bottom: 0px;
-}
-
-.app-sidenav.mat-drawer {
-  position: fixed;
-  top: $top-toolbar-height;
-  bottom: 0px;
+.app-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 a.mat-list-item.nav-selected {
@@ -75,6 +71,9 @@ button.my-fab {
     width: 100%;
     margin: 0px;
     display: flex;
+  }
+  .app-sidenav.mat-drawer {
+    top: 0px;
   }
   .large-card, .small-card, .giant-card {
     width: 100%;
