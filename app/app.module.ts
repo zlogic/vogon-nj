@@ -7,7 +7,7 @@ import { APP_BASE_HREF } from '@angular/common';
 
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TagInputModule } from 'ngx-chips';
-import { Ng2PageScrollModule } from 'ng2-page-scroll';
+import { NgxPageScrollModule } from 'ngx-page-scroll';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { VogonMaterialModule } from './material.module';
@@ -46,7 +46,7 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     ResponsiveBreakpointsModule,
     InfiniteScrollModule,
     TagInputModule,
-    Ng2PageScrollModule.forRoot(),
+    NgxPageScrollModule,
     NgxChartsModule
   ],
   declarations: [

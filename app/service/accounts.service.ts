@@ -1,11 +1,10 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/mergeMap';
+import { Observable, of } from 'rxjs';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 
 import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
-import { CurrencyService } from './currency.service';
 
 export class Account {
   id: number;
@@ -64,26 +63,27 @@ export class AccountsService {
   }
   submitAccounts() {
     return this.httpService.post("service/accounts", this.accounts)
-      .mergeMap((res: Response) => {
-        var accounts = res.json().map((account: any) => Account.fromJson(account));
-        this.setAccounts(accounts);
-        return Observable.of(res);
-      })
-      .catch(() => this.update());
+      .pipe(
+        mergeMap((res: Response) => {
+          var accounts = res.json().map((account: any) => Account.fromJson(account));
+          this.setAccounts(accounts);
+          return of(res);
+        }),
+        catchError(() => this.update())
+      );
   }
   
   constructor(
     private httpService: HTTPService,
-    private authorizationService: AuthorizationService,
-    private currencyService: CurrencyService
+    private authorizationService: AuthorizationService
   ) {
     this.doUpdate = new UpdateHelper(() => {
       if(this.authorizationService.isAuthorized())
         return this.httpService.get("service/accounts")
-          .map((res: Response) => {
+          .pipe(map((res: Response) => {
             var accounts = res.json().map((account: any) => Account.fromJson(account));
             this.setAccounts(accounts);
-          });
+          }));
       else {
         this.accounts = [];
       }

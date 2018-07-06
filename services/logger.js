@@ -2,10 +2,11 @@ var winston = require('winston');
 var i18n = require('i18n');
 var split = require('split');
 
-var logger = new (winston.Logger)({
+var logger = winston.createLogger({
   transports: [
-    new (winston.transports.Console)({ json: false, showLevel: false })
-  ]
+    new (winston.transports.Console)()
+  ],
+  format: winston.format.simple()
 });
 logger.level = 'silly';
 

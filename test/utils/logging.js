@@ -5,6 +5,7 @@ var path = require('path');
 logger.configure({
   level: 'silly',
   transports: [
-    new (winston.transports.File)({ filename: path.join('test', 'tmp', 'tests.log'), json: false, showLevel: false, timestamp: false })
-  ]
+    new winston.transports.File({ filename: path.join('test', 'tmp', 'tests.log')})
+  ],
+  format: winston.format.printf(info => `${info.message}`)
 });

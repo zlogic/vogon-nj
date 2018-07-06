@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { Response, Headers } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
+import { Response } from '@angular/http';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
@@ -19,24 +20,26 @@ export class UserService {
   submit(userdata: any): Observable<any> {
     userdata['version'] = this.version;
     return this.httpService.post("service/user", userdata)
-      .map((res) => {
-        this.username = res.json().username;
-        this.version = res.json().version;
-        this.userObservable.emit();
-        return res;
-      })
-      .catch(() => this.update());
+      .pipe(
+        map((res) => {
+          this.username = res.json().username;
+          this.version = res.json().version;
+          this.userObservable.emit();
+          return res;
+        }),
+        catchError(() => this.update())
+      );
   };
   importData(file: File): Observable<any> {
     if (file === undefined)
-      return Observable.of();
+      return of();
     var formData = new FormData();
     formData.append("file", file);
     return this.httpService.post("service/import", formData)
-      .map((res) => {
+      .pipe(map((res) => {
         this.importObservable.emit();
         return res;
-      });
+      }));
   };
   constructor(
     private httpService: HTTPService,
@@ -45,12 +48,12 @@ export class UserService {
     this.doUpdate = new UpdateHelper(() => {
       if(this.authorizationService.isAuthorized())
         return this.httpService.get("service/user")
-          .map((res: Response) => {
+          .pipe(map((res: Response) => {
             this.username = res.json().username;
             this.version = res.json().version;
             this.userObservable.emit();
             return res;
-          });
+          }));
       else {
         this.username = undefined;
         this.version = undefined;

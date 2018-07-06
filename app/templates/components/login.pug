@@ -12,10 +12,10 @@ div(class="card-container")
             span #{__('Register')}
       form([formGroup]="loginForm", (ngSubmit)="onSubmit()", autocomplete="off", novalidate)
         p
-          mat-input-container
+          mat-form-field
             input(matInput, type="text", placeholder=__('Username'), formControlName="username")
           |  
-          mat-input-container
+          mat-form-field
             input(matInput, type="password", placeholder=__('Password'), formControlName="password")
         p
           mat-checkbox(checked, formControlName="rememberToken") #{__('Remember me')}

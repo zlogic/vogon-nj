@@ -3,7 +3,6 @@ var webpack = require('webpack');
 var i18n = require('i18n');
 var AngularCompilerPlugin = require('@ngtools/webpack').AngularCompilerPlugin;
 var HtmlWebpackPlugin = require('html-webpack-plugin');
-var HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 var ConstDependency = require('webpack/lib/dependencies/ConstDependency');
 
 var env_debug = process.env.NODE_ENV !== "production";
@@ -32,9 +31,10 @@ I18nPlugin.prototype.apply = function(compiler) {
 
 module.exports = {
   entry: {
-    'app': './app/main.ts',
-    'polyfills': './app/polyfills.ts'
+    'polyfills': './app/polyfills.ts',
+    'app': './app/main.ts'
   },
+  mode: 'none',
   resolve: {
     alias: {
       views: path.resolve(__dirname, 'app', 'templates/'),
@@ -101,9 +101,6 @@ module.exports = {
       {}
     ),
     new I18nPlugin(),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: ['app', 'polyfills']
-    }),
     new webpack.DefinePlugin({
       'process.env': {
         'ENV': JSON.stringify(process.env.NODE_ENV)
@@ -119,9 +116,11 @@ if(!env_debug) {
       tsConfigPath: './tsconfig.json',
       entryModule: path.resolve(__dirname, 'app', 'app.module#AppModule')
     }),
-    new webpack.optimize.UglifyJsPlugin({ beautify: false, comments: false }),
     new webpack.LoaderOptionsPlugin({ minimize: true })
   );
+  module.exports.optimization = {
+    minimize: true
+  }
 }
 
 module.exports.plugins.push(

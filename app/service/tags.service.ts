@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
@@ -35,11 +36,11 @@ export class TagsService {
     this.doUpdate = new UpdateHelper(() => {
       if(this.authorizationService.isAuthorized())
         return this.httpService.get("service/analytics/tags")
-          .map((res: Response) => {
+          .pipe(map((res: Response) => {
             this.tags = res.json();
             this.tagsObservable.emit();
             return res;
-          });
+          }));
       else {
         this.tags = [];
         this.tagsObservable.emit();

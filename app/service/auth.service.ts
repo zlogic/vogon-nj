@@ -1,11 +1,8 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Response, Headers } from '@angular/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/throw';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/merge';
-import 'rxjs/add/operator/catch';
+import { Observable, throwError } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 import { AlertService, HTTPService } from './http.service';
 
@@ -35,30 +32,34 @@ export class AuthorizationService {
   performAuthorization(username:string, password:string, rememberToken:boolean): Observable<Response> {
     var params = {username: username, password: password, client_id: this.clientId, grant_type: "password"};
     return this.httpService.post("oauth/token", this.httpService.encodeForm(params), this.postHeaders)
-        .map((data: Response) => {
-          this.setToken(data.json().access_token, rememberToken);
-          return data;
-        })
-        .catch((error: Response | any) => {
-          this.resetAuthorization(__("Unable to authenticate"));
-          return Observable.throw(error);
-        });
+        .pipe(
+          map((data: Response) => {
+            this.setToken(data.json().access_token, rememberToken);
+            return data;
+          }),
+          catchError((error: Response | any) => {
+            this.resetAuthorization(__("Unable to authenticate"));
+            return throwError(error);
+          })
+        );
   };
   logout(): Observable<Response> {
     if (this.access_token !== undefined) {
       var params = {token: this.access_token};
       return this.httpService.post("oauth/logout", this.httpService.encodeForm(params), this.postHeaders)
-          .map((res: Response) => {
-            this.resetAuthorization();
-            return res;
-          })
-          .catch((error: Response | any) => {
-            this.resetAuthorization();
-            return Observable.throw(error);
-          });
+          .pipe(
+            map((res: Response) => {
+              this.resetAuthorization();
+              return res;
+            }),
+            catchError((error: Response | any) => {
+              this.resetAuthorization();
+              return throwError(error);
+            })
+          );
     } else {
       this.resetAuthorization();
-      return Observable.throw(new Response({
+      return throwError(new Response({
         body: {error_description: __("Already logged out")},
         status: null, headers: null, url: null, merge: null
       }));

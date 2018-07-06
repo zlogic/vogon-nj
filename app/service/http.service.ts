@@ -1,12 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Http, Response, Request, RequestOptions, RequestMethod, Headers } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/of';
-import 'rxjs/add/observable/throw';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/finally';
+import { Http, Response, Request, RequestMethod, Headers } from '@angular/http';
+import { Observable, of, throwError } from 'rxjs';
+import { mergeMap, catchError, finalize } from 'rxjs/operators';
 
 @Injectable()
 export class AlertService {
@@ -57,7 +53,7 @@ export class HTTPService {
     if (data.status === 401)
       this.resetAuthorization();
     if (data.status === 401 && this.isTokenURL(data.url)){
-      return Observable.throw(new Response({
+      return throwError(new Response({
         body: JSON.stringify({error_description: data.text()}),
         status: null, headers: null, url: null, merge: null
       }));
@@ -67,7 +63,7 @@ export class HTTPService {
       this.alertService.addAlert(errorMessage);
       //TODO: refresh page to reset state?
     }
-    return Observable.throw(data);
+    return throwError(data);
   };
   encodeForm(data: any): string{
     var buffer = [];
@@ -80,8 +76,10 @@ export class HTTPService {
     var request = new Request({ method: method, headers: headers, url: url, body: data});
     this.alertService.startLoadingRequest();
     return this.http.request(request)
-      .catch((error: Response | any) => this.errorHandler(error))
-      .finally(() => this.alertService.endLoadingRequest());
+      .pipe(
+        catchError((error: Response | any) => this.errorHandler(error)),
+        finalize(() => this.alertService.endLoadingRequest())
+      );
   }
   get(url:string, extraHeaders?:Headers): Observable<Response> {
     return this.request(RequestMethod.Get, url, undefined, extraHeaders);
@@ -109,7 +107,7 @@ export class UpdateHelper {
     this.updateFunctionObservable = undefined;
     if(this.updateRequested)
       return this.doUpdate();
-    return Observable.of(result);
+    return of(result);
   };
   inProgress(): boolean {
     return this.updateFunctionObservable !== undefined;
@@ -119,16 +117,18 @@ export class UpdateHelper {
     this.updateFunctionObservable = this.updateFunction();
     if(this.updateFunctionObservable !== undefined)
       return this.updateFunctionObservable
-        .mergeMap((res) => {
-          return this.updateCompleted(res);
-        })
-        .catch((error: Response | any) => {
-          this.updateRequested = false;
-          this.updateFunctionObservable = undefined;
-          return Observable.throw(error);
-        });
+        .pipe(
+          mergeMap((res) => {
+            return this.updateCompleted(res);
+          }),
+          catchError((error: Response | any) => {
+            this.updateRequested = false;
+            this.updateFunctionObservable = undefined;
+            return throwError(error);
+          })
+        );
     else
-      return Observable.of();
+      return of();
   };
   update(): Observable<any> {
     this.updateRequested = true;

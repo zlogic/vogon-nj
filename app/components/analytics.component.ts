@@ -1,8 +1,7 @@
 import { Component, Inject } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
 import { DOCUMENT } from '@angular/platform-browser';
 
-import { PageScrollService, PageScrollInstance } from 'ng2-page-scroll';
+import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll';
 
 import { HTTPService } from '../service/http.service';
 import { AccountsService, Account } from '../service/accounts.service';

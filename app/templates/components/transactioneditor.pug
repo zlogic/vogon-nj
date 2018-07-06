@@ -3,7 +3,7 @@ form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEdi
     mat-card-title
       div(style="display: flex; align-items: center;")
         span(style="align-self: center;")
-          mat-input-container
+          mat-form-field
             textarea(matInput, placeholder=__('Description'), formControlName="description", [(ngModel)]="transaction.description")
     mat-card-content
       mat-button-toggle-group(formControlName="type", [(ngModel)]="transaction.type")
@@ -12,7 +12,7 @@ form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEdi
         mat-button-toggle(value="transfer")
           span #{__('Transfer')}
     mat-card-content
-      mat-input-container
+      mat-form-field
         input(matInput, [matDatepicker]="picker", placeholder=__("Date"), formControlName="date", [(ngModel)]="transaction.date")
         mat-datepicker-toggle(matSuffix, type="button", [for]="picker")
       mat-datepicker(#picker)
@@ -27,7 +27,7 @@ form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEdi
               mat-option(*ngFor="let account of visibleAccounts", [value]="account.id")
                 | {{account.name}}
           span &nbsp;
-          mat-input-container
+          mat-form-field
             input(matInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount", [(ngModel)]="transaction.FinanceTransactionComponents[i].amount")
             span(matSuffix)
               | &nbsp;{{getCurrency(i)}}

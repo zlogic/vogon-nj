@@ -1,12 +1,9 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormGroup, Validators, FormBuilder, FormArray } from '@angular/forms';
-import { Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
 
 import { TransactionsService, Transaction, TransactionComponent } from '../service/transactions.service';
 import { AccountsService, Account } from '../service/accounts.service';
 import { TagsService } from '../service/tags.service';
-import { HTTPService } from '../service/http.service';
 
 @Component({
   selector: 'transaction-editor',

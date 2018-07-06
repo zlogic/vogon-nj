@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/observable/throw';
-import 'rxjs/add/operator/mergeMap';
+import { Observable, of, throwError } from 'rxjs';
+import { map, mergeMap, catchError } from 'rxjs/operators';
 
 import { AuthorizationService } from './auth.service';
 import { HTTPService, UpdateHelper } from './http.service';
@@ -103,13 +102,15 @@ export class TransactionsService {
     if (id === undefined)
       return this.update();
     return this.httpService.get("service/transactions/transaction/" + id)
-      .mergeMap((res: Response) => {
-        var transaction = Transaction.fromJson(res.json());
-        if (!this.updateTransactionLocal(transaction))
-          this.reset();// infinite scroll will automatically call update()
-        return Observable.of(res);
-      })
-      .catch(() => this.update());
+      .pipe(
+        mergeMap((res: Response) => {
+          var transaction = Transaction.fromJson(res.json());
+          if (!this.updateTransactionLocal(transaction))
+            this.reset();// infinite scroll will automatically call update()
+          return of(res);
+        }),
+        catchError(() => this.update())
+      );
   }
   removeTransaction(transaction: Transaction){
     this.transactions.unshift(transaction);
@@ -117,14 +118,16 @@ export class TransactionsService {
   submitTransaction(transaction: Transaction) {
     transaction.date = dateToJson(transaction.date);
     return this.httpService.post("service/transactions", transaction)
-      .mergeMap((res: Response) => {
-        var transaction: Transaction = Transaction.fromJson(res.json());
-        this.accountsService.update().subscribe();
-        if (!this.updateTransactionLocal(transaction))
-          this.reset();// infinite scroll will automatically call update()
-        return Observable.of(res);
-      })
-      .catch(() => this.update());
+      .pipe(
+        mergeMap((res: Response) => {
+          var transaction: Transaction = Transaction.fromJson(res.json());
+          this.accountsService.update().subscribe();
+          if (!this.updateTransactionLocal(transaction))
+            this.reset();// infinite scroll will automatically call update()
+          return of(res);
+        }),
+        catchError(() => this.update())
+      );
   }
   deleteTransaction(transaction: Transaction): Observable<Response> {
     if (transaction === undefined || transaction.id === undefined)
@@ -134,11 +137,13 @@ export class TransactionsService {
       return this.accountsService.update();
     };
     return this.httpService.delete("service/transactions/transaction/" + transaction.id)
-        .mergeMap(afterDeletion)
-        .catch((err) => {
-          afterDeletion(undefined).subscribe();
-          return Observable.throw(err);
-        });
+        .pipe(
+          mergeMap(afterDeletion),
+          catchError((err) => {
+            afterDeletion(undefined).subscribe();
+            return throwError(err);
+          })
+        );
   }
   getDate(): string {
     return dateToJson(new Date());
@@ -255,19 +260,21 @@ export class TransactionsService {
           params['filterTags'] = JSON.stringify(this.filterTags);
       }
       return this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
-        .map((res: Response) => {
-          if (res.json().length !== 0) {
-            this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
-          } else {
+        .pipe(
+          map((res: Response) => {
+            if (res.json().length !== 0) {
+              this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
+            } else {
+              this.lastPage = true;
+            }
+            return res;
+          }),
+          catchError((err) => {
+            this.reset();
             this.lastPage = true;
-          }
-          return res;
-        })
-        .catch((err) => {
-          this.reset();
-          this.lastPage = true;
-          return Observable.throw(err);
-        });
+            return throwError(err);
+          })
+        );
     });
     // transactions will be reloaded after accounts are updated
     this.accountsService.accountsObservable.subscribe(() => this.update().subscribe());

@@ -1,12 +1,11 @@
 import { Component, Inject } from '@angular/core';
 import { FormGroup, FormBuilder } from '@angular/forms';
 import { DOCUMENT } from '@angular/platform-browser';
-import 'rxjs/add/operator/debounceTime';
+import { debounceTime } from 'rxjs/operators';
 
-import { PageScrollService, PageScrollInstance } from 'ng2-page-scroll';
+import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll';
 
-import { AuthorizationService } from '../service/auth.service';
-import { Transaction, TransactionComponent, TransactionsService } from '../service/transactions.service';
+import { Transaction, TransactionsService } from '../service/transactions.service';
 import { TagsService } from '../service/tags.service';
 
 @Component({
@@ -70,7 +69,7 @@ export class TransactionsComponent {
       'filterDate': undefined,
       'filterTags': undefined
     });
-    this.filterForm.valueChanges.debounceTime(1000).subscribe(() => {
+    this.filterForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
       if(this.filterForm.dirty)
         this.transactionsService.update().subscribe();
     });
@@ -78,7 +77,6 @@ export class TransactionsComponent {
 
   constructor(
     public transactionsService: TransactionsService,
-    private authorizationService: AuthorizationService,
     public tagsService: TagsService,
     private formBuilder: FormBuilder,
     private pageScrollService: PageScrollService,

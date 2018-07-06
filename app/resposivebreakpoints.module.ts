@@ -10,7 +10,7 @@ const APP_BREAKPOINTS = [{
 
 export const CustomBreakPointsProvider = { 
   provide: BREAKPOINTS,
-  useValue: [...DEFAULT_BREAKPOINTS, ...APP_BREAKPOINTS]
+  useValue: APP_BREAKPOINTS
 };
 
 @NgModule({

@@ -1,9 +1,7 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Observable } from 'rxjs/Observable';
-import 'rxjs/add/operator/mergeMap';
+import { mergeMap } from 'rxjs/operators';
 
-import { HTTPService } from '../service/http.service';
 import { AuthorizationService } from '../service/auth.service';
 import { UserService } from '../service/user.service';
 
@@ -24,7 +22,7 @@ export class UsersettingsComponent {
       userdata['password'] = password;
     }
     return this.userService.submit(userdata)
-      .mergeMap((res) => this.userService.importData(this.getFile()))
+      .pipe(mergeMap(() => this.userService.importData(this.getFile())))
       .subscribe();
   }
   cancelEditing() {
@@ -51,7 +49,6 @@ export class UsersettingsComponent {
 
   constructor(
     private formBuilder: FormBuilder,
-    private httpService: HTTPService,
     public authorizationService: AuthorizationService,
     public userService: UserService
   ) { }

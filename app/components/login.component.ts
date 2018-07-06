@@ -1,8 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup, Validators, FormBuilder } from '@angular/forms';
-import { Response } from '@angular/http';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs/Observable';
 import { AuthorizationService } from '../service/auth.service';
 import { HTTPService } from '../service/http.service';
 import { ConfigurationService } from '../service/configuration.service';
@@ -25,7 +23,7 @@ export class LoginComponent {
     private router: Router,
     private configurationService: ConfigurationService
   ){
-    this.loginForm = formBuilder.group({
+    this.loginForm = this.formBuilder.group({
       'username': [null, Validators.required],
       'password': [null, Validators.required],
       'rememberToken': [false]

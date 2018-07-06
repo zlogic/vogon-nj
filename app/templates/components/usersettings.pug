@@ -5,10 +5,10 @@ form([formGroup]="usersettingsForm", (ngSubmit)="submitEditing()", autocomplete=
         | #{__('User settings')}
       mat-card-content
         section
-          mat-input-container
+          mat-form-field
             input(matInput, type="text", placeholder=__('Username'), formControlName="username")
         section
-          mat-input-container
+          mat-form-field
             input(matInput, type="password", placeholder=__('Password'), formControlName="password")
         section
           p

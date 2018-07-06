@@ -10,7 +10,7 @@ form([formGroup]="accountForm", (ngSubmit)="submitEditing()", autocomplete="off"
         mat-card-title
           div(style="display: flex; align-items: center;")
             span(*ngIf="!isEditing(account)", style="align-self: center;") {{account.name}}
-            mat-input-container(*ngIf="isEditing(account)")
+            mat-form-field(*ngIf="isEditing(account)")
               input(matInput, placeholder=__("Account name"), formControlName="name", [(ngModel)]="account.name")
             span(style="flex: 1 1 auto;")
             button(mat-icon-button, type="button", *ngIf="!isEditing(account)", [matMenuTriggerFor]="accountMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
