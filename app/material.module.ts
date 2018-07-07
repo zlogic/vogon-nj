@@ -17,7 +17,8 @@ import {
   MatSnackBarModule,
   MatChipsModule,
   MatProgressBarModule,
-  MatNativeDateModule
+  MatNativeDateModule,
+  MatAutocompleteModule
 } from '@angular/material';
 
 @NgModule({
@@ -38,7 +39,8 @@ import {
     MatChipsModule,
     MatProgressBarModule,
     MatSnackBarModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatAutocompleteModule
   ],
   exports: [
     MatButtonModule,
@@ -57,7 +59,8 @@ import {
     MatChipsModule,
     MatProgressBarModule,
     MatSnackBarModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatAutocompleteModule
   ]
 })
 export class VogonMaterialModule { }

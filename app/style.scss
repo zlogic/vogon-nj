@@ -96,7 +96,8 @@ mat-card.editor-card-accounts {
 }
 
 .editor-card > mat-card-content {
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
 }
 

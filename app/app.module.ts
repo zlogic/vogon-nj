@@ -1,12 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { APP_BASE_HREF } from '@angular/common';
 
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
-import { TagInputModule } from 'ngx-chips';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { VogonMaterialModule } from './material.module';
@@ -31,6 +30,7 @@ import { AnalyticsComponent } from './components/analytics.component';
 import { UsersettingsComponent } from './components/usersettings.component';
 import { IntroComponent } from './components/intro.component';
 import { TransactionEditorComponent } from './components/transactioneditor.component';
+import { TagsInputComponent } from './components/tagsinput.component';
 
 @NgModule({
   imports: [ 
@@ -39,9 +39,9 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     VogonRoutingModule,
     VogonMaterialModule,
     FormsModule,
+    ReactiveFormsModule,
     HttpModule,
     InfiniteScrollModule,
-    TagInputModule,
     NgxChartsModule
   ],
   declarations: [
@@ -49,6 +49,7 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     LoginComponent,
     TransactionsComponent,
     TransactionEditorComponent,
+    TagsInputComponent,
     AccountsComponent,
     AnalyticsComponent,
     UsersettingsComponent,

@@ -11,8 +11,7 @@ form(#transactionForm="ngForm", (ngSubmit)="submitEditing(transactionForm)", aut
         input(matInput, [matDatepicker]="picker", placeholder=__("Date"), name="date", [(ngModel)]="transaction.date", required)
         mat-datepicker-toggle(matSuffix, type="button", [for]="picker")
       mat-datepicker(#picker)
-      tag-input(placeholder=__("Tags"), name="tags", [(ngModel)]="transaction.tags", [modelAsStrings]="true")
-        tag-input-dropdown([autocompleteItems]="tagsService.tags")
+      tags-input(placeholder=__("Tags"), name="tags", [ngModel]="transaction.tags")
       p
         mat-button-toggle-group(name="type", [(ngModel)]="transaction.type", required)
           mat-button-toggle(value="expenseincome")

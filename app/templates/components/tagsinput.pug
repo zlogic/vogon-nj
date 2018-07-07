@@ -1,0 +1,9 @@
+mat-form-field(style="width:100%;")
+  mat-chip-list(#tagsList)
+    mat-chip(*ngFor="let tag of tags; let i=index", [selectable]="true", [removable]="true", (removed)="removeTag(i)")
+      | {{tag}}
+      mat-icon(matChipRemove) cancel
+    input([placeholder]="placeholder", #tagsInput, [formControl]="tagsControl", [matChipInputFor]="tagsList", [matAutocomplete]="auto", [matChipInputSeparatorKeyCodes]="separatorKeysCodes", [matChipInputAddOnBlur]="false", (matChipInputTokenEnd)="addTag($event)")
+  mat-autocomplete(#auto="matAutocomplete", (optionSelected)="selectedTag($event)")
+    mat-option(*ngFor="let tag of filteredTags | async", [value]="tag")
+      | {{tag}}
