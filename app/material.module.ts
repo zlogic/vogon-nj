@@ -15,6 +15,8 @@ import {
   MatSidenavModule,
   MatToolbarModule,
   MatSnackBarModule,
+  MatTabsModule,
+  MatStepperModule,
   MatChipsModule,
   MatProgressBarModule,
   MatNativeDateModule,
@@ -39,6 +41,8 @@ import {
     MatChipsModule,
     MatProgressBarModule,
     MatSnackBarModule,
+    MatTabsModule,
+    MatStepperModule,
     MatNativeDateModule,
     MatAutocompleteModule
   ],
@@ -59,6 +63,8 @@ import {
     MatChipsModule,
     MatProgressBarModule,
     MatSnackBarModule,
+    MatTabsModule,
+    MatStepperModule,
     MatNativeDateModule,
     MatAutocompleteModule
   ]

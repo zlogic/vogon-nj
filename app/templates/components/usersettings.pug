@@ -4,19 +4,18 @@ form(#usersettingsForm="ngForm", (ngSubmit)="submitEditing()", autocomplete="off
       mat-card-title
         | #{__('User settings')}
       mat-card-content
-        section
+        p
           mat-form-field
             input(matInput, type="text", placeholder=__('Username'), name="username", [(ngModel)]="username", required)
-        section
+        p
           mat-form-field
             input(matInput, type="password", placeholder=__('Password'), name="password", [(ngModel)]="password")
-        section
-          p
-            button(mat-raised-button, type="button", (click)="importData()") #{__('Import data')}
-            span &nbsp;
-            input(type="file" #fileInput)
-          p
-            button(mat-raised-button, type="button", (click)="exportData()") #{__('Export data')}
+        p
+          button(mat-raised-button, type="button", (click)="importData()") #{__('Import data')}
+          span &nbsp;
+          input(type="file" #fileInput)
+        p
+          button(mat-raised-button, type="button", (click)="exportData()") #{__('Export data')}
       mat-card-actions
         button(mat-button, type="submit", [disabled]="!usersettingsForm.valid") #{__('Apply')}
         button(mat-button, type="button", (click)="cancelEditing()") #{__('Cancel')}

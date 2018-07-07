@@ -3,7 +3,6 @@ div(class="card-container")
     mat-card-content
       h3
         | #{__('Vogon authorization')}
-      section
       p(*ngIf="isAllowRegistration()")
         mat-button-toggle-group([(ngModel)]="mode")
           mat-button-toggle(value="login")

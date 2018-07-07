@@ -1,75 +1,77 @@
-button(mat-fab, class="my-fab", (click)="buildReport()")
-  mat-icon assistant
 div(class="card-container")
-  mat-card(class="large-card")
-    mat-card-title #{__('Tags')}
+  mat-card(class="giant-card")
+    mat-card-title #{__('Analytics')}
     mat-card-content
-      p
-        button(mat-button, (click)="selectAllTags()") #{__('Select all tags')}
-        button(mat-button, (click)="deselectAllTags()") #{__('Deselect all tags')}
-      section(*ngFor="let tag of tags")
-        mat-checkbox([(ngModel)]="tag.selected") {{tag.tag.length&gt;0?tag.tag:"&nbsp;"}}
-  mat-card(class="large-card")
-    mat-card-title #{__('Accounts')}
-    mat-card-content
-      p
-        button(mat-button, (click)="selectAllAccounts()") #{__('Select all accounts')}
-        button(mat-button, (click)="deselectAllAccounts()") #{__('Deselect all accounts')}
-      section(*ngFor="let account of accounts")
-        mat-checkbox([(ngModel)]="account.selected") {{accountsService.getAccount(account.id).name}}
-  mat-card(class="large-card")
-    mat-card-title #{__('Report configuration')}
-    mat-card-content
-      section
-        mat-form-field
-          input(matInput, [matDatepicker]="startDatePicker", placeholder=__("Start date"), [(ngModel)]="startDate")
-          mat-datepicker-toggle(matSuffix, type="button", [for]="startDatePicker")
-        mat-datepicker(#startDatePicker)
-        span &nbsp;
-        mat-form-field
-          input(matInput, [matDatepicker]="endDatePicker", placeholder=__("End date"), [(ngModel)]="endDate")
-          mat-datepicker-toggle(matSuffix, type="button", [for]="endDatePicker")
-        mat-datepicker(#endDatePicker)
-      section
-        mat-checkbox([(ngModel)]="transactionTypeEnabled.transfer") #{__('Transfer transactions')}
-      section
-        mat-checkbox([(ngModel)]="transactionTypeEnabled.income") #{__('Income transactions')}
-      section
-        mat-checkbox([(ngModel)]="transactionTypeEnabled.expense") #{__('Expense transactions')}
-ng-template([ngIf]="reports !== undefined")
-  mat-toolbar()
-    mat-select(placeholder=__("Select currency"), [(ngModel)]="selectedCurrency", (change)="currencyChanged()")
-      mat-option(*ngFor="let currency of currencies", [value]="currency")
-        | {{currencyService.findCurrency(currency).displayName}}
-  div(class="card-container")
-    mat-card(class="giant-card")
-      mat-card-title #{__('Tags chart')}
-      mat-card-content
-        div(style="width: 100%; height: 400px;")
-          ngx-charts-pie-chart([results]="tagsChart", [labels]="true")
-    mat-card(class="giant-card")
-      mat-card-title #{__('Balance chart')}
-      mat-card-content
-        div(style="width: 100%; height: 400px;")
-          ngx-charts-line-chart([results]="balanceChart", [xAxis]="true", [yAxis]="true", [autoScale]="false")
-  div(class="card-container")
-    mat-card(class="large-card")
-      mat-card-title #{__('Report by transactions')}
-      mat-card-content
-        mat-list
-          mat-list-item(*ngFor="let transaction of getReportTransactions()")
-            h4(mat-line) {{transaction.description}}
-            p(mat-line)
-              span(style="float: left;") {{transaction.date | date}}
-              span(style="float: right;")
-                ng-template([ngIf]="transactionsService.isTransferTransaction(transaction)") &sum; 
-                | {{transaction.amount | number:"1.2-2"}} {{selectedCurrency}}
-    mat-card(class="large-card")
-      mat-card-title #{__('Report by tags')}
-      mat-card-content
-        mat-list
-          mat-list-item(*ngFor="let tagExpense of getReportTagExpenses()")
-            h4(mat-line) {{tagExpense.tag}}
-            p(mat-line)
-              span(style="float: right;")
-                | {{tagExpense.amount | number : "1.2"}} {{selectedCurrency}}
+      mat-vertical-stepper
+        mat-step
+          ng-template(matStepLabel) #{__('Tags')}
+          p
+            button(mat-button, (click)="selectAllTags()") #{__('Select all tags')}
+            button(mat-button, (click)="deselectAllTags()") #{__('Deselect all tags')}
+          div(class="many-checkbox-container")
+            ng-container(*ngFor="let tag of tags")
+              mat-checkbox([(ngModel)]="tag.selected") {{tag.tag.length&gt;0?tag.tag:"&nbsp;"}}
+          div
+            button(mat-button, matStepperNext) #{__('Next')}
+        mat-step
+          ng-template(matStepLabel) #{__('Accounts')}
+          p
+            button(mat-button, (click)="selectAllAccounts()") #{__('Select all accounts')}
+            button(mat-button, (click)="deselectAllAccounts()") #{__('Deselect all accounts')}
+          div(class="many-checkbox-container")
+            ng-container(*ngFor="let account of accounts")
+              mat-checkbox([(ngModel)]="account.selected") {{accountsService.getAccount(account.id).name}}
+          div
+            button(mat-button, matStepperNext) #{__('Next')}
+        mat-step
+          ng-template(matStepLabel)  #{__('Report configuration')}
+          p
+            mat-form-field
+              input(matInput, [matDatepicker]="startDatePicker", placeholder=__("Start date"), [(ngModel)]="startDate")
+              mat-datepicker-toggle(matSuffix, type="button", [for]="startDatePicker")
+            mat-datepicker(#startDatePicker)
+            span &nbsp;
+            mat-form-field
+              input(matInput, [matDatepicker]="endDatePicker", placeholder=__("End date"), [(ngModel)]="endDate")
+              mat-datepicker-toggle(matSuffix, type="button", [for]="endDatePicker")
+            mat-datepicker(#endDatePicker)
+          p
+            mat-checkbox([(ngModel)]="transactionTypeEnabled.transfer") #{__('Transfer transactions')}
+          p
+            mat-checkbox([(ngModel)]="transactionTypeEnabled.income") #{__('Income transactions')}
+          p
+            mat-checkbox([(ngModel)]="transactionTypeEnabled.expense") #{__('Expense transactions')}
+          div
+            button(mat-button, matStepperNext) #{__('Next')}
+        mat-step
+          ng-template(matStepLabel)  #{__('Report')}
+          button(mat-raised-button, color="primary", (click)="buildReport()") #{__('Build report')}
+          ng-template([ngIf]="reports !== undefined")
+            p
+              mat-form-field
+                mat-select(placeholder=__("Select currency"), [(ngModel)]="selectedCurrency", (selectionChange)="currencyChanged()")
+                  mat-option(*ngFor="let currency of currencies", [value]="currency")
+                    | {{currencyService.findCurrency(currency).displayName}}
+            mat-tab-group(dynamicHeight)
+              mat-tab(label=__('Tags chart'))
+                div(style="width: 100%; height: 400px;")
+                  ngx-charts-pie-chart([results]="tagsChart", [labels]="true")
+              mat-tab(label=__('Balance chart'))
+                div(style="width: 100%; height: 400px;")
+                  ngx-charts-line-chart([results]="balanceChart", [xAxis]="true", [yAxis]="true", [autoScale]="false")
+              mat-tab(label=__('Report by transactions'))
+                mat-list
+                  mat-list-item(*ngFor="let transaction of getReportTransactions()")
+                    h4(mat-line) {{transaction.description}}
+                    p(mat-line)
+                      span(style="float: left;") {{transaction.date | date}}
+                      span(style="float: right;")
+                        ng-template([ngIf]="transactionsService.isTransferTransaction(transaction)") &sum; 
+                        | {{transaction.amount | number:"1.2-2"}} {{selectedCurrency}}
+              mat-tab(label=__('Report by tags'))
+                mat-list
+                  mat-list-item(*ngFor="let tagExpense of getReportTagExpenses()")
+                    h4(mat-line) {{tagExpense.tag}}
+                    p(mat-line)
+                      span(style="float: right;")
+                        | {{tagExpense.amount | number : "1.2"}} {{selectedCurrency}}

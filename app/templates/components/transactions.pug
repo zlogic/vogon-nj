@@ -70,7 +70,7 @@ div(class="card-container", infiniteScroll, (scrolled)="transactionsService.next
 div(*ngIf="transactionsService.isLoadingNextPage()", class="card-container")
   mat-card(class="large-card")
     mat-card-content
-      section
+      div
         span #{__('Loading...')}
-      section
+      div
         mat-progress-bar(mode="indeterminate")
