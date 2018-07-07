@@ -1,36 +1,35 @@
-form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
-  mat-card(class="large-card")
+
+form(#transactionForm="ngForm", (ngSubmit)="submitEditing(transactionForm)", autocomplete="off", novalidate)
+  mat-card(class="editor-card-transactions mat-elevation-z4")
     mat-card-title
-      div(style="display: flex; align-items: center;")
-        span(style="align-self: center;")
-          mat-form-field
-            textarea(matInput, placeholder=__('Description'), formControlName="description", [(ngModel)]="transaction.description")
-    mat-card-content
-      mat-button-toggle-group(formControlName="type", [(ngModel)]="transaction.type")
-        mat-button-toggle(value="expenseincome")
-          span #{__('Expense/income')}
-        mat-button-toggle(value="transfer")
-          span #{__('Transfer')}
+      | #{__('Edit transaction')}
     mat-card-content
       mat-form-field
-        input(matInput, [matDatepicker]="picker", placeholder=__("Date"), formControlName="date", [(ngModel)]="transaction.date")
+        input(matInput, placeholder=__('Description'), name="description", [(ngModel)]="transaction.description", required)
+      span &nbsp;
+      mat-form-field
+        input(matInput, [matDatepicker]="picker", placeholder=__("Date"), name="date", [(ngModel)]="transaction.date", required)
         mat-datepicker-toggle(matSuffix, type="button", [for]="picker")
       mat-datepicker(#picker)
-    mat-card-content
-      tag-input(placeholder=__("Tags"), formControlName="tags", [(ngModel)]="transaction.tags", [modelAsStrings]="true")
+      tag-input(placeholder=__("Tags"), name="tags", [(ngModel)]="transaction.tags", [modelAsStrings]="true")
         tag-input-dropdown([autocompleteItems]="tagsService.tags")
-    mat-card-content(formArrayName="FinanceTransactionComponents")
-      div(*ngFor="let component of getComponentsGroup().controls; let i=index", [formGroupName]="i")
+      p
+        mat-button-toggle-group(name="type", [(ngModel)]="transaction.type", required)
+          mat-button-toggle(value="expenseincome")
+            span #{__('Expense/income')}
+          mat-button-toggle(value="transfer")
+            span #{__('Transfer')}
+      div(*ngFor="let component of transaction.FinanceTransactionComponents; let i=index")
         div(style="display: flex;")
           mat-form-field
-            mat-select(placeholder=__("Account"), formControlName="AccountId", [(ngModel)]="transaction.FinanceTransactionComponents[i].AccountId")
+            mat-select(placeholder=__("Account"), [name]="'AccountId'+i", [(ngModel)]="component.AccountId", required)
               mat-option(*ngFor="let account of visibleAccounts", [value]="account.id")
                 | {{account.name}}
           span &nbsp;
           mat-form-field
-            input(matInput, type="text", style="text-align:right;", placeholder=__('Amount'), formControlName="amount", [(ngModel)]="transaction.FinanceTransactionComponents[i].amount")
+            input(matInput, type="text", style="text-align:right;", placeholder=__('Amount'), [name]="'amount'+i", [(ngModel)]="component.amount", required, pattern="^-?\\d+(\\.\\d+)?$")
             span(matSuffix)
-              | &nbsp;{{getCurrency(i)}}
+              | &nbsp;{{getCurrency(component)}}
           span(style="flex: 1 1 auto;")
           button(mat-icon-button, type="button", [matMenuTriggerFor]="componentMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
             mat-icon more_vert
@@ -38,7 +37,6 @@ form(style="layout: flex;", [formGroup]="transactionForm", (ngSubmit)="submitEdi
             button(mat-menu-item, type="button", (click)="deleteTransactionComponent(i)")
               mat-icon delete_forever
               span #{__("Delete")}
-    mat-card-content
       button(mat-mini-fab, type="button", (click)="addTransactionComponent()")
         mat-icon add
     mat-card-actions

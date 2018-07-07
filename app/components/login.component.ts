@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { FormGroup, Validators, FormBuilder } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthorizationService } from '../service/auth.service';
 import { HTTPService } from '../service/http.service';
@@ -11,24 +10,17 @@ import { ConfigurationService } from '../service/configuration.service';
 
 export class LoginComponent {
   mode: string = "login";
-
-  loginForm: FormGroup;
-
+  username: string = "";
+  password: string = "";
+  rememberToken: boolean = false;
   errorMessage: string;
   
   constructor(
-    private formBuilder: FormBuilder,
     private httpService: HTTPService,
     private authorizationService: AuthorizationService,
     private router: Router,
     private configurationService: ConfigurationService
-  ){
-    this.loginForm = this.formBuilder.group({
-      'username': [null, Validators.required],
-      'password': [null, Validators.required],
-      'rememberToken': [false]
-    });
-  }
+  ){  }
 
   modeIsLogin(): boolean { return this.mode == "login"; }
   modeIsRegister(): boolean { return this.mode == "register"; }
@@ -37,34 +29,30 @@ export class LoginComponent {
 
   private onSuccess() {
     this.router.navigate(['/transactions']);
-    this.loginForm.reset();
     this.errorMessage = undefined;
   }
 
-  private login(username: string, password: string, rememberToken: boolean) {
-    return this.authorizationService.performAuthorization(username, password, rememberToken)
+  private login() {
+    return this.authorizationService.performAuthorization(this.username, this.password, this.rememberToken)
       .subscribe(
         () => this.onSuccess(),
         (err) => this.errorMessage = err.json().error_description
       );
   }
 
-  private register(username: string, password: string, rememberToken: boolean) {
-    var user = {username: username, password: password};
+  private register() {
+    var user = {username: this.username, password: this.password};
     return this.httpService.post("register", user)
       .subscribe(
-        () => this.login(username, password, rememberToken),
+        () => this.login(),
         (err) => this.errorMessage = err.json().exception
       );
   }
 
   onSubmit() {
-    var username = this.loginForm.controls['username'].value
-    var password = this.loginForm.controls['password'].value;
-    var rememberToken = this.loginForm.controls['rememberToken'].value;
     if(this.mode === "login")
-      this.login(username, password, rememberToken);
+      this.login();
     else if(this.mode === "register")
-      this.register(username, password, rememberToken);
+      this.register();
   }
 }

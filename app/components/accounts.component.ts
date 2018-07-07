@@ -1,8 +1,5 @@
-import { Component, Inject } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { DOCUMENT } from '@angular/platform-browser';
-
-import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll';
+import { Component } from '@angular/core';
+import { NgForm } from '@angular/forms';
 
 import { AccountsService, Account } from '../service/accounts.service'
 import { CurrencyService } from '../service/currency.service'
@@ -12,12 +9,11 @@ import { CurrencyService } from '../service/currency.service'
 })
 
 export class AccountsComponent {
-  accountForm: FormGroup;
   showAllAccounts: boolean;
   editingAccount: Account = undefined;
 
-  isEditing(account: Account): boolean {
-    return this.editingAccount == account;
+  isEditing(): boolean {
+    return this.editingAccount !== undefined;
   }
   createAccount() {
     if(this.editingAccount !== undefined){
@@ -33,20 +29,12 @@ export class AccountsComponent {
   };
   startEditing(account: Account) {
     this.editingAccount = account;
-    this.accountForm.controls['showInList'].setValue(account.showInList);
-    if (account.id === undefined) {
-      let pageScrollInstance: PageScrollInstance = PageScrollInstance.newInstance({document: this.document, scrollTarget: '#accountEditor', pageScrollOffset: 64+24});
-      this.pageScrollService.start(pageScrollInstance);
-    }
   }
   cancelEditing() {
     this.editingAccount = undefined;
     this.accountsService.update().subscribe();
   }
-  submitEditing() {
-    if(this.editingAccount !== undefined) {
-      this.editingAccount.showInList = this.accountForm.controls['showInList'].value;
-    }
+  submitEditing(transactionForm: NgForm) {
     this.editingAccount = undefined;
     this.accountsService.submitAccounts().subscribe();
   }
@@ -56,19 +44,8 @@ export class AccountsComponent {
     });
     this.accountsService.submitAccounts().subscribe();
   }
-  ngOnInit() {
-    this.accountForm = this.formBuilder.group({
-      'name': [null, Validators.required],
-      'currency': [null, Validators.required],
-      'includeInTotal': [null, Validators.required],
-      'showInList': [null, Validators.required]
-    });
-  }
   constructor(
     public accountsService: AccountsService,
-    public currencyService: CurrencyService,
-    private formBuilder: FormBuilder,
-    private pageScrollService: PageScrollService,
-    @Inject(DOCUMENT) private document: any
+    public currencyService: CurrencyService
   ) { }
 }

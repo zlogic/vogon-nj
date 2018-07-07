@@ -36,7 +36,6 @@ div(class="card-container")
         mat-checkbox([(ngModel)]="transactionTypeEnabled.income") #{__('Income transactions')}
       section
         mat-checkbox([(ngModel)]="transactionTypeEnabled.expense") #{__('Expense transactions')}
-div(id="report")
 ng-template([ngIf]="reports !== undefined")
   mat-toolbar()
     mat-select(placeholder=__("Select currency"), [(ngModel)]="selectedCurrency", (change)="currencyChanged()")

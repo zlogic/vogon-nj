@@ -1,44 +1,48 @@
-button(mat-fab, class="my-fab", (click)="createAccount()")
+button(mat-fab, class="my-fab", *ngIf="!isEditing()", (click)="createAccount()")
   mat-icon add
 mat-toolbar
   mat-slide-toggle([(ngModel)]="showAllAccounts") #{__("Show all accounts")}
-form([formGroup]="accountForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
-  div(class="card-container")
-    ng-container(*ngFor="let account of accountsService.accounts")
-      div(*ngIf="isEditing(account)", id="accountEditor")
-      mat-card(class="small-card", *ngIf="account.showInList || showAllAccounts")
-        mat-card-title
-          div(style="display: flex; align-items: center;")
-            span(*ngIf="!isEditing(account)", style="align-self: center;") {{account.name}}
-            mat-form-field(*ngIf="isEditing(account)")
-              input(matInput, placeholder=__("Account name"), formControlName="name", [(ngModel)]="account.name")
-            span(style="flex: 1 1 auto;")
-            button(mat-icon-button, type="button", *ngIf="!isEditing(account)", [matMenuTriggerFor]="accountMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
-              mat-icon more_vert
-            mat-menu(#accountMenu="matMenu")
-              button(mat-menu-item, type="button", (click)="startEditing(account)")
-                mat-icon edit
-                span #{__("Edit")}
-              button(mat-menu-item, type="button", (click)="deleteAccount(account)")
-                mat-icon delete_forever
-                span #{__("Delete")}
-        mat-card-content(*ngIf="isEditing(account)")
-          p
-            mat-select(placeholder=__("Currency"), formControlName="currency", [(ngModel)]="account.currency")
-              mat-option(*ngFor="let currency of currencyService.currencies", [value]="currency.currencyCode")
-                | {{currency.displayName}}
-          p
-            mat-slide-toggle(formControlName="includeInTotal", [(ngModel)]="account.includeInTotal") #{__("Include in total")}
-          p
-            mat-slide-toggle(formControlName="showInList") #{__("Show in accounts list")}
-        mat-card-content
-          div(style="display: flex; align-items: top;")
-            span(style="display: block;") {{account.currency}}
-            span(style="flex: 1 1 auto;")
-            span(style="display: block;") {{account.balance | number:"1.2-2"}}
-        mat-card-actions(*ngIf="isEditing(account)")
-          button(mat-button, type="submit", [disabled]="!accountForm.valid") #{__('Apply')}
-          button(mat-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
+div(*ngIf="isEditing()")
+  form(#accountForm="ngForm", (ngSubmit)="submitEditing(accountForm)", autocomplete="off", novalidate)
+    mat-card(class="editor-card-accounts mat-elevation-z4")
+      mat-card-title
+        | #{__('Edit account')}
+      mat-card-content
+        mat-form-field
+          input(matInput, placeholder=__("Account name"), name="name", [(ngModel)]="editingAccount.name", required)
+        span &nbsp;
+        mat-form-field
+          mat-select(placeholder=__("Currency"), name="currency", [(ngModel)]="editingAccount.currency", required)
+            mat-option(*ngFor="let currency of currencyService.currencies", [value]="currency.currencyCode")
+              | {{currency.displayName}}
+        p
+          mat-slide-toggle(name="includeInTotal", [(ngModel)]="editingAccount.includeInTotal", required) #{__("Include in total")}
+        p
+          mat-slide-toggle(name="showInList", [(ngModel)]="editingAccount.showInList", required) #{__("Show in accounts list")}
+      mat-card-actions
+        button(mat-button, type="submit", [disabled]="!accountForm.valid") #{__('Apply')}
+        button(mat-button, type="button", (click)="cancelEditing()") #{__('Cancel')}
+div(class="card-container")
+  ng-container(*ngFor="let account of accountsService.accounts")
+    mat-card(class="small-card", *ngIf="account.showInList || showAllAccounts")
+      mat-card-title
+        div(style="display: flex; align-items: center;")
+          span(style="align-self: center;") {{account.name}}
+          span(style="flex: 1 1 auto;")
+          button(mat-icon-button, type="button", [matMenuTriggerFor]="accountMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
+            mat-icon more_vert
+          mat-menu(#accountMenu="matMenu")
+            button(mat-menu-item, type="button", (click)="startEditing(account)")
+              mat-icon edit
+              span #{__("Edit")}
+            button(mat-menu-item, type="button", (click)="deleteAccount(account)")
+              mat-icon delete_forever
+              span #{__("Delete")}
+      mat-card-content
+        div(style="display: flex; align-items: top;")
+          span(style="display: block;") {{account.currency}}
+          span(style="flex: 1 1 auto;")
+          span(style="display: block;") {{account.balance | number:"1.2-2"}}
 div(class="card-container")
   ng-container(*ngFor="let currencyTotals of accountsService.getTotalsForCurrencies()")
     mat-card(class="small-card")

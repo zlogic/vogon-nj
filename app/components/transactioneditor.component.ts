@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
-import { FormGroup, Validators, FormBuilder, FormArray } from '@angular/forms';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { NgForm } from '@angular/forms'
 
 import { TransactionsService, Transaction, TransactionComponent } from '../service/transactions.service';
 import { AccountsService, Account } from '../service/accounts.service';
@@ -10,44 +10,29 @@ import { TagsService } from '../service/tags.service';
   templateUrl: '../templates/components/transactioneditor.pug'
 })
 
-export class TransactionEditorComponent implements OnInit {
+export class TransactionEditorComponent {
   @Input('transaction') transaction: Transaction;
   @Output() done = new EventEmitter();
-  transactionForm: FormGroup;
   visibleAccounts: Account[];
 
-  getComponentsGroup() {
-    return <FormArray>this.transactionForm.controls['FinanceTransactionComponents'];
-  }  
-
-  private createComponentControl(component: TransactionComponent) {
-    return this.formBuilder.group({
-      'AccountId': [undefined, Validators.required],
-      'amount': [undefined, [Validators.required, Validators.pattern(/^-?\d+(\.\d+)?$/)]]
-    });
-  }
-  addTransactionComponent(component?: TransactionComponent) {
-    if(component === undefined) {
-      component = new TransactionComponent();
-      component.amount = 0;
-      this.transaction.FinanceTransactionComponents.push(component);
-    }
-    this.getComponentsGroup().push(this.createComponentControl(component));
+  addTransactionComponent() {
+    var component = new TransactionComponent();
+    component.amount = 0;
+    this.transaction.FinanceTransactionComponents.push(component);
   }
   deleteTransactionComponent(i: number) {
-    this.getComponentsGroup().removeAt(i);
     this.transaction.FinanceTransactionComponents.splice(i, 1);
   }
-  getCurrency(i: number): string{
-    var selectedAccount = (<FormArray>this.getComponentsGroup().controls[i]).controls['AccountId'].value;
+  getCurrency(component: TransactionComponent): string{
+    var selectedAccount = component.AccountId;
     if(selectedAccount === undefined){
       return undefined;
     }
     var account = this.accountsService.getAccount(selectedAccount)
     return account !== undefined ? account.currency : undefined;
   }
-  submitEditing() {
-    if(!this.transactionForm.valid)
+  submitEditing(transactionForm: NgForm) {
+    if(!transactionForm.valid)
       return;
     this.tagsService.mergeTags(this.transaction.tags);
     this.transactionsService.submitTransaction(this.transaction).subscribe();
@@ -61,24 +46,13 @@ export class TransactionEditorComponent implements OnInit {
     this.done.emit();
   }
 
-  ngOnInit() {
-    this.transactionForm = this.formBuilder.group({
-      'description': [undefined, Validators.required],
-      'type': [undefined, Validators.required],
-      'date': [undefined, Validators.required],
-      'tags': [undefined],
-      'FinanceTransactionComponents': this.formBuilder.array([])
-    });
-    this.transaction.FinanceTransactionComponents.forEach((component) => this.addTransactionComponent(component));
+  constructor(
+    private transactionsService: TransactionsService,
+    public accountsService: AccountsService,
+    public tagsService: TagsService
+  ) {
     this.visibleAccounts = this.accountsService.accounts.filter(function(account){
       return account.showInList;
     });
   }
-
-  constructor(
-    private formBuilder: FormBuilder,
-    private transactionsService: TransactionsService,
-    public accountsService: AccountsService,
-    public tagsService: TagsService
-  ) { }
 }

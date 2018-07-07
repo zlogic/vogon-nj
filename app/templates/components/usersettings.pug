@@ -1,4 +1,4 @@
-form([formGroup]="usersettingsForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
+form(#usersettingsForm="ngForm", (ngSubmit)="submitEditing()", autocomplete="off", novalidate)
   div(class="card-container")
     mat-card(class="large-card")
       mat-card-title
@@ -6,10 +6,10 @@ form([formGroup]="usersettingsForm", (ngSubmit)="submitEditing()", autocomplete=
       mat-card-content
         section
           mat-form-field
-            input(matInput, type="text", placeholder=__('Username'), formControlName="username")
+            input(matInput, type="text", placeholder=__('Username'), name="username", [(ngModel)]="username", required)
         section
           mat-form-field
-            input(matInput, type="password", placeholder=__('Password'), formControlName="password")
+            input(matInput, type="password", placeholder=__('Password'), name="password", [(ngModel)]="password")
         section
           p
             button(mat-raised-button, type="button", (click)="importData()") #{__('Import data')}

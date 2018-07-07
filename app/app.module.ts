@@ -1,13 +1,12 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { APP_BASE_HREF } from '@angular/common';
 
 import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { TagInputModule } from 'ngx-chips';
-import { NgxPageScrollModule } from 'ngx-page-scroll';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { VogonMaterialModule } from './material.module';
@@ -24,7 +23,6 @@ import { ConfigurationService } from './service/configuration.service';
 
 import { AppComponent } from './app.component';
 import { VogonRoutingModule } from './router.module';
-import { ResponsiveBreakpointsModule } from './resposivebreakpoints.module'
 
 import { LoginComponent } from './components/login.component';
 import { TransactionsComponent } from './components/transactions.component';
@@ -41,12 +39,9 @@ import { TransactionEditorComponent } from './components/transactioneditor.compo
     VogonRoutingModule,
     VogonMaterialModule,
     FormsModule,
-    ReactiveFormsModule,
     HttpModule,
-    ResponsiveBreakpointsModule,
     InfiniteScrollModule,
     TagInputModule,
-    NgxPageScrollModule,
     NgxChartsModule
   ],
   declarations: [

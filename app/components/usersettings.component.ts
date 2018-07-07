@@ -1,5 +1,4 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { mergeMap } from 'rxjs/operators';
 
 import { AuthorizationService } from '../service/auth.service';
@@ -10,16 +9,15 @@ import { UserService } from '../service/user.service';
 })
 
 export class UsersettingsComponent {
-  usersettingsForm: FormGroup;
   @ViewChild('fileInput') fileInput: ElementRef;
   @ViewChild('exportForm') exportForm: ElementRef;
+  username: string;
+  password: string;
 
   submitEditing() {
-    var username = this.usersettingsForm.controls['username'].value;
-    var password = this.usersettingsForm.controls['password'].value;
-    var userdata: any = {username: username};
-    if (password !== undefined && password !== null) {
-      userdata['password'] = password;
+    var userdata: any = {username: this.username};
+    if (this.password !== undefined && this.password !== null) {
+      userdata['password'] = this.password;
     }
     return this.userService.submit(userdata)
       .pipe(mergeMap(() => this.userService.importData(this.getFile())))
@@ -37,19 +35,14 @@ export class UsersettingsComponent {
   exportData() {
     this.exportForm.nativeElement.submit();
   }
-  ngOnInit() {
-    this.usersettingsForm = this.formBuilder.group({
-      'username': [this.userService.username, Validators.required],
-      'password': undefined
-    });
-    this.userService.userObservable.subscribe(() => {
-      this.usersettingsForm.controls['username'].setValue(this.userService.username);
-    });
-  }
 
   constructor(
-    private formBuilder: FormBuilder,
     public authorizationService: AuthorizationService,
     public userService: UserService
-  ) { }
+  ) {
+    this.username = this.userService.username;
+    this.userService.userObservable.subscribe(() => {
+      this.username = this.userService.username;
+    });
+  }
 }

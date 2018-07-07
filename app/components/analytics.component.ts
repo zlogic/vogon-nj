@@ -1,7 +1,4 @@
-import { Component, Inject } from '@angular/core';
-import { DOCUMENT } from '@angular/platform-browser';
-
-import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll';
+import { Component } from '@angular/core';
 
 import { HTTPService } from '../service/http.service';
 import { AccountsService, Account } from '../service/accounts.service';
@@ -74,10 +71,6 @@ export class AnalyticsComponent {
       .subscribe((res) => {
         this.reports = res.json();
         this.updateCurrencies();
-        if(this.reports !== undefined) {
-          let pageScrollInstance: PageScrollInstance = PageScrollInstance.simpleInstance(this.document, '#report');
-          this.pageScrollService.start(pageScrollInstance);
-        }
       });
   }
   updateCurrencies() {
@@ -122,9 +115,7 @@ export class AnalyticsComponent {
     public transactionsService: TransactionsService,
     public tagsService: TagsService,
     public currencyService: CurrencyService,
-    public userService: UserService,
-    private pageScrollService: PageScrollService,
-    @Inject(DOCUMENT) private document: any
+    public userService: UserService
   ) {
     let currentTime = new Date();
     this.startDate = new Date(currentTime.getFullYear(), currentTime.getMonth(), 1);

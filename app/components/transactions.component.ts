@@ -1,9 +1,6 @@
-import { Component, Inject } from '@angular/core';
-import { FormGroup, FormBuilder } from '@angular/forms';
-import { DOCUMENT } from '@angular/platform-browser';
+import { Component, ViewChild } from '@angular/core';
+import { NgForm } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
-
-import { PageScrollService, PageScrollInstance } from 'ngx-page-scroll';
 
 import { Transaction, TransactionsService } from '../service/transactions.service';
 import { TagsService } from '../service/tags.service';
@@ -13,8 +10,8 @@ import { TagsService } from '../service/tags.service';
 })
 
 export class TransactionsComponent {
-  private editingTransaction: Transaction;
-  filterForm: FormGroup;
+  @ViewChild('filterForm') filterForm: NgForm;
+  editingTransaction: Transaction;
 
   totalsByCurrency(transaction: Transaction): {currency: string; amount: any;}[] {
     var totals = [];
@@ -41,15 +38,11 @@ export class TransactionsComponent {
     this.transactionsService.transactions.unshift(transaction);
     this.startEditing(transaction);
   }
-  isEditing(transaction: Transaction): boolean {
-    return this.editingTransaction === transaction;
+  isEditing(): boolean {
+    return this.editingTransaction !== undefined;
   }
   startEditing(transaction: Transaction) {
     this.editingTransaction = transaction;
-    if (transaction.id === undefined) {
-      let pageScrollInstance: PageScrollInstance = PageScrollInstance.simpleInstance(this.document, '#transactionsStart');
-      this.pageScrollService.start(pageScrollInstance);
-    }
   }
   stopEditing() {
     this.editingTransaction = undefined;
@@ -64,11 +57,6 @@ export class TransactionsComponent {
     this.transactionsService.deleteTransaction(transaction).subscribe();
   }
   ngOnInit() {
-    this.filterForm = this.formBuilder.group({
-      'filterDescription': undefined,
-      'filterDate': undefined,
-      'filterTags': undefined
-    });
     this.filterForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
       if(this.filterForm.dirty)
         this.transactionsService.update().subscribe();
@@ -77,9 +65,6 @@ export class TransactionsComponent {
 
   constructor(
     public transactionsService: TransactionsService,
-    public tagsService: TagsService,
-    private formBuilder: FormBuilder,
-    private pageScrollService: PageScrollService,
-    @Inject(DOCUMENT) private document: any
+    public tagsService: TagsService
   ) { }
 }

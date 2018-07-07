@@ -10,15 +10,15 @@ div(class="card-container")
             span #{__('Login')}
           mat-button-toggle(value="register")
             span #{__('Register')}
-      form([formGroup]="loginForm", (ngSubmit)="onSubmit()", autocomplete="off", novalidate)
+      form(#loginForm="ngForm", (ngSubmit)="onSubmit()", autocomplete="off", novalidate)
         p
           mat-form-field
-            input(matInput, type="text", placeholder=__('Username'), formControlName="username")
-          |  
+            input(matInput, type="text", placeholder=__('Username'), name="username", [(ngModel)]="username", required)
+          span &nbsp;
           mat-form-field
-            input(matInput, type="password", placeholder=__('Password'), formControlName="password")
+            input(matInput, type="password", placeholder=__('Password'), name="password", [(ngModel)]="password", required)
         p
-          mat-checkbox(checked, formControlName="rememberToken") #{__('Remember me')}
+          mat-checkbox(checked, name="rememberToken", [(ngModel)]="rememberToken") #{__('Remember me')}
         p
           mat-error(*ngIf="errorMessage") {{errorMessage}}
         p
