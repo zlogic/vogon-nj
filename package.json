@@ -10,7 +10,7 @@
     "postinstall": "npm run build",
     "test": "mocha test/*.js",
     "maintenance": "node ./bin/maintenance",
-    "heroku-prebuild": "npm install --ignore-scripts --only=development && npm rebuild",
+    "heroku-prebuild": "npm install mkdirp && npm install --only=development",
     "heroku-postbuild": "npm prune --production"
   },
   "dependencies": {
