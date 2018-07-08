@@ -52,3 +52,8 @@ export const appRoutes: Routes = [
   ]
 })
 export class VogonRoutingModule {}
+
+export function getBaseHref() {
+  // Use the same base URL as the HTML page. Admin can change base href, for example when using URL rewrites.
+  return document.querySelector('base').href;
+}

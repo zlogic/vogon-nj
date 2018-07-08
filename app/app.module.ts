@@ -21,7 +21,7 @@ import { UpdateService } from './service/update.service';
 import { ConfigurationService } from './service/configuration.service';
 
 import { AppComponent } from './app.component';
-import { VogonRoutingModule } from './router.module';
+import { VogonRoutingModule, getBaseHref } from './router.module';
 
 import { LoginComponent } from './components/login.component';
 import { TransactionsComponent } from './components/transactions.component';
@@ -66,7 +66,7 @@ import { TagsInputComponent } from './components/tagsinput.component';
     UserService,
     UpdateService,
     ConfigurationService,
-    { provide: APP_BASE_HREF, useValue: '/' }
+    { provide: APP_BASE_HREF, useFactory: getBaseHref }
   ],
   bootstrap: [ AppComponent ]
 })
