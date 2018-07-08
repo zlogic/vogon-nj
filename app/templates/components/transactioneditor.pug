@@ -18,8 +18,8 @@ form(#transactionForm="ngForm", (ngSubmit)="submitEditing(transactionForm)", aut
             span #{__('Expense/income')}
           mat-button-toggle(value="transfer")
             span #{__('Transfer')}
-      div(*ngFor="let component of transaction.FinanceTransactionComponents; let i=index")
-        div(style="display: flex;")
+      div(*ngFor="let component of transaction.FinanceTransactionComponents; let i=index", style="display: flex;")
+        div
           mat-form-field
             mat-select(placeholder=__("Account"), [name]="'AccountId'+i", [(ngModel)]="component.AccountId", required)
               mat-option(*ngFor="let account of visibleAccounts", [value]="account.id")
@@ -29,13 +29,13 @@ form(#transactionForm="ngForm", (ngSubmit)="submitEditing(transactionForm)", aut
             input(matInput, type="text", style="text-align:right;", placeholder=__('Amount'), [name]="'amount'+i", [(ngModel)]="component.amount", required, pattern="^-?\\d+(\\.\\d+)?$")
             span(matSuffix)
               | &nbsp;{{getCurrency(component)}}
-          span(style="flex: 1 1 auto;")
-          button(mat-icon-button, type="button", [matMenuTriggerFor]="componentMenu", style="align-self: flex-start;", aria-label="#{__('Open menu')}")
-            mat-icon more_vert
-          mat-menu(#componentMenu="matMenu")
-            button(mat-menu-item, type="button", (click)="deleteTransactionComponent(i)")
-              mat-icon delete_forever
-              span #{__("Delete")}
+        span(style="flex: 1 1 auto;")
+        button(mat-icon-button, type="button", [matMenuTriggerFor]="componentMenu", style="align-self: center;", aria-label="#{__('Open menu')}")
+          mat-icon more_vert
+        mat-menu(#componentMenu="matMenu")
+          button(mat-menu-item, type="button", (click)="deleteTransactionComponent(i)")
+            mat-icon delete_forever
+            span #{__("Delete")}
       button(mat-mini-fab, type="button", (click)="addTransactionComponent()")
         mat-icon add
     mat-card-actions
