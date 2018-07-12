@@ -25,7 +25,7 @@ RUN rm -rf \
   Procfile
 
 # Process resources with Webpack
-RUN npm run build
+RUN NODE_ENV=production npm run build
 
 # Delete development files
 RUN npm prune --production
