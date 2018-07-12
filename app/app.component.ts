@@ -1,6 +1,5 @@
 import { Component, ViewEncapsulation, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { ObservableMedia } from '@angular/flex-layout';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { AuthorizationService } from './service/auth.service';
 import { AlertService } from './service/http.service';
