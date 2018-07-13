@@ -1,28 +1,22 @@
-FROM node:8-alpine
+FROM node:8-alpine as builder
 
 # Create app directory
 RUN mkdir -p /usr/src/vogon-nj
 WORKDIR /usr/src/vogon-nj
 
+# Bundle app source
+COPY . /usr/src/vogon-nj
+
 # Install app dependencies
-COPY package.json /usr/src/vogon-nj/
 RUN  buildDeps='git' \
   && set -x \
   && apk add --no-cache --virtual .build-deps $buildDeps \
   && npm install \
   && apk del .build-deps
 
-# Bundle app source
-COPY . /usr/src/vogon-nj
-
 # Run tests
 RUN npm test -- --timeout 10000
 
-# Delete test resources
-RUN rm -rf \
-  test \
-  .git .gitignore \
-  Procfile
 
 # Process resources with Webpack
 RUN NODE_ENV=production npm run build
@@ -30,8 +24,17 @@ RUN NODE_ENV=production npm run build
 # Delete development files
 RUN npm prune --production
 
-# Delete npm cache
-RUN rm -rf ~/.npm /tmp/*
+# Delete test resources and other unnecessary files
+RUN rm -rf \
+  test \
+  .git .gitignore \
+  Procfile package-lock.json
+
+# Copy into a fresh image
+FROM node:8-alpine
+
+WORKDIR /usr/src/vogon-nj
+COPY --from=builder /usr/src/vogon-nj /usr/src/vogon-nj
 
 EXPOSE 3000
 CMD [ "npm", "start" ]
