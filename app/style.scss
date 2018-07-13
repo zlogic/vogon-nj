@@ -34,10 +34,6 @@ html, body {
   flex: 1;
 }
 
-.is-small-screen .app-sidenav-container {
-   flex: 1 0 auto;
-}
-
 a.mat-list-item.nav-selected {
   color: mat-color($accent);
 }
