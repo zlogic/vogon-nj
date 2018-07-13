@@ -31,7 +31,7 @@ RUN NODE_ENV=production npm run build
 RUN npm prune --production
 
 # Delete npm cache
-RUN rm -rf ~/.npm
+RUN rm -rf ~/.npm /tmp/*
 
 EXPOSE 3000
 CMD [ "npm", "start" ]
