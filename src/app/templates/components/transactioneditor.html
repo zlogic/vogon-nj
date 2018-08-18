@@ -1,0 +1,37 @@
+<form #transactionForm="ngForm" (ngSubmit)="submitEditing(transactionForm)" autocomplete="off" novalidate="novalidate">
+  <mat-card class="editor-card-transactions mat-elevation-z4">
+    <mat-card-title i18n>Edit transaction</mat-card-title>
+    <mat-card-content>
+      <mat-form-field><input matInput="matInput" i18n-placeholder placeholder="Description" name="description" [(ngModel)]="transaction.description" required="required" /></mat-form-field><span>&nbsp;</span>
+      <mat-form-field><input matInput="matInput" [matDatepicker]="picker" i18n-placeholder placeholder="Date" name="date" [(ngModel)]="transaction.date" required="required" />
+        <mat-datepicker-toggle matSuffix="matSuffix" type="button" [for]="picker"></mat-datepicker-toggle>
+      </mat-form-field>
+      <mat-datepicker #picker></mat-datepicker>
+      <tags-input i18n-placeholder placeholder="Tags" name="tags" [ngModel]="transaction.tags"></tags-input>
+      <p>
+        <mat-button-toggle-group name="type" [(ngModel)]="transaction.type" required="required">
+          <mat-button-toggle value="expenseincome"><span i18n>Expense/income</span></mat-button-toggle>
+          <mat-button-toggle value="transfer"><span i18n>Transfer</span></mat-button-toggle>
+        </mat-button-toggle-group>
+      </p>
+      <div *ngFor="let component of transaction.FinanceTransactionComponents; let i=index" style="display: flex;">
+        <div>
+          <mat-form-field>
+            <mat-select i18n-placeholder placeholder="Account" [name]="'AccountId'+i" [(ngModel)]="component.AccountId" required="required">
+              <mat-option *ngFor="let account of visibleAccounts" [value]="account.id">{{account.name}}</mat-option>
+            </mat-select>
+          </mat-form-field><span>&nbsp;</span>
+          <mat-form-field><input matInput="matInput" type="text" style="text-align:right;" i18n-placeholder placeholder="Amount" [name]="'amount'+i" [(ngModel)]="component.amount" required="required" pattern="^-?\d+(\.\d+)?$" /><span matSuffix="matSuffix">&nbsp;{{getCurrency(component)}}</span></mat-form-field>
+        </div><span style="flex: 1 1 auto;"></span><button mat-icon-button="mat-icon-button" type="button" [matMenuTriggerFor]="componentMenu" style="align-self: center;" i18n-aria-label aria-label="Open menu"><mat-icon>more_vert</mat-icon></button>
+        <mat-menu #componentMenu="matMenu">
+          <button mat-menu-item="mat-menu-item" type="button" (click)="deleteTransactionComponent(i)"><mat-icon>delete_forever</mat-icon><span i18n>Delete</span></button>
+        </mat-menu>
+      </div>
+      <button mat-mini-fab="mat-mini-fab" type="button" (click)="addTransactionComponent()"><mat-icon>add</mat-icon></button>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button="mat-button" type="submit" [disabled]="!transactionForm.valid" i18n>Apply</button>
+      <button mat-button="mat-button" type="button" (click)="cancelEditing()" i18n>Cancel</button>
+    </mat-card-actions>
+  </mat-card>
+</form>

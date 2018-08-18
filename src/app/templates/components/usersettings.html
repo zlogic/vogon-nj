@@ -1,0 +1,21 @@
+<form #usersettingsForm="ngForm" (ngSubmit)="submitEditing()" autocomplete="off" novalidate="novalidate">
+  <div class="card-container">
+    <mat-card class="large-card">
+      <mat-card-title i18n>User settings</mat-card-title>
+      <mat-card-content>
+        <p>
+          <mat-form-field><input matInput="matInput" type="text" i18n-placeholder placeholder="Username" name="username" [(ngModel)]="username" required="required" /></mat-form-field>
+        </p>
+        <p>
+          <mat-form-field><input matInput="matInput" type="password" i18n-placeholder placeholder="Password" name="password" [(ngModel)]="password" /></mat-form-field>
+        </p>
+        <p><button mat-raised-button="mat-raised-button" type="button" (click)="importData()" i18n>Import data</button><span>&nbsp;</span><input type="file" #fileInput /></p>
+        <p><button mat-raised-button="mat-raised-button" type="button" (click)="exportData()" i18n>Export data</button></p>
+      </mat-card-content>
+      <mat-card-actions><button mat-button="mat-button" type="submit" [disabled]="!usersettingsForm.valid" i18n>Apply</button><button mat-button="mat-button" type="button" (click)="cancelEditing()" i18n>Cancel</button></mat-card-actions>
+    </mat-card>
+  </div>
+</form>
+<div style="display: none;">
+  <form method="post" action="service/export" #exportForm><input type="hidden" name="access_token" [value]="authorizationService.getAccessToken()" /></form>
+</div>

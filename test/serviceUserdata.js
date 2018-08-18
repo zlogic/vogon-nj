@@ -3,7 +3,6 @@ var assert = require('assert');
 var dbService = require('../services/dbservice');
 var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
-var i18n = require('i18n');
 
 var baseUrl = serviceBase.baseUrl;
 var authenticateUser = serviceBase.authenticateUser;

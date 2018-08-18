@@ -1,5 +1,4 @@
 var passport = require('passport');
-var i18n = require('i18n');
 var logger = require('../services/logger');
 var dbService = require('./dbservice');
 var tokencleaner = require('./tokencleaner');
@@ -7,6 +6,7 @@ var oauth2orize = require('oauth2orize');
 var uuid = require('uuid');
 var BearerStrategy = require('passport-http-bearer').Strategy;
 var LocalStrategy = require('passport-local').Strategy;
+var logger = require('../services/logger');
 
 var server = oauth2orize.createServer();
 
@@ -35,10 +35,10 @@ passport.use(new BearerStrategy(function(token, cb) {
 passport.use(new LocalStrategy(function(username, password, done) {
   dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
     if (!user)
-      throw new Error(i18n.__("Bad credentials"));
+      throw new Error("Bad credentials");
     return user.validatePassword(password).then(function(passwordValid) {
       if(!passwordValid)
-        throw new Error(i18n.__("Bad credentials"));
+        throw new Error("Bad credentials");
       done(null, user);
       return null;
     });
@@ -48,10 +48,10 @@ passport.use(new LocalStrategy(function(username, password, done) {
 server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
   dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
     if (!user)
-      throw new Error(i18n.__("Bad credentials"));
+      throw new Error("Bad credentials");
     return user.validatePassword(password).then(function(passwordValid) {
       if(!passwordValid)
-        throw new Error(i18n.__("Bad credentials"));
+        throw new Error("Bad credentials");
       return null;
     }).then(function() {
       var createToken = function(remainingAttempts){
@@ -64,7 +64,7 @@ server.exchange(oauth2orize.exchange.password(function(client, username, passwor
           remainingAttempts--;
           if(remainingAttempts > 0)
             return createToken(remainingAttempts);
-          throw new Error(i18n.__("Cannot create token"));
+          throw new Error("Cannot create token");
         });
       };
       return createToken(5);
@@ -78,8 +78,10 @@ var allowRegistration= function(){
 
 var logout = function(token){
   return dbService.Token.findById(token).then(function(foundToken){
-    if(foundToken === null || foundToken === undefined)
-      throw new Error(i18n.__("Cannot delete non-existing token %s", token));
+    if(foundToken === null || foundToken === undefined){
+      logger.logger.error("Token %s does not exist", token)
+      throw new Error("Cannot delete non-existing token");
+    }
     return foundToken.destroy();
   });
 };

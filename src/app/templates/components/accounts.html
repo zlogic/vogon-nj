@@ -1,0 +1,61 @@
+<button class="my-fab" mat-fab="mat-fab" *ngIf="!isEditing()" (click)="createAccount()"><mat-icon>add</mat-icon></button>
+<mat-toolbar>
+  <mat-slide-toggle [(ngModel)]="showAllAccounts" i18n>Show all accounts</mat-slide-toggle>
+</mat-toolbar>
+<div *ngIf="isEditing()">
+  <form #accountForm="ngForm" (ngSubmit)="submitEditing(accountForm)" autocomplete="off" novalidate="novalidate">
+    <mat-card class="editor-card-accounts mat-elevation-z4">
+      <mat-card-title i18n>Edit account</mat-card-title>
+      <mat-card-content>
+        <mat-form-field><input matInput="matInput" i18n-placeholder placeholder="Account name" name="name" [(ngModel)]="editingAccount.name" required="required" /></mat-form-field><span>&nbsp;</span>
+        <mat-form-field>
+          <mat-select i18n-placeholder placeholder="Currency" name="currency" [(ngModel)]="editingAccount.currency" required="required">
+            <mat-option *ngFor="let currency of currencyService.currencies" [value]="currency.currencyCode">{{currency.displayName}}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <p>
+          <mat-slide-toggle name="includeInTotal" [(ngModel)]="editingAccount.includeInTotal" required="required" i18n>Include in total</mat-slide-toggle>
+        </p>
+        <p>
+          <mat-slide-toggle name="showInList" [(ngModel)]="editingAccount.showInList" required="required" i18n>Show in accounts list</mat-slide-toggle>
+        </p>
+      </mat-card-content>
+      <mat-card-actions><button mat-button="mat-button" type="submit" [disabled]="!accountForm.valid" i18n>Apply</button><button mat-button="mat-button" type="button" (click)="cancelEditing()" i18n>Cancel</button></mat-card-actions>
+    </mat-card>
+  </form>
+</div>
+<div class="card-container">
+  <ng-container *ngFor="let account of accountsService.accounts">
+    <mat-card class="small-card" *ngIf="account.showInList || showAllAccounts">
+      <mat-card-title>
+        <div style="display: flex; align-items: center;">
+          <span style="align-self: center;">{{account.name}}</span>
+          <span style="flex: 1 1 auto;"></span>
+          <button mat-icon-button="mat-icon-button" type="button" [matMenuTriggerFor]="accountMenu" style="align-self: flex-start;" i18n-aria-label aria-label="Open menu"><mat-icon>more_vert</mat-icon></button>
+          <mat-menu #accountMenu="matMenu"><button mat-menu-item="mat-menu-item" type="button" (click)="startEditing(account)"><mat-icon>edit</mat-icon><span i18n>Edit</span></button><button mat-menu-item="mat-menu-item" type="button" (click)="deleteAccount(account)"><mat-icon>delete_forever</mat-icon><span i18n>Delete</span></button></mat-menu>
+        </div>
+      </mat-card-title>
+      <mat-card-content>
+        <div style="display: flex; align-items: top;">
+          <span style="display: block;">{{account.currency}}</span>
+          <span style="flex: 1 1 auto;"></span>
+          <span style="display: block;">{{account.balance | number:"1.2-2"}}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>
+<div class="card-container">
+  <ng-container *ngFor="let currencyTotals of accountsService.getTotalsForCurrencies()">
+    <mat-card class="small-card">
+      <mat-card-title i18n>Total for {{currencyTotals.currency}}</mat-card-title>
+      <mat-card-content>
+        <div style="display: flex; align-items: top;">
+          <span style="display: block;">{{currencyTotals.currency}}</span>
+          <span style="flex: 1 1 auto;"></span>
+          <span style="display: block;">{{currencyTotals.total | number:"1.2-2"}}</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</div>

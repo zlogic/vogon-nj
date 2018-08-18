@@ -3,7 +3,6 @@ var assert = require('assert');
 var dbService = require('../services/dbservice');
 var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
-var i18n = require('i18n');
 
 var baseUrl = serviceBase.baseUrl;
 var authenticateUser = serviceBase.authenticateUser;
@@ -127,7 +126,7 @@ describe('Service', function() {
             try {
               assert.ok(err);
               assert.equal(result.status, 500);
-              assert.deepEqual(result.text, i18n.__('Data was already updated from another session'));
+              assert.deepEqual(result.text, 'Data was already updated from another session');
               dbService.Account.findAll().then(function(accounts){
                 accounts = accounts.map(function(account){return account.toJSON();});
                 assert.deepEqual(accounts, finalAccounts)

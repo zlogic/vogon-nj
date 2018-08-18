@@ -3,7 +3,6 @@ var dbService = require('../services/dbservice');
 var fs = require('fs');
 var logger = require('../services/logger').logger;
 var dbConfiguration = require('./utils/dbconfiguration.js');
-require('./utils/i18nconfiguration.js');
 require('./utils/logging');
 
 var currentDate = function(){
@@ -899,7 +898,6 @@ describe('Model', function() {
     it('should not allow conflicting updates from separate transactions', function (done) {
       this.timeout(4000);
       var user;
-      dbConfiguration.reconfigureDb(false);
       dbService.sequelize.sync({force: true}).then(function() {
         return dbService.sequelize.transaction(function(transaction){
           return dbService.User.create({
@@ -946,7 +944,7 @@ describe('Model', function() {
       }).then(function(){
         done(new Error("Transaction constraint was not enforced, conflicting updates applied"));
       }).catch(function(error){
-        assert.equal(error.name, 'SequelizeTimeoutError');
+        assert.equal(error.name, 'SequelizeDatabaseError');
         done();
       }).catch(done);
     });

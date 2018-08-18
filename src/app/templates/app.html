@@ -1,0 +1,39 @@
+<div class="app-container" [class.is-small-screen]="isSmallScreen()">
+  <mat-toolbar class="app-main-toolbar" color="primary"><button mat-icon-button="mat-icon-button" i18n-aria-label aria-label="Toggle sidebar" (click)="sidenav.toggle()"><mat-icon>menu</mat-icon></button><span *ngIf="isAuthorized();then authorized_title else unauthorized_title"></span>
+    <ng-template #authorized_title i18n>Vogon for {{getUsername()}}</ng-template>
+    <ng-template #unauthorized_title i18n>Vogon</ng-template><span style="width: 64px;"></span><span style="flex: 1 1 auto;"><mat-progress-bar *ngIf="isLoading()" mode="indeterminate" color="accent"></mat-progress-bar></span></mat-toolbar>
+  <mat-sidenav-container class="app-sidenav-container" [style.marginTop.px]="isSmallScreen() ? 56 : 0">
+    <mat-sidenav class="app-sidenav" #sidenav [mode]="isSmallScreen()?'over':'side'" [fixedInViewport]="isSmallScreen()" fixedTopGap="56" fixedBottomGap="0">
+      <mat-nav-list>
+        <ng-template [ngIf]="isAuthorized()">
+          <a mat-list-item="mat-list-item" routerLink="transactions" [routerLinkActive]="['nav-selected']">
+            <mat-icon mat-list-icon="mat-list-icon">list</mat-icon><span i18n>Transactions</span>
+          </a>
+          <a mat-list-item="mat-list-item" routerLink="accounts" [routerLinkActive]="['nav-selected']">
+            <mat-icon mat-list-icon="mat-list-icon">account_balance_wallet</mat-icon><span i18n>Accounts</span>
+          </a>
+          <a mat-list-item="mat-list-item" routerLink="analytics" [routerLinkActive]="['nav-selected']">
+            <mat-icon mat-list-icon="mat-list-icon">multiline_chart</mat-icon><span i18n>Analytics</span>
+          </a>
+          <a mat-list-item="mat-list-item" routerLink="usersettings" [routerLinkActive]="['nav-selected']">
+            <mat-icon mat-list-icon="mat-list-icon">settings</mat-icon><span i18n>User settings</span>
+          </a>
+          <a mat-list-item="mat-list-item" (click)="logout()">
+            <mat-icon mat-list-icon="mat-list-icon">exit_to_app</mat-icon><span i18n>Logout</span>
+          </a>
+        </ng-template>
+        <ng-template [ngIf]="!isAuthorized()">
+          <a mat-list-item="mat-list-item" routerLink="login" [routerLinkActive]="['nav-selected']">
+            <mat-icon mat-list-icon="mat-list-icon">open_in_browser</mat-icon><span i18n>Login</span>
+          </a>
+        </ng-template>
+        <a mat-list-item="mat-list-item" routerLink="intro" [routerLinkActive]="['nav-selected']">
+          <mat-icon mat-list-icon="mat-list-icon">help</mat-icon><span i18n>Help/Info</span>
+        </a>
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

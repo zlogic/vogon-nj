@@ -3,7 +3,6 @@ var assert = require('assert');
 var dbService = require('../services/dbservice');
 var prepopulate = require('./utils/prepopulate').prepopulate;
 var superagent = require('superagent');
-var i18n = require('i18n');
 var uuid = require('uuid');
 
 var baseUrl = serviceBase.baseUrl;
@@ -198,7 +197,7 @@ describe('Service', function() {
                 assert.equal(err.status, 500);
                 assert.equal(!!token2, false);
                 assert.equal(generatorCounter, 1 + 5);
-                assert.deepEqual(err.response.body, {error:"server_error", error_description:i18n.__("Cannot create token")});
+                assert.deepEqual(err.response.body, {error:"server_error", error_description:"Cannot create token"});
                 return dbService.Token.findAll().then(function(tokens){
                   assert.equal(tokens.length, 1);
                   assert.equal(tokens[0].id, "1");
@@ -218,7 +217,7 @@ describe('Service', function() {
           try {
             assert.ok(err);
             assert.equal(err.status, 500);
-            assert.equal(err.response.body.error_description, i18n.__('Bad credentials'));
+            assert.equal(err.response.body.error_description, 'Bad credentials');
             assert.equal(!!token, false);
             done();
           } catch(err) {done(err);}
@@ -242,7 +241,7 @@ describe('Service', function() {
               try {
                 assert.ok(err);
                 assert.equal(result.status, 500);
-                assert.deepEqual(result.body, {error:"server_error", error_description:i18n.__("Cannot delete non-existing token %s", 'badtoken')});
+                assert.deepEqual(result.body, {error:"server_error", error_description:"Cannot delete non-existing token"});
                 dbService.Token.findAll().then(function(tokens){
                   assert.equal(tokens.length, 1);
                   assert.equal(tokens[0].id, token);

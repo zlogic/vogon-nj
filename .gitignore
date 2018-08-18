@@ -39,7 +39,7 @@ bower_components
 test/tmp
 
 # TypeScript and Webpack generated sources
-app/output
+dist
 
 # Visual Studio Code configuration
 .vscode

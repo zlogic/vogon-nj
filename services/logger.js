@@ -1,19 +1,22 @@
 var winston = require('winston');
-var i18n = require('i18n');
 var split = require('split');
 
 var logger = winston.createLogger({
   transports: [
     new (winston.transports.Console)()
   ],
-  format: winston.format.simple()
+  format: winston.format.combine(
+    winston.format.colorize(),
+    winston.format.splat(),
+    winston.format.simple()
+  )
 });
 logger.level = 'silly';
 
 var stream = split().on('data', logger.info);
 
 var logException = function(err){
-  logger.error(i18n.__("An error has occurred: %s, status %s, stack trace:\n%s"), err, err.status, err.stack);
+  logger.error("An error has occurred: %s, status %s, stack trace:\n%s", err, err.status, err.stack);
 };
 
 var sequelizeLogger = function(args) {

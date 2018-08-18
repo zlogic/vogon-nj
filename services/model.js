@@ -1,7 +1,6 @@
 var Sequelize = require('sequelize');
 var path = require('path');
 var os = require('os');
-var i18n = require('i18n');
 var crypto = require('crypto');
 var logger = require('./logger');
 
@@ -175,7 +174,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   User.prototype.validatePassword = function(password){
     var instance = this;
     if(instance.getDataValue('password') === undefined || instance.getDataValue('password') === null)
-     return sequelize.Promise.reject(new Error(i18n.__("Password is not set")));
+     return sequelize.Promise.reject(new Error("Password is not set"));
     var storedUserPassword = JSON.parse(instance.getDataValue('password'));
     return hashPassword(password, storedUserPassword.salt, storedUserPassword.options).then(function(result){
       return JSON.parse(result).hash === storedUserPassword.hash;
@@ -240,7 +239,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       return sequelize.Promise.resolve();
 
     if(options === undefined || options.transaction === undefined)
-      return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterUpdate hook can only be run from a transaction")));
+      return sequelize.Promise.reject(new Error("FinanceTransactionComponent afterUpdate hook can only be run from a transaction"));
     var transaction = options.transaction;
 
     var updatePreviousAccount = function(){
@@ -270,7 +269,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       return sequelize.Promise.resolve();
 
     if(options === undefined || options.transaction === undefined)
-      return sequelize.Promise.reject(new Error(i18n.__("FinanceTransactionComponent afterDestroy hook can only be run from a transaction")));
+      return sequelize.Promise.reject(new Error("FinanceTransactionComponent afterDestroy hook can only be run from a transaction"));
 
     var transaction = options.transaction;
     return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
@@ -292,11 +291,11 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
   var conflictResolutionHook = function(instance, options){
     if(options === undefined || options.transaction === undefined)
-      throw new Error(i18n.__("conflictResolutionHook hook can only be run from a transaction"));
+      throw new Error("conflictResolutionHook hook can only be run from a transaction");
     var transaction = options.transaction;
     return instance.constructor.findOne({where: {id: instance.id}, transaction: transaction}).then(function(dbInstance){
       if(dbInstance.version !== instance.version){
-        throw new Error(i18n.__("Data was already updated from another session"));
+        throw new Error("Data was already updated from another session");
       } else if(!instance.changed('version')){
         instance.version++;
         return dbInstance.increment('version', {transaction: transaction});
@@ -319,9 +318,9 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     var createdFinanceTransactions = undefined;
 
     if(options === undefined || options.transaction === undefined)
-      return sequelize.Promise.reject(new Error(i18n.__("Import can only be run from a transaction")));
+      return sequelize.Promise.reject(new Error("Import can only be run from a transaction"));
     if(user === undefined)
-      return sequelize.Promise.reject(new Error(i18n.__("Cannot import data for unknown user")));
+      return sequelize.Promise.reject(new Error("Cannot import data for unknown user"));
     var transaction = options.transaction;
 
     //Java version workarounds
@@ -392,7 +391,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
   var exportData = function(user){
     if(user === undefined)
-      return sequelize.Promise.reject(new Error(i18n.__("Cannot export data for unknown user")));
+      return sequelize.Promise.reject(new Error("Cannot export data for unknown user"));
     return sequelize.transaction(function(transaction){
       return User.findOne({
         where: {id: user.id},

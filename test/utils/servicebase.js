@@ -3,7 +3,6 @@ var tokencleaner = require('../../services/tokencleaner');
 var logger = require('../../services/logger').logger;
 var superagent = require('superagent');
 var dbConfiguration = require('./dbconfiguration');
-require('./i18nconfiguration');
 require('./logging');
 
 var app = require('../../app');

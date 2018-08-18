@@ -7,5 +7,8 @@ logger.configure({
   transports: [
     new winston.transports.File({ filename: path.join('test', 'tmp', 'tests.log')})
   ],
-  format: winston.format.printf(info => `${info.message}`)
+  format: winston.format.combine(
+    winston.format.splat(),
+    winston.format.printf(info => `${info.message}`)
+  )
 });

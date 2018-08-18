@@ -1,0 +1,92 @@
+<div class="card-container">
+  <mat-card class="giant-card">
+    <mat-card-title i18n>Analytics</mat-card-title>
+    <mat-card-content>
+      <mat-vertical-stepper>
+        <mat-step>
+          <ng-template matStepLabel="matStepLabel" i18n>Tags</ng-template>
+          <p><button mat-button="mat-button" (click)="selectAllTags()" i18n>Select all tags</button><button mat-button="mat-button" (click)="deselectAllTags()" i18n>Deselect all tags</button></p>
+          <div class="many-checkbox-container">
+            <ng-container *ngFor="let tag of tags">
+              <mat-checkbox [(ngModel)]="tag.selected">{{tag.tag.length&gt;0?tag.tag:"&nbsp;"}}</mat-checkbox>
+            </ng-container>
+          </div>
+          <div><button mat-button="mat-button" matStepperNext="matStepperNext" i18n>Next</button></div>
+        </mat-step>
+        <mat-step>
+          <ng-template matStepLabel="matStepLabel" i18n>Accounts</ng-template>
+          <p><button mat-button="mat-button" (click)="selectAllAccounts()" i18n>Select all accounts</button><button mat-button="mat-button" (click)="deselectAllAccounts()" i18n>Deselect all accounts</button></p>
+          <div class="many-checkbox-container">
+            <ng-container *ngFor="let account of accounts">
+              <mat-checkbox [(ngModel)]="account.selected">{{accountsService.getAccount(account.id).name}}</mat-checkbox>
+            </ng-container>
+          </div>
+          <div><button mat-button="mat-button" matStepperNext="matStepperNext" i18n>Next</button></div>
+        </mat-step>
+        <mat-step>
+          <ng-template matStepLabel="matStepLabel" i18n>Report configuration</ng-template>
+          <p>
+            <mat-form-field><input matInput="matInput" [matDatepicker]="startDatePicker" i18n-placeholder placeholder="Start date" [(ngModel)]="startDate" />
+              <mat-datepicker-toggle matSuffix="matSuffix" type="button" [for]="startDatePicker"></mat-datepicker-toggle>
+            </mat-form-field>
+            <mat-datepicker #startDatePicker></mat-datepicker><span>&nbsp;</span>
+            <mat-form-field><input matInput="matInput" [matDatepicker]="endDatePicker" i18n-placeholder placeholder="End date" [(ngModel)]="endDate" />
+              <mat-datepicker-toggle matSuffix="matSuffix" type="button" [for]="endDatePicker"></mat-datepicker-toggle>
+            </mat-form-field>
+            <mat-datepicker #endDatePicker></mat-datepicker>
+          </p>
+          <p>
+            <mat-checkbox [(ngModel)]="transactionTypeEnabled.transfer" i18n>Transfer transactions</mat-checkbox>
+          </p>
+          <p>
+            <mat-checkbox [(ngModel)]="transactionTypeEnabled.income" i18n>Income transactions</mat-checkbox>
+          </p>
+          <p>
+            <mat-checkbox [(ngModel)]="transactionTypeEnabled.expense" i18n>Expense transactions</mat-checkbox>
+          </p>
+          <div><button mat-button="mat-button" matStepperNext="matStepperNext" i18n>Next</button></div>
+        </mat-step>
+        <mat-step>
+          <ng-template matStepLabel="matStepLabel" i18n>Report</ng-template><button mat-raised-button="mat-raised-button" color="primary" (click)="buildReport()" i18n>Build report</button>
+          <ng-template [ngIf]="reports !== undefined">
+            <p>
+              <mat-form-field>
+                <mat-select i18n-placeholder placeholder="Select currency" [(ngModel)]="selectedCurrency" (selectionChange)="currencyChanged()">
+                  <mat-option *ngFor="let currency of currencies" [value]="currency">{{currencyService.findCurrency(currency).displayName}}</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </p>
+            <mat-tab-group dynamicHeight="dynamicHeight">
+              <mat-tab i18n-label label="Tags chart">
+                <div style="width: 100%; height: 400px;">
+                  <ngx-charts-pie-chart [results]="tagsChart" [labels]="true"></ngx-charts-pie-chart>
+                </div>
+              </mat-tab>
+              <mat-tab i18n-label label="Balance chart">
+                <div style="width: 100%; height: 400px;">
+                  <ngx-charts-line-chart [results]="balanceChart" [xAxis]="true" [yAxis]="true" [autoScale]="false"></ngx-charts-line-chart>
+                </div>
+              </mat-tab>
+              <mat-tab i18n-label label="Report by transactions">
+                <mat-list>
+                  <mat-list-item *ngFor="let transaction of getReportTransactions()">
+                    <h4 mat-line="mat-line">{{transaction.description}}</h4>
+                    <p mat-line="mat-line"><span style="float: left;">{{transaction.date | date}}</span><span style="float: right;"><ng-template [ngIf]="transactionsService.isTransferTransaction(transaction)">&sum; </ng-template>{{transaction.amount | number:"1.2-2"}} {{selectedCurrency}}</span></p>
+                  </mat-list-item>
+                </mat-list>
+              </mat-tab>
+              <mat-tab i18n-label label="Report by tags">
+                <mat-list>
+                  <mat-list-item *ngFor="let tagExpense of getReportTagExpenses()">
+                    <h4 mat-line="mat-line">{{tagExpense.tag}}</h4>
+                    <p mat-line="mat-line"><span style="float: right;">{{tagExpense.amount | number : "1.2"}} {{selectedCurrency}}</span></p>
+                  </mat-list-item>
+                </mat-list>
+              </mat-tab>
+            </mat-tab-group>
+          </ng-template>
+        </mat-step>
+      </mat-vertical-stepper>
+    </mat-card-content>
+  </mat-card>
+</div>

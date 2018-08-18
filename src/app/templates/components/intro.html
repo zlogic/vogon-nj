@@ -1,0 +1,34 @@
+<div class="card-container">
+  <mat-card class="large-card">
+    <mat-card-content>
+      <ng-template [ngIf]="isAllowRegistration()">
+        <h3 i18n>Registration</h3>
+        <p i18n>To register, select the Register tab and enter a username and password.</p>
+        <p i18n>Press Register and you'll be registered logged into your account.</p>
+        <h4 i18n>Notice</h4>
+        <p i18n>If you have entered an already existing username, you'll see an error and should use another username and password.</p>
+        <h4 i18n>Warning</h4>
+        <p i18n>Registration is simple, we don't ask your contact details or stupid questions like your favorite food :) And so there's no way of recovering passwords!</p>
+        <h4 i18n>Warning</h4>
+        <p i18n>This may be a non-production deployment of Vogon and may be reset or closed by the site admin without notice. Consider exporting your data frequently or contacting the website administrator to confirm your data won't be destroyed without
+          notice.</p>
+      </ng-template>
+      <ng-template [ngIf]="!isAllowRegistration()">
+        <h3 i18n>Private deployment</h3>
+        <p i18n>This is a private Vogon deployment with registration disabled. You can try a public deployment on <a href="http://vogon-nj-demo.herokuapp.com">Heroku</a> (may take a few minutes to load for the first time)</p>
+        <h4 i18n>Warning</h4>
+        <p i18n>The link above is provided as a demo only and is not guaranteed to keep running. You can create a private deployment of Vogon on Heroku, see the project page below.</p>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="large-card">
+    <mat-card-content>
+      <h3 i18n>About Vogon</h3>
+      <p i18n>Vogon is an open-source personal finance tracker.</p>
+      <p i18n>It runs on most cloud providers, even on free tiers.</p>
+      <p i18n>For more information, visit the project's <a href="https://github.com/zlogic/vogon-nj">Github</a> page.</p>
+      <p i18n>Developed by <a href="https://plus.google.com/+DmitryZolotukhin">Dmitry Zolotukhin</a>.</p>
+      <p class="text-center"><img src="images/vogon-logo-large.png" alt="Vogon logo" /></p>
+    </mat-card-content>
+  </mat-card>
+</div>
