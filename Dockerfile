@@ -19,7 +19,7 @@ RUN npm test -- --timeout 10000
 
 
 # Process resources with Webpack
-RUN NODE_ENV=production npm run build
+RUN NODE_ENV=production npm run build:prod
 
 # Delete development files
 RUN npm prune --production
