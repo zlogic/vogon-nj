@@ -3,6 +3,7 @@ import { Observable, of, merge } from 'rxjs';
 import { mergeMap, catchError } from 'rxjs/operators';
 
 import { AccountsService } from './accounts.service';
+import { TransactionsService } from './transactions.service';
 import { UserService } from './user.service';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class UpdateService {
   update(): Observable<any> {
     return merge(
       this.accountsService.update().pipe(catchError((err) => of(err))),
+      this.transactionsService.update().pipe(catchError((err) => of(err))),
       this.userService.update().pipe(catchError((err) => of(err)))
     );  
     //No need to update transactions, since they automatically update if accounts change
@@ -17,6 +19,7 @@ export class UpdateService {
   }
   constructor(
     private accountsService: AccountsService,
+    private transactionsService: TransactionsService,
     private userService: UserService
   ){
     this.update().subscribe();
