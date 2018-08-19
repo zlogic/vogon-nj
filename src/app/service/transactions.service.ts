@@ -223,15 +223,6 @@ export class TransactionsService {
     }
     return totals;
   }
-  applySort(column: string) {
-    if (this.sortColumn === column) {
-      this.sortAsc = !this.sortAsc;
-    } else {
-      this.sortAsc = column === "description";
-      this.sortColumn = column;
-    }
-    this.update().subscribe();
-  }
   isLoadingNextPage(): boolean {
     return this.doUpdate.inProgress();
   }

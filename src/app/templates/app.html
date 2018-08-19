@@ -1,7 +1,11 @@
 <div class="app-container" [class.is-small-screen]="isSmallScreen()">
-  <mat-toolbar class="app-main-toolbar" color="primary"><button mat-icon-button="mat-icon-button" i18n-aria-label aria-label="Toggle sidebar" (click)="sidenav.toggle()"><mat-icon>menu</mat-icon></button><span *ngIf="isAuthorized();then authorized_title else unauthorized_title"></span>
+  <mat-toolbar class="app-main-toolbar" color="primary">
+    <button mat-icon-button i18n-aria-label aria-label="Toggle sidebar" (click)="sidenav.toggle()"><mat-icon>menu</mat-icon></button>
+    <span *ngIf="isAuthorized();then authorized_title else unauthorized_title"></span>
     <ng-template #authorized_title i18n>Vogon for {{getUsername()}}</ng-template>
-    <ng-template #unauthorized_title i18n>Vogon</ng-template><span style="width: 64px;"></span><span style="flex: 1 1 auto;"><mat-progress-bar *ngIf="isLoading()" mode="indeterminate" color="accent"></mat-progress-bar></span></mat-toolbar>
+    <ng-template #unauthorized_title i18n>Vogon</ng-template><span style="width: 64px;"></span>
+    <span style="flex: 1 1 auto;"><mat-progress-bar *ngIf="isLoading()" mode="indeterminate" color="accent"></mat-progress-bar></span>
+  </mat-toolbar>
   <mat-sidenav-container class="app-sidenav-container" [style.marginTop.px]="isSmallScreen() ? 56 : 0">
     <mat-sidenav class="app-sidenav" #sidenav [mode]="isSmallScreen()?'over':'side'" [fixedInViewport]="isSmallScreen()" fixedTopGap="56" fixedBottomGap="0">
       <mat-nav-list>

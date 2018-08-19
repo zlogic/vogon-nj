@@ -1,4 +1,4 @@
-<mat-form-field style="width:100%;">
+<mat-form-field [ngClass]="styleClass">
   <mat-chip-list #tagsList>
     <mat-chip *ngFor="let tag of tags; let i=index" [selectable]="true" [removable]="true" (removed)="removeTag(i)">{{tag}}
       <mat-icon matChipRemove="matChipRemove">cancel</mat-icon>

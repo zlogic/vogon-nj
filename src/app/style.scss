@@ -87,6 +87,22 @@ button.my-fab {
   bottom: 0px;
 }
 
+.table-container {
+  padding: 24px;
+}
+
+.table-container table, .table-container form {
+  width: 100%;
+}
+
+.tags-input-fullwidth {
+  width: 100%;
+}
+
+.amount-not-valid {
+  color: mat-color($warn);
+}
+
 mat-card.editor-card-transactions {
   @extend .editor-card;
   width: 500px;

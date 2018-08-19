@@ -1,5 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { Sort } from '@angular/material';
 import { debounceTime } from 'rxjs/operators';
 
 import { Transaction, TransactionsService } from '../service/transactions.service';
@@ -12,6 +13,8 @@ import { TagsService } from '../service/tags.service';
 export class TransactionsComponent {
   @ViewChild('filterForm') filterForm: NgForm;
   editingTransaction: Transaction;
+
+  displayedColumns: string[] = ['description', 'date', 'accounts', 'amount', 'menu'];
 
   totalsByCurrency(transaction: Transaction): {currency: string; amount: any;}[] {
     var totals = [];
@@ -61,6 +64,17 @@ export class TransactionsComponent {
       if(this.filterForm.dirty)
         this.transactionsService.update().subscribe();
     });
+  }
+  sortData(sort: Sort) {
+    this.transactionsService.sortColumn = sort.active;
+    this.transactionsService.sortAsc = sort.direction === "asc";
+    this.transactionsService.update().subscribe();
+  }
+  getSortDirection() {
+    return this.transactionsService.sortAsc ? "asc" : "desc";
+  }
+  getSortColumn() {
+    return this.transactionsService.sortColumn;
   }
 
   constructor(

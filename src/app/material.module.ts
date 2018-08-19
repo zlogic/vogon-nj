@@ -4,6 +4,7 @@ import {
   MatButtonModule,
   MatIconModule,
   MatListModule,
+  MatTableModule,
   MatCardModule,
   MatInputModule,
   MatCheckboxModule,
@@ -20,7 +21,8 @@ import {
   MatChipsModule,
   MatProgressBarModule,
   MatNativeDateModule,
-  MatAutocompleteModule
+  MatAutocompleteModule,
+  MatSortModule
 } from '@angular/material';
 
 @NgModule({
@@ -28,6 +30,7 @@ import {
     MatButtonModule,
     MatIconModule,
     MatListModule,
+    MatTableModule,
     MatCardModule,
     MatInputModule,
     MatCheckboxModule,
@@ -44,12 +47,14 @@ import {
     MatTabsModule,
     MatStepperModule,
     MatNativeDateModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatSortModule
   ],
   exports: [
     MatButtonModule,
     MatIconModule,
     MatListModule,
+    MatTableModule,
     MatCardModule,
     MatInputModule,
     MatCheckboxModule,
@@ -66,7 +71,8 @@ import {
     MatTabsModule,
     MatStepperModule,
     MatNativeDateModule,
-    MatAutocompleteModule
+    MatAutocompleteModule,
+    MatSortModule
   ]
 })
 export class VogonMaterialModule { }

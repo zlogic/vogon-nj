@@ -21,6 +21,7 @@ import { TagsService } from '../service/tags.service';
 export class TagsInputComponent implements ControlValueAccessor {
   tags: string[];
   @Input('placeholder') placeholder: string;
+  @Input('class') styleClass: string;
 
   @ViewChild('tagsInput') tagsInput: ElementRef;
   filteredTags: Observable<string[]>;

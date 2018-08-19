@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { MatTabChangeEvent } from '@angular/material';
 
 import { HTTPService } from '../service/http.service';
 import { AccountsService, Account } from '../service/accounts.service';
@@ -23,8 +24,9 @@ export class AnalyticsComponent {
   selectedCurrency: string;
   currencies: string[];
   tagsChart: {name: string, value: number}[];
-  balanceChart: {name: string, series: {name: string, value: number}[]}[];
+  balanceChart: {name: string, series: {name: Date, value: number}[]}[];
   balanceChartOptions = { elements: { line: { tension: 0 } } }
+  selectedTabIndex: number = 0;
 
   updateTags() {
     this.tags = [];
@@ -86,10 +88,9 @@ export class AnalyticsComponent {
     return this.reports[this.selectedCurrency].tagExpenses;
   }
   currencyChanged() {
-    this.updateTagsChart();
-    this.updateBalanceChart();
+    this.updateSelectedTab();
   }
-  updateTagsChart() {
+  private updateTagsChart() {
     this.tagsChart = [];
     var tagExpenses = this.reports[this.selectedCurrency].tagExpenses;
     if(tagExpenses !== undefined)
@@ -100,14 +101,20 @@ export class AnalyticsComponent {
         }
       });
   }
-  updateBalanceChart() {
-    var data: {name: string, value: number}[] = [];
+  private updateBalanceChart() {
+    var data: {name: Date, value: number}[] = [];
     var accountGraph = this.reports[this.selectedCurrency].accountsBalanceGraph;
     if (accountGraph !== undefined)
       for (var date in accountGraph) {
-        data.push({name: date, value: accountGraph[date]});
+        data.push({name: new Date(date), value: accountGraph[date]});
       }
     this.balanceChart = [{name: this.i18n.__("Balance"), series: data}]
+  }
+  updateSelectedTab() {
+    if(this.selectedTabIndex === 0)
+      this.updateTagsChart();
+    else if(this.selectedTabIndex === 1)
+      this.updateBalanceChart();
   }
 
   constructor(
