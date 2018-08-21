@@ -14,19 +14,18 @@ RUN  buildDeps='git' \
   && npm install \
   && apk del .build-deps
 
-# Run tests
-RUN npm test -- --timeout 10000
-
-
 # Process resources with Webpack
 RUN NODE_ENV=production npm run build:prod
+
+# Run tests
+RUN npm test -- --timeout 10000
 
 # Delete development files
 RUN npm prune --production
 
-# Delete test resources and other unnecessary files
+# Delete test resources, sources and other unnecessary files
 RUN rm -rf \
-  test \
+  test src \
   .git .gitignore \
   Procfile package-lock.json
 

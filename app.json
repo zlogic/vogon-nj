@@ -2,7 +2,7 @@
   "name": "Vogon-NJ",
   "description": "A simple personal finance tracker using Node.js and AngularJS",
   "repository": "https://github.com/zlogic/vogon-nj",
-  "logo": "https://raw.githubusercontent.com/zlogic/vogon-nj/master/public/images/vogon-logo-large.png",
+  "logo": "https://raw.githubusercontent.com/zlogic/vogon-nj/master/src/assets/images/vogon-logo-large.png",
   "keywords": ["node", "express", "static", "finance", "angular"],
   "env": {
     "ALLOW_REGISTRATION": {
