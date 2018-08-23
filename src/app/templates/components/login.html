@@ -8,7 +8,7 @@
           <mat-button-toggle value="register"><span i18n>Register</span></mat-button-toggle>
         </mat-button-toggle-group>
       </p>
-      <form #loginForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" novalidate="novalidate">
+      <form #loginForm="ngForm" (ngSubmit)="onSubmit()" autocomplete="off" novalidate>
         <p>
           <mat-form-field><input matInput type="text" i18n-placeholder placeholder="Username" name="username" [(ngModel)]="username" required /></mat-form-field><span>&nbsp;</span>
           <mat-form-field><input matInput type="password" i18n-placeholder placeholder="Password" name="password" [(ngModel)]="password" required /></mat-form-field>

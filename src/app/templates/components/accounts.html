@@ -1,6 +1,6 @@
-<button class="my-fab" mat-fab="mat-fab" *ngIf="!isEditing()" (click)="createAccount()"><mat-icon>add</mat-icon></button>
+<button class="my-fab" mat-fab *ngIf="!isEditing()" (click)="createAccount()"><mat-icon>add</mat-icon></button>
 <div *ngIf="isEditing()">
-  <form #accountForm="ngForm" (ngSubmit)="submitEditing(accountForm)" autocomplete="off" novalidate="novalidate">
+  <form #accountForm="ngForm" (ngSubmit)="submitEditing(accountForm)" autocomplete="off" novalidate>
     <mat-card class="editor-card-accounts mat-elevation-z4">
       <mat-card-title i18n>Edit account</mat-card-title>
       <mat-card-content>

@@ -1,8 +1,8 @@
-<button class="my-fab" mat-fab="mat-fab" *ngIf="!isEditing()" (click)="addTransaction()"><mat-icon>add</mat-icon></button>
+<button class="my-fab" mat-fab *ngIf="!isEditing()" (click)="addTransaction()"><mat-icon>add</mat-icon></button>
 <transaction-editor *ngIf="isEditing()" [transaction]="editingTransaction" (done)="stopEditing()"></transaction-editor>
 
 <div class="table-container">
-  <form #filterForm="ngForm" autocomplete="off" novalidate="novalidate">
+  <form #filterForm="ngForm" autocomplete="off" novalidate>
     <div style="display: flex; align-items: center; flex-wrap: wrap;">
       <div style="flex: 1 1 auto;">
         <mat-form-field class="tags-input-fullwidth">
