@@ -55,7 +55,6 @@
     "ajv": "~6.5.3",
     "core-js": "~2.5.7",
     "country-data": "~0.0.31",
-    "d3": "~5.7.0",
     "hammerjs": "~2.0.8",
     "material-design-icons": "~3.0.1",
     "mocha": "~5.2.0",
