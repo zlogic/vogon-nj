@@ -99,6 +99,18 @@ button.my-fab {
   width: 100%;
 }
 
+.filter-field-grow {
+  flex: 1 1 auto;
+}
+
+.filter-field-grow > mat-form-field {
+  width: 100%;
+}
+
+.filter-field-nogrow {
+  display: block;
+}
+
 .amount-not-valid {
   color: mat-color($warn);
 }
@@ -135,5 +147,13 @@ mat-card.editor-card-accounts {
     bottom: 0px;
     left: 0px;
     right: 0px;
+  }
+  
+  .filter-field-nogrow {
+    flex: 1 1 auto;
+  }
+
+  .filter-field-nogrow > mat-form-field {
+    width: 100%;
   }
 }

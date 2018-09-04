@@ -1,6 +1,7 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Sort } from '@angular/material';
+import { MediaMatcher } from '@angular/cdk/layout';
 import { debounceTime } from 'rxjs/operators';
 
 import { Transaction, TransactionsService } from '../service/transactions.service';
@@ -11,10 +12,13 @@ import { TagsService } from '../service/tags.service';
 })
 
 export class TransactionsComponent {
-  @ViewChild('filterForm') filterForm: NgForm;
+  @ViewChild('filterForm') private filterForm: NgForm;
+  private mobileQuery: MediaQueryList;
+  private mobileQueryListener: () => void;
+
   editingTransaction: Transaction;
 
-  displayedColumns: string[] = ['description', 'date', 'accounts', 'amount', 'menu'];
+  private displayedColumns: string[] = ['description', 'date', 'accounts', 'amount', 'menu'];
 
   totalsByCurrency(transaction: Transaction): {currency: string; amount: any;}[] {
     var totals = [];
@@ -77,8 +81,28 @@ export class TransactionsComponent {
     return this.transactionsService.sortColumn;
   }
 
+  isSmallScreen(): boolean {
+    return this.mobileQuery.matches;
+  }
+
+  getDisplayedColumns(): string[] {
+    if(this.mobileQuery.matches)
+      return ['summary'];
+    return this.displayedColumns;
+  }
+
   constructor(
     public transactionsService: TransactionsService,
-    public tagsService: TagsService
-  ) { }
+    public tagsService: TagsService,
+    private media: MediaMatcher,
+    private changeDetectorRef: ChangeDetectorRef
+  ) {
+    this.mobileQuery = media.matchMedia('(max-width: 600px)');
+    this.mobileQueryListener = () => changeDetectorRef.detectChanges();
+    this.mobileQuery.addListener(this.mobileQueryListener);
+  }
+  
+  ngOnDestroy(): void {
+    this.mobileQuery.removeListener(this.mobileQueryListener);
+  }
 }
