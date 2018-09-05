@@ -45,6 +45,7 @@ export class AccountsComponent {
   showAllAccounts: boolean;
   editingAccount: Account = undefined;
   displayedColumns: string[] = ['name', 'currency', 'balance', 'menu'];
+  showAccounts: ViewAccount[] = [];
 
   isEditing(): boolean {
     return this.editingAccount !== undefined;
@@ -79,12 +80,18 @@ export class AccountsComponent {
     this.accountsService.submitAccounts().subscribe();
   }
   getAccounts(): ViewAccount[] {
-    let showAccounts = this.accountsService.accounts.filter((account) => account.showInList || this.showAllAccounts).map(account => new ViewAccount(account));
+    let updatedShowAccounts = this.accountsService.accounts.filter((account) => account.showInList || this.showAllAccounts).map(account => {
+      let existingShowAccount = this.showAccounts.find(showAccount => showAccount !== undefined  && showAccount.account === account);
+      if(existingShowAccount !== undefined)
+        return existingShowAccount;
+      return new ViewAccount(account);
+    });
     this.accountsService.getTotalsForCurrencies().forEach((totalCurrency) => {
       let account = new ViewAccount(totalCurrency.currency, totalCurrency.total);
-      showAccounts.push(account);
+      updatedShowAccounts.push(account);
     });
-    return showAccounts;
+    this.showAccounts = updatedShowAccounts;
+    return this.showAccounts;
   }
   constructor(
     public accountsService: AccountsService,

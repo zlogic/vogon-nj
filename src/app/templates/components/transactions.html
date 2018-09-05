@@ -55,8 +55,7 @@
       <mat-menu #transactionMenu="matMenu">
         <button mat-menu-item (click)="duplicateTransaction(transaction)"><mat-icon>content_copy</mat-icon><span i18n>Duplicate</span></button>
         <button mat-menu-item (click)="startEditing(transaction)"><mat-icon>edit</mat-icon><span i18n>Edit</span></button>
-        <button mat-menu-item (click)="deleteTransaction(transaction)">
-        <mat-icon>delete_forever</mat-icon><span i18n>Delete</span></button>
+        <button mat-menu-item (click)="deleteTransaction(transaction)"><mat-icon>delete_forever</mat-icon><span i18n>Delete</span></button>
       </mat-menu>
     </ng-template>
 

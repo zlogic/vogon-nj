@@ -2,12 +2,21 @@
   <mat-card class="editor-card-transactions mat-elevation-z4">
     <mat-card-title i18n>Edit transaction</mat-card-title>
     <mat-card-content>
-      <mat-form-field><input matInput i18n-placeholder placeholder="Description" name="description" [(ngModel)]="transaction.description" required /></mat-form-field>
-      <span>&nbsp;</span>
-      <mat-form-field><input matInput [matDatepicker]="picker" i18n-placeholder placeholder="Date" name="date" [(ngModel)]="transaction.date" required />
-        <mat-datepicker-toggle matSuffix type="button" [for]="picker"></mat-datepicker-toggle>
-      </mat-form-field>
-      <mat-datepicker #picker></mat-datepicker>
+      <span style="display: flex; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1 1 auto;">
+          <mat-form-field style="width:100%;">
+            <input matInput i18n-placeholder placeholder="Description" name="description" [(ngModel)]="transaction.description" required />
+          </mat-form-field>
+        </div>
+        <span>&nbsp;</span>
+        <div style="flex: 1 1 auto;">
+          <mat-form-field style="width:100%;">
+            <input matInput [matDatepicker]="picker" i18n-placeholder placeholder="Date" name="date" [(ngModel)]="transaction.date" required />
+            <mat-datepicker-toggle matSuffix type="button" [for]="picker"></mat-datepicker-toggle>
+          </mat-form-field>
+          <mat-datepicker #picker></mat-datepicker>
+        </div>
+      </span>
       <tags-input i18n-placeholder placeholder="Tags" name="tags" class="tags-input-fullwidth" [ngModel]="transaction.tags"></tags-input>
       <p>
         <mat-button-toggle-group name="type" [(ngModel)]="transaction.type" required>
