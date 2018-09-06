@@ -7,7 +7,8 @@ import { TagsService } from '../service/tags.service';
 
 @Component({
   selector: 'transaction-editor',
-  templateUrl: '../templates/components/transactioneditor.html'
+  templateUrl: './transactioneditor.component.html',
+  styleUrls: ['./transactioneditor.component.scss']
 })
 
 export class TransactionEditorComponent {

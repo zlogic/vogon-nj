@@ -10,7 +10,7 @@ import { TagsService } from '../service/tags.service';
 
 @Component({
   selector: 'tags-input',
-  templateUrl: '../templates/components/tagsinput.html',
+  templateUrl: './tagsinput.component.html',
   providers: [{ 
     provide: NG_VALUE_ACCESSOR,
     useExisting: forwardRef(() => TagsInputComponent),

@@ -5,33 +5,12 @@
 @include angular-material-theme($theme);
 @include mat-core();
 
-$sidenav-content-background: mat-color(map-get($theme, "background"), "background");
-
 body {
   font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 html, body {
   margin: 0;
-}
-
-.is-small-screen .app-main-toolbar {
-  position: fixed;
-  z-index: 2;
-}
-
-.app-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-.app-sidenav-container {
-  flex: 1;
 }
 
 a.mat-list-item.nav-selected {
@@ -45,6 +24,10 @@ button.my-fab {
   z-index: 3;
 }
 
+.amount-cell, input.mat-input-element.amount-cell {
+  text-align: right;
+}
+
 .card-container {
   display: flex;
   justify-content: center;
@@ -53,7 +36,7 @@ button.my-fab {
   margin-top: 24px;
 }
 
-.large-card, .small-card, .giant-card {
+.large-card, .giant-card {
   margin-right: 24px;
   margin-bottom: 24px;
 }
@@ -62,29 +45,8 @@ button.my-fab {
   width: 420px;
 }
 
-.small-card {
-  width: 300px;
-}
-
 .giant-card {
   width: 700px;
-}
-
-.many-checkbox-container {
-  width: 100%;
-  height: 400px;
-  overflow:auto;
-  display:flex;
-  flex-direction: column;
-}
-
-.editor-card {
-  position: fixed;
-  z-index: 3;
-  display: flex;
-  flex-direction: column;
-  right: 32px;
-  bottom: 0px;
 }
 
 .table-container {
@@ -99,42 +61,21 @@ button.my-fab {
   width: 100%;
 }
 
-.filter-field-grow {
+.form-row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.form-field-grow {
   flex: 1 1 auto;
 }
 
-.filter-field-grow > mat-form-field {
+.form-field-grow > mat-form-field {
   width: 100%;
 }
 
-.filter-field-nogrow {
-  display: block;
-}
-
-.amount-not-valid {
-  color: mat-color($warn);
-}
-
-mat-card.editor-card-transactions {
-  @extend .editor-card;
-  width: 500px;
-  height: 400px;
-}
-
-mat-card.editor-card-accounts {
-  @extend .editor-card;
-  width: 400px;
-  height: 250px;
-}
-
-.editor-card > mat-card-content {
-  overflow-y: auto;
-  overflow-x: hidden;
-  flex: 1;
-}
-
 @media screen and (max-width: 600px) {
-  .large-card, .small-card, .giant-card {
+  .large-card, .giant-card {
     width: 100%;
     margin-right: 24px;
     margin-left: 24px;
@@ -149,15 +90,15 @@ mat-card.editor-card-accounts {
     right: 0px;
   }
   
-  .filter-field-nogrow {
+  .form-field-nogrow {
     flex: 1 1 auto;
   }
 
-  .filter-field-nogrow > mat-form-field {
+  .form-field-nogrow > mat-form-field {
     width: 100%;
   }
   
-.table-container {
+  .table-container {
     padding: 8px;
   }
 }

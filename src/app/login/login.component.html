@@ -20,8 +20,8 @@
           <mat-error *ngIf="errorMessage">{{errorMessage}}</mat-error>
         </p>
         <p>
-            <button mat-raised-button type="submit" color="primary" *ngIf="modeIsLogin()" [disabled]="!loginForm.valid" i18n>Login</button>
-            <button mat-raised-button type="submit" color="primary" *ngIf="modeIsRegister()" [disabled]="!loginForm.valid" i18n>Register</button>
+          <button mat-raised-button type="submit" color="primary" *ngIf="modeIsLogin()" [disabled]="!loginForm.valid" i18n>Login</button>
+          <button mat-raised-button type="submit" color="primary" *ngIf="modeIsRegister()" [disabled]="!loginForm.valid" i18n>Register</button>
         </p>
       </form>
     </mat-card-content>

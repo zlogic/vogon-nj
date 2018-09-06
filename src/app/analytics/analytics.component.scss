@@ -1,0 +1,28 @@
+@import '../../editor-semimodal.scss';
+
+.analytics-chart-container {
+  width: 100%;
+  height: 400px;
+}
+
+.analytics-table-description {
+  float: left;
+}
+
+.analytics-table-amount {
+  float: right;
+}
+
+.many-checkbox-container {
+  width: 100%;
+  height: 400px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+mat-card.editor-card-transactions {
+  @extend .editor-card;
+  width: 500px;
+  height: 400px;
+}

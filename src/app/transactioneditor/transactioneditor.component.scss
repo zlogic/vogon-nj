@@ -1,0 +1,22 @@
+@import '../../editor-semimodal.scss';
+
+.row-with-button {
+  display: flex;
+  align-items: center;
+}
+
+.row-with-button>.row-button {
+  align-self: center;
+}
+
+mat-card.editor-card-transactions {
+  @extend .editor-card;
+  width: 500px;
+  height: 400px;
+}
+
+@media screen and (max-width: 600px) {
+  mat-card.editor-card-transactions {
+    @include editor-card-fullscreen();
+  }
+}

@@ -1,0 +1,35 @@
+@import '../../vogon-material-theme.scss';
+
+.filter-form {
+  align-items: center;
+}
+
+.filter-form-tags {
+  min-width: 200px;
+}
+
+.form-field-nogrow {
+  display: block;
+}
+
+.tags-container {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+.amount-not-valid {
+  color: mat-color($warn);
+}
+
+.full-row-button-cell {
+  text-align: right;
+}
+
+.wrap-row {
+  display: flex;
+  align-items: center;
+}
+
+.wrap-row-contents {
+  flex: 1 1 auto;
+}

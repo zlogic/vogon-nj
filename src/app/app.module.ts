@@ -23,14 +23,14 @@ import { ConfigurationService } from './service/configuration.service';
 import { AppComponent } from './app.component';
 import { VogonRoutingModule, getBaseHref } from './router.module';
 
-import { LoginComponent } from './components/login.component';
-import { TransactionsComponent } from './components/transactions.component';
-import { AccountsComponent } from './components/accounts.component';
-import { AnalyticsComponent } from './components/analytics.component';
-import { UsersettingsComponent } from './components/usersettings.component';
-import { IntroComponent } from './components/intro.component';
-import { TransactionEditorComponent } from './components/transactioneditor.component';
-import { TagsInputComponent } from './components/tagsinput.component';
+import { LoginComponent } from './login/login.component';
+import { TransactionsComponent } from './transactions/transactions.component';
+import { AccountsComponent } from './accounts/accounts.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
+import { UsersettingsComponent } from './usersettings/usersettings.component';
+import { IntroComponent } from './intro/intro.component';
+import { TransactionEditorComponent } from './transactioneditor/transactioneditor.component';
+import { TagsInputComponent } from './tagsinput/tagsinput.component';
 import { I18nService } from './service/i18n.service';
 
 @NgModule({

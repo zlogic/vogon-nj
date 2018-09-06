@@ -3,12 +3,12 @@ import { RouterModule, Routes, Router, CanActivate, ActivatedRouteSnapshot, Rout
 
 import { AuthorizationService } from './service/auth.service';
 
-import { LoginComponent } from './components/login.component';
-import { TransactionsComponent } from './components/transactions.component';
-import { AccountsComponent } from './components/accounts.component';
-import { AnalyticsComponent } from './components/analytics.component';
-import { UsersettingsComponent } from './components/usersettings.component';
-import { IntroComponent } from './components/intro.component';
+import { LoginComponent } from './login/login.component';
+import { TransactionsComponent } from './transactions/transactions.component';
+import { AccountsComponent } from './accounts/accounts.component';
+import { AnalyticsComponent } from './analytics/analytics.component';
+import { UsersettingsComponent } from './usersettings/usersettings.component';
+import { IntroComponent } from './intro/intro.component';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

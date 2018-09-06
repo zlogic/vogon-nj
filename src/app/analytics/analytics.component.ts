@@ -11,7 +11,8 @@ import { dateToJson } from '../utils';
 import { I18nService } from '../service/i18n.service';
 
 @Component({
-  templateUrl: '../templates/components/analytics.html'
+  templateUrl: './analytics.component.html',
+  styleUrls: ['./analytics.component.scss']
 })
 
 export class AnalyticsComponent {

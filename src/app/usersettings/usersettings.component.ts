@@ -5,7 +5,8 @@ import { AuthorizationService } from '../service/auth.service';
 import { UserService } from '../service/user.service';
 
 @Component({
-  templateUrl: '../templates/components/usersettings.html'
+  templateUrl: './usersettings.component.html',
+  styleUrls: ['./usersettings.component.css']
 })
 
 export class UsersettingsComponent {

@@ -8,7 +8,8 @@ import { Transaction, TransactionsService } from '../service/transactions.servic
 import { TagsService } from '../service/tags.service';
 
 @Component({
-  templateUrl: '../templates/components/transactions.html'
+  templateUrl: './transactions.component.html',
+  styleUrls: ['./transactions.component.scss']
 })
 
 export class TransactionsComponent {

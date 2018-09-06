@@ -1,0 +1,23 @@
+
+.editor-card {
+  position: fixed;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  right: 32px;
+  bottom: 0px;
+}
+
+.editor-card > mat-card-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+}
+
+@mixin editor-card-fullscreen {
+  width: calc(100% - 24px);
+  height: calc(100vh - 104px);
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+}

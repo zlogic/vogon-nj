@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { ConfigurationService } from '../service/configuration.service';
 
 @Component({
-  templateUrl: '../templates/components/intro.html'
+  templateUrl: './intro.component.html',
+  styleUrls: ['./intro.component.css']
 })
 
 export class IntroComponent {

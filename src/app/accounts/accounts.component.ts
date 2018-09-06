@@ -38,7 +38,8 @@ class ViewAccount {
 }
 
 @Component({
-  templateUrl: '../templates/components/accounts.html'
+  templateUrl: './accounts.component.html',
+  styleUrls: ['./accounts.component.scss']
 })
 
 export class AccountsComponent {

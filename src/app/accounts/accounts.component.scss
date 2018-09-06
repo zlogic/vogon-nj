@@ -1,0 +1,13 @@
+@import '../../editor-semimodal.scss';
+
+mat-card.editor-card-accounts {
+  @extend .editor-card;
+  width: 400px;
+  height: 250px;
+}
+
+@media screen and (max-width: 600px) {
+  mat-card.editor-card-accounts {
+    @include editor-card-fullscreen();
+  }
+}

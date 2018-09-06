@@ -3,10 +3,10 @@
     <mat-card class="large-card">
       <mat-card-title i18n>User settings</mat-card-title>
       <mat-card-content>
-        <p>
+        <p class="form-field-fullwidth">
           <mat-form-field><input matInput type="text" i18n-placeholder placeholder="Username" name="username" [(ngModel)]="username" required /></mat-form-field>
         </p>
-        <p>
+        <p class="form-field-fullwidth">
           <mat-form-field><input matInput type="password" i18n-placeholder placeholder="Password" name="password" [(ngModel)]="password" /></mat-form-field>
         </p>
         <p><button mat-raised-button type="button" (click)="importData()" i18n>Import data</button><span>&nbsp;</span><input type="file" #fileInput /></p>
@@ -16,6 +16,6 @@
     </mat-card>
   </div>
 </form>
-<div style="display: none;">
+<div [hidden]="true">
   <form method="post" action="service/export" #exportForm><input type="hidden" name="access_token" [value]="authorizationService.getAccessToken()" /></form>
 </div>

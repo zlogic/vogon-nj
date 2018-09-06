@@ -2,15 +2,15 @@
   <mat-card class="editor-card-transactions mat-elevation-z4">
     <mat-card-title i18n>Edit transaction</mat-card-title>
     <mat-card-content>
-      <span style="display: flex; align-items: center; flex-wrap: wrap;">
-        <div style="flex: 1 1 auto;">
-          <mat-form-field style="width:100%;">
+      <span class="form-row-wrap row-with-button">
+        <div class="form-field-grow">
+          <mat-form-field>
             <input matInput i18n-placeholder placeholder="Description" name="description" [(ngModel)]="transaction.description" required />
           </mat-form-field>
         </div>
         <span>&nbsp;</span>
-        <div style="flex: 1 1 auto;">
-          <mat-form-field style="width:100%;">
+        <div class="form-field-grow">
+          <mat-form-field>
             <input matInput [matDatepicker]="picker" i18n-placeholder placeholder="Date" name="date" [(ngModel)]="transaction.date" required />
             <mat-datepicker-toggle matSuffix type="button" [for]="picker"></mat-datepicker-toggle>
           </mat-form-field>
@@ -24,24 +24,24 @@
           <mat-button-toggle value="transfer"><span i18n>Transfer</span></mat-button-toggle>
         </mat-button-toggle-group>
       </p>
-      <span *ngFor="let component of transaction.FinanceTransactionComponents; let i=index" style="display: flex; align-items: center;">
-        <span style="flex: 1 1 auto; display: flex; flex-wrap: wrap;">
-          <div style="flex: 1 1 auto;">
-            <mat-form-field style="width:100%;">
+      <span *ngFor="let component of transaction.FinanceTransactionComponents; let i=index" class="row-with-button">
+        <span class="form-field-grow form-row-wrap">
+          <div class="form-field-grow">
+            <mat-form-field>
               <mat-select i18n-placeholder placeholder="Account" [name]="'AccountId'+i" [(ngModel)]="component.AccountId" required>
                 <mat-option *ngFor="let account of visibleAccounts" [value]="account.id">{{account.name}}</mat-option>
               </mat-select>
             </mat-form-field>
           </div>
           <span>&nbsp;</span>
-          <div style="flex: 1 1 auto;">
-            <mat-form-field style="width:100%;">
-              <input matInput type="text" style="text-align:right;" i18n-placeholder placeholder="Amount" [name]="'amount'+i" [(ngModel)]="component.amount" required pattern="^-?\d+(\.\d+)?$" />
+          <div class="form-field-grow">
+            <mat-form-field>
+              <input matInput type="text" class="amount-cell" i18n-placeholder placeholder="Amount" [name]="'amount'+i" [(ngModel)]="component.amount" required pattern="^-?\d+(\.\d+)?$" />
               <span matSuffix>&nbsp;{{getCurrency(component)}}</span>
             </mat-form-field>
           </div>
         </span>
-        <button mat-icon-button type="button" (click)="deleteTransactionComponent(i)" style="align-self: center;" i18n-aria-label aria-label="Delete">
+        <button mat-icon-button type="button" (click)="deleteTransactionComponent(i)" class="row-button" i18n-aria-label aria-label="Delete">
           <mat-icon>delete_forever</mat-icon>
         </button>
       </span>
