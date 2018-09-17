@@ -295,7 +295,9 @@ router.get('/analytics/tags', function(req, res, next) {
           tagsSet = tagsSet.add(tag);
         });
       });
-      return Array.from(tagsSet);
+      var tagsArray = Array.from(tagsSet);
+      tagsArray.sort();
+      return tagsArray;
     });
   }).then(function(response){
     res.send(response);

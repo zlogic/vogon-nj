@@ -22,7 +22,7 @@ describe('Service', function() {
             try {
               assert.ok(result);
               assert.equal(result.status, 200);
-              assert.deepEqual(result.body, ["","hello","world","magic"]);
+              assert.deepEqual(result.body, ["","hello","magic","world"]);
               done();
             } catch(err) {done(err);}
           });

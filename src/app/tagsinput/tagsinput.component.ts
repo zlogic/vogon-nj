@@ -1,7 +1,7 @@
 import { Component, Input, ElementRef, ViewChild, forwardRef } from '@angular/core';
 import { MatChipInputEvent, MatAutocompleteSelectedEvent } from '@angular/material';
 import { FormControl, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { ENTER } from '@angular/cdk/keycodes';
 import { Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
@@ -22,18 +22,19 @@ export class TagsInputComponent implements ControlValueAccessor {
   tags: string[];
   @Input('placeholder') placeholder: string;
   @Input('class') styleClass: string;
+  @Input('allowCreate') allowCreate: boolean = true;
 
   @ViewChild('tagsInput') tagsInput: ElementRef;
   filteredTags: Observable<string[]>;
   tagsControl = new FormControl();
-  separatorKeysCodes: number[] = [ENTER, COMMA];
+  separatorKeysCodes: number[] = [ENTER];
 
   private propagateChange = (_: any) => {};
 
   addTag(event: MatChipInputEvent) {
     const input = event.input;
-    const value = event.value;
-
+    const value = this.allowCreate ? event.value : '';
+    
     if ((value || '').trim())
       this.tags.push(value.trim());
     if (input)
