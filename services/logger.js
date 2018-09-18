@@ -1,15 +1,24 @@
 var winston = require('winston');
 var split = require('split');
 
-var logger = winston.createLogger({
-  transports: [
-    new (winston.transports.Console)()
-  ],
-  format: winston.format.combine(
+var format;
+if(process.stdout.isTTY)
+  format = winston.format.combine(
     winston.format.colorize(),
     winston.format.splat(),
     winston.format.simple()
-  )
+  );
+else
+  format = winston.format.combine(
+    winston.format.splat(),
+    winston.format.simple()
+  );
+
+var logger = winston.createLogger({
+  transports: [
+    new (winston.transports.Console)({stderrLevels: ['error']})
+  ],
+  format: format
 });
 logger.level = 'silly';
 
