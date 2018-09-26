@@ -11,7 +11,6 @@ export class UpdateService {
   update(): Observable<any> {
     return merge(
       this.accountsService.update().pipe(catchError((err) => of(err))),
-      this.transactionsService.update().pipe(catchError((err) => of(err))),
       this.userService.update().pipe(catchError((err) => of(err)))
     );  
     //No need to update transactions, since they automatically update if accounts change

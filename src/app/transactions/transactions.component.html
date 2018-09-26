@@ -24,8 +24,7 @@
     </div>
   </form>
   <table mat-table [dataSource]="transactionsService.transactions" matSort [matSortActive]="getSortColumn()" [matSortDirection]="getSortDirection()" matSortDisableClear (matSortChange)="sortData($event)" class="mat-elevation-z4" 
-    infiniteScroll="infiniteScroll" (scrolled)="transactionsService.nextPage()" [infiniteScrollDisabled]="transactionsService.isLoadingNextPage() || transactionsService.isLastPage()" [immediateCheck]="true" [infiniteScrollContainer]="'mat-sidenav-content'" [fromRoot]="true">
-    
+    infiniteScroll="infiniteScroll" (scrolled)="transactionsService.nextPage()" [infiniteScrollDisabled]="transactionsService.isLoadingNextPage() || transactionsService.isLastPage()" [immediateCheck]="false" [infiniteScrollContainer]="'mat-sidenav-content'" [fromRoot]="true">
     <ng-template let-transaction="transaction" #transactionItemDescription>{{transaction.description}}</ng-template>
     <ng-template let-transaction="transaction" #transactionItemTags>
       <div class="tags-container">
