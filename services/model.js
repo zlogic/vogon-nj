@@ -2,6 +2,7 @@ var Sequelize = require('sequelize');
 var path = require('path');
 var os = require('os');
 var crypto = require('crypto');
+var util = require('util');
 var logger = require('./logger');
 
 var fixedPointMultiplier = 100.0;
@@ -25,7 +26,10 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   else
     sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
 
-  var hashPassword = function(password, salt, options){
+  var cryptopbkdf2 = util.promisify(crypto.pbkdf2);
+  var cryptoRandomBytes = util.promisify(crypto.randomBytes);
+
+  var hashPassword = async function(password, salt, options){
     if(options === null || options === undefined)
       options = {
         iterations: 10000,
@@ -33,34 +37,21 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
         digest: 'sha512',
         saltlen: 256
       };
-    var pbkdf2 = function(salt){
-      return new sequelize.Promise(function(resolve, reject) {
-        crypto.pbkdf2(password, salt, options.iterations, options.keylen, options.digest, function(err, hash){
-          if(err)
-            return reject(err);
-          hash = hash.toString('hex');
-          options =  {
-            iterations: options.iterations,
-            keylen: options.keylen,
-            digest: options.digest
-          };
-          resolve(JSON.stringify({salt: salt, hash:hash, options: options}));
-        });
-      });
+    var pbkdf2 = async function(salt){
+      var hash = await cryptopbkdf2(password, salt, options.iterations, options.keylen, options.digest);
+      hash = hash.toString('hex');
+      options =  {
+        iterations: options.iterations,
+        keylen: options.keylen,
+        digest: options.digest
+      };
+      return JSON.stringify({salt: salt, hash:hash, options: options});
     };
-    if(salt === null || salt === undefined)  
-      return new sequelize.Promise(function(resolve, reject) {
-        crypto.randomBytes(options.saltlen, function(err, salt){
-          if(err)
-            return reject(err);
-          salt = salt.toString('hex');
-          resolve(salt);
-        });
-      }).then(function(salt) {
-        return pbkdf2(salt);
-      });
-    else
-      return pbkdf2(salt);
+    if(salt === null || salt === undefined) {
+      salt = await cryptoRandomBytes(options.saltlen);
+      salt = salt.toString('hex');
+    }
+    return pbkdf2(salt);
   };
 
   /**
@@ -171,14 +162,13 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   }, {
     timestamps: false,
   });
-  User.prototype.validatePassword = function(password){
+  User.prototype.validatePassword = async function(password){
     var instance = this;
     if(instance.getDataValue('password') === undefined || instance.getDataValue('password') === null)
-     return sequelize.Promise.reject(new Error("Password is not set"));
+     return Promise.reject(new Error("Password is not set"));
     var storedUserPassword = JSON.parse(instance.getDataValue('password'));
-    return hashPassword(password, storedUserPassword.salt, storedUserPassword.options).then(function(result){
-      return JSON.parse(result).hash === storedUserPassword.hash;
-    });
+    var hashedPassword = await hashPassword(password, storedUserPassword.salt, storedUserPassword.options)
+    return JSON.parse(hashedPassword).hash === storedUserPassword.hash;
   };
 
   var Token = sequelize.define('Token', {
@@ -221,86 +211,75 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
    * Hooks
    */
   //TODO: set default values or do validation for all fields
-  Account.hook('beforeCreate', function(account, options){
+  Account.hook('beforeCreate', async function(account, options){
     account.balance = 0;
-    return sequelize.Promise.resolve();
   });
 
-  FinanceTransactionComponent.hook('afterUpdate', function(financeTransactionComponent, options){
+  FinanceTransactionComponent.hook('afterUpdate', async function(financeTransactionComponent, options){
     var previousAccount = financeTransactionComponent.previous("AccountId");
     var newAccount = financeTransactionComponent.AccountId;
     var previousAmount = parseInt(financeTransactionComponent.previous("amount"), 10);
     var newAmount = parseInt(financeTransactionComponent.getDataValue("amount"), 10);
 
     if(financeTransactionComponent.AccountId === undefined && previousAccount === undefined)
-      return sequelize.Promise.resolve();
+      return;
 
     if(!financeTransactionComponent.changed("AccountId") && !financeTransactionComponent.changed("amount"))
-      return sequelize.Promise.resolve();
+      return;
 
     if(options === undefined || options.transaction === undefined)
-      return sequelize.Promise.reject(new Error("FinanceTransactionComponent afterUpdate hook can only be run from a transaction"));
+      throw new Error("FinanceTransactionComponent afterUpdate hook can only be run from a transaction");
     var transaction = options.transaction;
 
-    var updatePreviousAccount = function(){
-      if(previousAccount === undefined || previousAccount === null)
-        return sequelize.Promise.resolve();
-      if(!financeTransactionComponent.changed("AccountId"))
-        return sequelize.Promise.resolve();
-      return Account.findById(previousAccount, {transaction: transaction}).then(function(account){
-        return account.increment("balance", {by: -previousAmount, transaction: transaction});
-      });
-    };
-    var updateNewAccount = function(){
-      if(newAccount === undefined || newAccount === null)
-        return sequelize.Promise.resolve();
-      var incrementAmount = newAmount;
-      if(!financeTransactionComponent.changed("AccountId") && financeTransactionComponent.changed("amount"))
-        incrementAmount = newAmount - previousAmount;
-      return Account.findById(newAccount, {transaction: transaction}).then(function(account){
-        return account.increment("balance", {by: incrementAmount, transaction: transaction});
-      });
-    };
-    return updatePreviousAccount().then(updateNewAccount);
+    //Update previous account
+    if(previousAccount !== undefined && previousAccount !== null && financeTransactionComponent.changed("AccountId")) {
+      var account = await Account.findById(previousAccount, {transaction: transaction})
+      await account.increment("balance", {by: -previousAmount, transaction: transaction});
+    }
+    //Update new account
+    if(newAccount === undefined || newAccount === null)
+      return;
+    var incrementAmount = newAmount;
+    if(!financeTransactionComponent.changed("AccountId") && financeTransactionComponent.changed("amount"))
+      incrementAmount = newAmount - previousAmount;
+    var account = await Account.findById(newAccount, {transaction: transaction})
+    await account.increment("balance", {by: incrementAmount, transaction: transaction});
   });
 
-  FinanceTransactionComponent.hook('afterDestroy', function(financeTransactionComponent, options){
+  FinanceTransactionComponent.hook('afterDestroy', async function(financeTransactionComponent, options){
     if(financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null)
-      return sequelize.Promise.resolve();
+      return;
 
     if(options === undefined || options.transaction === undefined)
-      return sequelize.Promise.reject(new Error("FinanceTransactionComponent afterDestroy hook can only be run from a transaction"));
+      throw new Error("FinanceTransactionComponent afterDestroy hook can only be run from a transaction");
 
     var transaction = options.transaction;
-    return Account.findById(financeTransactionComponent.AccountId, {transaction: transaction}).then(function(account){
-      return account.increment("balance", {by: -parseInt(financeTransactionComponent.getDataValue("amount"), 10), transaction: transaction});
-    });
+    var account = await Account.findById(financeTransactionComponent.AccountId, {transaction: transaction});
+    await account.increment("balance", {by: -parseInt(financeTransactionComponent.getDataValue("amount"), 10), transaction: transaction});
   });
 
-  var userPasswordHashingHook = function(user, options) {
+  var userPasswordHashingHook = async function(user, options) {
     if (!user.changed('password'))
-      return sequelize.Promise.resolve();
+      return;
     
-    return hashPassword(user.getDataValue('password'), null, null).then(function(result) {
-      user.setDataValue('password', result);
-      return null;
-    });
+    var hashedPassword = await hashPassword(user.getDataValue('password'), null, null);
+    user.setDataValue('password', hashedPassword);
+    return null;
   };
   User.hook('beforeCreate', userPasswordHashingHook);
   User.hook('beforeUpdate', userPasswordHashingHook);
 
-  var conflictResolutionHook = function(instance, options){
+  var conflictResolutionHook = async function(instance, options){
     if(options === undefined || options.transaction === undefined)
       throw new Error("conflictResolutionHook hook can only be run from a transaction");
     var transaction = options.transaction;
-    return instance.constructor.findOne({where: {id: instance.id}, transaction: transaction}).then(function(dbInstance){
-      if(dbInstance.version !== instance.version){
-        throw new Error("Data was already updated from another session");
-      } else if(!instance.changed('version')){
-        instance.version++;
-        return dbInstance.increment('version', {transaction: transaction});
-      }
-    });
+    var dbInstance = await instance.constructor.findOne({where: {id: instance.id}, transaction: transaction});
+    if(dbInstance.version !== instance.version){
+      throw new Error("Data was already updated from another session");
+    } else if(!instance.changed('version')){
+      instance.version++;
+      return dbInstance.increment('version', {transaction: transaction});
+    }
   };
   Account.hook('beforeUpdate', conflictResolutionHook);
   FinanceTransaction.hook('beforeUpdate', conflictResolutionHook);
@@ -312,15 +291,15 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   /**
    * Helper tools
    */
-  var importData = function(user, data, options){
+  var importData = async function(user, data, options){
     var accountRemappings = {};
     var createdAccounts = undefined;
     var createdFinanceTransactions = undefined;
 
     if(options === undefined || options.transaction === undefined)
-      return sequelize.Promise.reject(new Error("Import can only be run from a transaction"));
+      throw new Error("Import can only be run from a transaction");
     if(user === undefined)
-      return sequelize.Promise.reject(new Error("Cannot import data for unknown user"));
+      throw new Error("Cannot import data for unknown user");
     var transaction = options.transaction;
 
     //Java version workarounds
@@ -343,9 +322,9 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
     //Preprocess data
     data.Accounts = data.Accounts.map(function(account, i){
-        accountRemappings[account.id] = i;
-        delete account.id;
-        return account;
+      accountRemappings[account.id] = i;
+      delete account.id;
+      return account;
     });
     data.FinanceTransactions = data.FinanceTransactions.map(function(financeTransaction){
       delete financeTransaction.id;
@@ -357,44 +336,41 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       return financeTransaction;
     });
 
-    return Promise.all(data.Accounts.map(function(account){
+    var createdAccounts = await Promise.all(data.Accounts.map(function(account){
       return Account.create(account, {transaction: transaction});
-    })).then(function(accounts){
-      createdAccounts = accounts;
-      return user.addAccounts(accounts, {transaction: transaction});
-    }).then(function(){
-      return Promise.all(data.FinanceTransactions.map(function(financeTransaction, i){
-        financeTransaction.TransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent, j){
-          var accountId = financeTransactionComponent.AccountId;
-          delete financeTransactionComponent.AccountId;
-          financeTransactionComponent.getAccount = function(){
-            return createdAccounts[accountRemappings[accountId]];
-          };
-          return financeTransactionComponent;
-        });
-        return FinanceTransaction.create(financeTransaction, {include: [FinanceTransactionComponent], transaction: transaction});
-      }));
-    }).then(function(financeTransactions){
-      createdFinanceTransactions = financeTransactions;
-      return user.addFinanceTransactions(financeTransactions, {transaction: transaction});
-    }).then(function(){
-      var promises = [];
-      createdFinanceTransactions.forEach(function(financeTransaction, i){
-        createdFinanceTransactions[i].FinanceTransactionComponents.forEach(function(financeTransactionComponent, j){
-          var account = data.FinanceTransactions[i].FinanceTransactionComponents[j].getAccount();
-          promises.push(financeTransactionComponent.setAccount(account, {transaction: transaction}));
-        });
+    }));
+    await user.addAccounts(createdAccounts, {transaction: transaction});
+    var financeTransactions = await Promise.all(data.FinanceTransactions.map(function(financeTransaction, i){
+      financeTransaction.TransactionComponents = financeTransaction.FinanceTransactionComponents.map(function(financeTransactionComponent, j){
+        var accountId = financeTransactionComponent.AccountId;
+        delete financeTransactionComponent.AccountId;
+        financeTransactionComponent.getAccount = function(){
+          return createdAccounts[accountRemappings[accountId]];
+        };
+        return financeTransactionComponent;
       });
-      return Promise.all(promises);
+      return FinanceTransaction.create(financeTransaction, {include: [FinanceTransactionComponent], transaction: transaction});
+    }));
+    createdFinanceTransactions = financeTransactions;
+    await user.addFinanceTransactions(financeTransactions, {transaction: transaction});
+
+    var promises = [];
+    createdFinanceTransactions.forEach(function(financeTransaction, i){
+      createdFinanceTransactions[i].FinanceTransactionComponents.forEach(function(financeTransactionComponent, j){
+        var account = data.FinanceTransactions[i].FinanceTransactionComponents[j].getAccount();
+        promises.push(financeTransactionComponent.setAccount(account, {transaction: transaction}));
+      });
     });
+    return Promise.all(promises);
   };
 
-  var exportData = function(user){
+  var exportData = async function(user){
     if(user === undefined)
-      return sequelize.Promise.reject(new Error("Cannot export data for unknown user"));
-    return sequelize.transaction(function(transaction){
-      return User.findOne({
-        where: {id: user.id},
+      throw new Error("Cannot export data for unknown user");
+    return sequelize.transaction(async function(transaction){
+      var userId = user.id;
+      user = await User.findOne({
+        where: {id: userId},
         include: [
           {model: Account, attributes: {exclude: ['UserId', 'version']}},
           {model: FinanceTransaction, attributes: {exclude: ['UserId', 'id', 'version']}, include: [
@@ -409,7 +385,6 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
         attributes: {exclude: ['id', 'version', 'password']},
         transaction: transaction
       });
-    }).then(function(user){
       user = user.toJSON();
       delete user.username;
       delete user.version;
@@ -440,44 +415,35 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     });
   };
 
-  var performMaintenance = function(){
-    var deleteOrphans = function(){
-      return sequelize.transaction(function(transaction){
-        return Account.findAll({where: {UserId: null}, transaction: transaction}).then(function(orphanedAccounts){
-          return sequelize.Promise.all(orphanedAccounts.map(function(orphanedAccount){
-            return orphanedAccount.destroy({transaction: transaction});
-          }));
-        }).then(function(){
-          return FinanceTransaction.findAll({where: {UserId: null}, transaction: transaction}).then(function(orphanedFinanceTransactions){
-            return sequelize.Promise.all(orphanedFinanceTransactions.map(function(orphanedFinanceTransaction){
-              return orphanedFinanceTransaction.destroy({transaction: transaction});
-            }));
-          });
-        }).then(function(){
-          return FinanceTransactionComponent.findAll({where: {FinanceTransactionId: null}, transaction: transaction}).then(function(orphanedFinanceTransactionComponents){
-            return sequelize.Promise.all(orphanedFinanceTransactionComponents.map(function(orphanedFinanceTransactionComponent){
-              return orphanedFinanceTransactionComponent.destroy({transaction: transaction});
-            }));
-          });
-        });
-      });
-    };
-    var recalculateBalance = function(){
-      return sequelize.transaction(function(transaction){
-        return Account.findAll({transaction: transaction}).then(function(accounts){
-          return sequelize.Promise.all(accounts.map(function(account){
-            return account.update({balance: 0}, {transaction: transaction}).then(function(){
-              return account.getFinanceTransactionComponents().then(function(financeTransactionComponents){
-                return sequelize.Promise.all(financeTransactionComponents.map(function(financeTransactionComponent){
-                  return account.increment("balance", {by: financeTransactionComponent.getDataValue('amount'), transaction: transaction});
-                }));
-              });
-            });
-          }));
-        });
-      });
-    }
-    return deleteOrphans().then(recalculateBalance);
+  var performMaintenance = async function(){
+    //Delete orphans
+    await sequelize.transaction(async function(transaction){
+      var orphanedAccounts = await Account.findAll({where: {UserId: null}, transaction: transaction});
+      await Promise.all(orphanedAccounts.map(function(orphanedAccount){
+        return orphanedAccount.destroy({transaction: transaction});
+      }));
+
+      var orphanedFinanceTransactions = await FinanceTransaction.findAll({where: {UserId: null}, transaction: transaction});
+      await Promise.all(orphanedFinanceTransactions.map(function(orphanedFinanceTransaction){
+        return orphanedFinanceTransaction.destroy({transaction: transaction});
+      }));
+
+      var orphanedFinanceTransactionComponents = await FinanceTransactionComponent.findAll({where: {FinanceTransactionId: null}, transaction: transaction});
+      await Promise.all(orphanedFinanceTransactionComponents.map(function(orphanedFinanceTransactionComponent){
+        return orphanedFinanceTransactionComponent.destroy({transaction: transaction});
+      }));
+    });
+    //Recalculate balance
+    await sequelize.transaction(async function(transaction){
+      var accounts = await Account.findAll({transaction: transaction});
+      await Promise.all(accounts.map(async function(account){
+        await account.update({balance: 0}, {transaction: transaction});
+        var financeTransactionComponents = await account.getFinanceTransactionComponents();
+        await Promise.all(financeTransactionComponents.map(function(financeTransactionComponent){
+          return account.increment("balance", {by: financeTransactionComponent.getDataValue('amount'), transaction: transaction});
+        }));
+      }));
+    });
   };
 
   var deleteExpiredTokens = function(){

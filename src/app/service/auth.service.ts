@@ -9,7 +9,6 @@ import { I18nService } from './i18n.service';
 
 @Injectable()
 export class AuthorizationService {
-  readonly clientId: string = "vogonweb";
   readonly postHeaders = new Headers({"Content-Type": "application/x-www-form-urlencoded"});
 
   private access_token: string;
@@ -31,7 +30,7 @@ export class AuthorizationService {
     }
   };
   performAuthorization(username:string, password:string, rememberToken:boolean): Observable<Response> {
-    var params = {username: username, password: password, client_id: this.clientId, grant_type: "password"};
+    var params = {username: username, password: password, grant_type: "password"};
     return this.httpService.post("oauth/token", this.httpService.encodeForm(params), this.postHeaders)
         .pipe(
           map((data: Response) => {

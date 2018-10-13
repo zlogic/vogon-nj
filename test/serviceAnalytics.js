@@ -12,41 +12,27 @@ describe('Service', function() {
   serviceBase.hooks();
 
   describe('analytics', function () {
-    it('should get a list of all tags for an authenticated user', function (done) {
+    it('should get a list of all tags for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, ["","hello","magic","world"]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, ["","hello","magic","world"]);
     });
-    it('should get a list of all tags for an authenticated user with no tags', function (done) {
+    it('should get a list of all tags for an authenticated user with no tags', async function () {
       var userData = {username: "user02", password: "mypassword2"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [""]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [""]);
     });
-    it('should get analytics data for all transactions', function (done) {
+    it('should get analytics data for all transactions', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -77,22 +63,15 @@ describe('Service', function() {
           accountsBalanceGraph:{"2014-02-17":160,"2014-06-07":160+144,"2015-01-07":160+144-3.14}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should get analytics data for only income transactions', function (done) {
+    it('should get analytics data for only income transactions', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -120,22 +99,15 @@ describe('Service', function() {
           accountsBalanceGraph:{"2014-02-17":160}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should get analytics data for only expense transactions', function (done) {
+    it('should get analytics data for only expense transactions', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -160,22 +132,15 @@ describe('Service', function() {
           accountsBalanceGraph:{"2015-01-07":-3.14}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should get analytics data for only transfer transactions', function (done) {
+    it('should get analytics data for only transfer transactions', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -202,22 +167,15 @@ describe('Service', function() {
           accountsBalanceGraph:{"2014-06-07":144}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should get analytics data for transactions at a specific day', function (done) {
+    it('should get analytics data for transactions at a specific day', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2014-02-17",
@@ -244,22 +202,15 @@ describe('Service', function() {
           accountsBalanceGraph:{"2014-02-17":160}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should get analytics data for transactions in a specific account', function (done) {
+    it('should get analytics data for transactions in a specific account', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -281,22 +232,15 @@ describe('Service', function() {
           accountsBalanceGraph: {"2014-02-17":42,"2014-06-07":42-144,"2015-01-07":42-144+2.72}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should get analytics data for transactions with a specific tag', function (done) {
+    it('should get analytics data for transactions with a specific tag', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -323,39 +267,25 @@ describe('Service', function() {
           accountsBalanceGraph:{"2015-01-07":-3.14}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should correctly handle an empty analytics request', function (done) {
+    it('should correctly handle an empty analytics request', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, {});
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, {});
     });
-    it('should not allow a user to use an AccountId belonging to another user in requests for getting analytics', function (done) {
+    it('should not allow a user to use an AccountId belonging to another user in requests for getting analytics', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var request = {
         earliestDate: "2010-01-01",
@@ -386,22 +316,15 @@ describe('Service', function() {
           accountsBalanceGraph:{"2014-02-17":160,"2014-06-07":160+144,"2015-01-07":160+144-3.14}
         }
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedAnalytics);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      var {token, result} = await authenticateUser(userData);
+
+      var result = await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedAnalytics);
     });
-    it('should not be able to get analytics for an unauthenticated user (no token)' , function (done) {
+    it('should not be able to get analytics for an unauthenticated user (no token)', async function () {
       var request = {
         earliestDate: "2010-01-01",
         latestDate: "2020-01-01",
@@ -411,43 +334,46 @@ describe('Service', function() {
         selectedTags: ["","hello","world","magic"],
         selectedAccounts: [1, 2]
       };
-      prepopulate().then(function(){
-        superagent.post(baseUrl + "/service/analytics").send(request).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.post(baseUrl + "/service/analytics").send(request);
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
-    it('should not be able to get a list of all tags for an unauthenticated user (no token)' , function (done) {
-      prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/analytics/tags").end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get a list of all tags for an unauthenticated user (no token)', async function () {
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/analytics/tags");
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
-    it('should not be able to get a list of all tags for an unauthenticated user (bad token)', function (done) {
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token)).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get a list of all tags for an unauthenticated user (bad token)', async function () {
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/analytics/tags").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
-    it('should not be able to get analytics for an unauthenticated user (bad token)', function (done) {
+    it('should not be able to get analytics for an unauthenticated user (bad token)', async function () {
       var request = {
         earliestDate: "2010-01-01",
         latestDate: "2020-01-01",
@@ -457,17 +383,18 @@ describe('Service', function() {
         selectedTags: ["","hello","world","magic"],
         selectedAccounts: [1, 2]
       };
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.post(baseUrl + "/service/analytics").set(tokenHeader(token)).send(request);
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
   });
 });

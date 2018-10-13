@@ -11,7 +11,7 @@ var tokenHeader = serviceBase.tokenHeader;
 describe('Service', function() {
   serviceBase.hooks();
 
-  var validateDefaultFinanceTransactionsData = function(done){
+  var validateDefaultFinanceTransactionsData = async function(){
     var defaultFinanceTransactions = [
       { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
         {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
@@ -24,248 +24,176 @@ describe('Service', function() {
         {AccountId: 3, amount: 100, id: 5, version: 1}
       ] }
     ];
-    dbService.FinanceTransaction.findAll({
+    var financeTransactions = await dbService.FinanceTransaction.findAll({
       model: dbService.FinanceTransaction,
       include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
       order: [
         ['id', 'ASC'],
         [dbService.FinanceTransactionComponent, 'id', 'ASC']
       ]
-    }).then(function(financeTransactions){
-      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-      assert.deepEqual(financeTransactions, defaultFinanceTransactions);
-      done();
-    }).catch(done);
+    });
+    financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+    assert.deepEqual(financeTransactions, defaultFinanceTransactions);
   };
 
   describe('transactionslist', function () {
-    it('should get a list of transactions for an authenticated user with default sort parameters', function (done) {
+    it('should get a list of transactions for an authenticated user with default sort parameters', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
-                ] },
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
+        ] },
+        { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
+        ] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with sort by date descending', function (done) {
+    it('should get a list of transactions for an authenticated user with sort by date descending', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?sortColumn=date&sortDirection=DESC").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
-                ] },
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?sortColumn=date&sortDirection=DESC").set(tokenHeader(token))
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
+        ] },
+        { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
+        ] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with sort by date ascending', function (done) {
+    it('should get a list of transactions for an authenticated user with sort by date ascending', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?sortColumn=date&sortDirection=ASC").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
-                ] },
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?sortColumn=date&sortDirection=ASC").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ] },
+        { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
+        ] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with sort by description descending', function (done) {
+    it('should get a list of transactions for an authenticated user with sort by description descending', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?sortColumn=description&sortDirection=DESC").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
-                ] },
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?sortColumn=description&sortDirection=DESC").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
+        ] },
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
+        ] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with sort by description ascending', function (done) {
+    it('should get a list of transactions for an authenticated user with sort by description ascending', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?sortColumn=description&sortDirection=ASC").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
-                ] },
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
-                ] },
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?sortColumn=description&sortDirection=ASC").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ] },
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 2.72, id: 4, version: 1}
+        ] },
+        { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with a date filter for an existing date', function (done) {
+    it('should get a list of transactions for an authenticated user with a date filter for an existing date', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterDate=2014-02-17").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterDate=2014-02-17").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
+        ] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with a date filter for a non-existing date', function (done) {
+    it('should get a list of transactions for an authenticated user with a date filter for a non-existing date', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterDate=1970-01-01").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, []);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterDate=1970-01-01").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, []);
     });
-    it('should get a list of transactions for an authenticated user with a tag filter for an existing tag', function (done) {
+    it('should get a list of transactions for an authenticated user with a tag filter for an existing tag', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterTags=[\"hello\"]").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
-                ] },
-                { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"hello\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
+        ] },
+        { tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 2, amount: 160, id: 2, version: 1}, {AccountId: 1, amount: 42, id: 1, version: 1}
+        ] }
+      ]);
     });
-    it('should get a list of transactions for an authenticated user with a tag filter for a non-existing tag', function (done) {
+    it('should get a list of transactions for an authenticated user with a tag filter for a non-existing tag', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterDate=[\"unknown\"]").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, []);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterDate=[\"unknown\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, []);
     });
-    it('should get a list of transactions for an authenticated user with a description filter for an existing description', function (done) {
+    it('should get a list of transactions for an authenticated user with a description filter for an existing description', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterDescription=%25transaction 2%25").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, [
-                { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
-                ] }
-              ]);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterDescription=%25transaction 2%25").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, [
+        { tags: ['hello','magic'], id: 3, type: 'expenseincome', description: 'test transaction 2', date: '2015-01-07', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 2.72, id: 4, version: 1}, {AccountId: 2, amount: -3.14, id: 3, version: 1}
+        ] }
+      ]);
     });
-    it('should result in a full tag match if a tag begins with a quote', function (done) {
+    it('should result in a full tag match if a tag begins with a quote', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newTransactions = [
         {description: "test transaction 4", type: "expenseincome", date: "2014-06-07", tags: ["prefix\"\"quote_start","world"]},
@@ -278,52 +206,37 @@ describe('Service', function() {
           delete financeTransaction.FinanceTransactionComponents;
         });
       };
-      prepopulate().then(function(){
-        return dbService.sequelize.transaction(function(transaction){
-          return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
-        });
-      }).then(function(financeTransactions){
-        return dbService.sequelize.transaction(function(transaction){
-          return dbService.User.find({where: {username:"user01"}, transaction:transaction}).then(function(user){
-            return dbService.sequelize.Promise.all(financeTransactions.map(function(financeTransaction){
-              return financeTransaction.setUser(user, {transaction:transaction});
-            }));
-          });
-        });
-      }).then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_start\"]").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, []);
-              superagent.get(baseUrl + "/service/transactions?filterTags=[\"prefix\\\"\\\"quote_start\"]").set(tokenHeader(token)).end(function(err, result){
-                if(err) return done(err);
-                try {
-                  assert.ok(result);
-                  assert.equal(result.status, 200);
-                  cleanTransactions(result.body);
-                  assert.deepEqual(result.body, [newTransactions[0]]);
-                  superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_middle\"]").set(tokenHeader(token)).end(function(err, result){
-                    if(err) return done(err);
-                    try {
-                      assert.ok(result);
-                      assert.equal(result.status, 200);
-                      cleanTransactions(result.body);
-                      assert.deepEqual(result.body, [newTransactions[1]]);
-                      done();
-                    } catch(err) {done(err);}
-                  });
-                } catch(err) {done(err);}
-              });
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var financeTransactions = await dbService.sequelize.transaction(function(transaction){
+        return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
+      });
+      await dbService.sequelize.transaction(async function(transaction){
+        var user = await dbService.User.find({where: {username:"user01"}, transaction:transaction});
+        return Promise.all(financeTransactions.map(function(financeTransaction){
+          return financeTransaction.setUser(user, {transaction:transaction});
+        }));
+      });
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_start\"]").set(tokenHeader(token))
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, []);
+
+      result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"prefix\\\"\\\"quote_start\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      cleanTransactions(result.body);
+      assert.deepEqual(result.body, [newTransactions[0]]);
+
+      result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_middle\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      cleanTransactions(result.body);
+      assert.deepEqual(result.body, [newTransactions[1]]);
     });
-    it('should result in a full tag match if a tag ends with a quote', function (done) {
+    it('should result in a full tag match if a tag ends with a quote', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newTransactions = [
         {description: "test transaction 4", type: "expenseincome", date: "2014-06-07", tags: [" hello","prefix\"\"quote_middle"]},
@@ -336,174 +249,131 @@ describe('Service', function() {
           delete financeTransaction.FinanceTransactionComponents;
         });
       };
-      prepopulate().then(function(){
-        return dbService.sequelize.transaction(function(transaction){
-          return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
-        });
-      }).then(function(financeTransactions){
-        return dbService.sequelize.transaction(function(transaction){
-          return dbService.User.find({where: {username:"user01"}, transaction:transaction}).then(function(user){
-            return dbService.sequelize.Promise.all(financeTransactions.map(function(financeTransaction){
-              return financeTransaction.setUser(user, {transaction:transaction});
-            }));
-          });
-        });
-      }).then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_middle\"]").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, []);
-              superagent.get(baseUrl + "/service/transactions?filterTags=[\"prefix\\\"\\\"quote_middle\"]").set(tokenHeader(token)).end(function(err, result){
-                if(err) return done(err);
-                try {
-                  assert.ok(result);
-                  assert.equal(result.status, 200);
-                  cleanTransactions(result.body);
-                  assert.deepEqual(result.body, [newTransactions[0]]);
-                  superagent.get(baseUrl + "/service/transactions?filterTags=[\"quote_end\\\"\"]").set(tokenHeader(token)).end(function(err, result){
-                    if(err) return done(err);
-                    try {
-                      assert.ok(result);
-                      assert.equal(result.status, 200);
-                      cleanTransactions(result.body);
-                      assert.deepEqual(result.body, [newTransactions[1]]);
-                      done();
-                    } catch(err) {done(err);}
-                  });
-                } catch(err) {done(err);}
-              });
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var financeTransactions = await dbService.sequelize.transaction(function(transaction){
+        return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
+      });
+      await dbService.sequelize.transaction(async function(transaction){
+        var user = await dbService.User.find({where: {username:"user01"}, transaction:transaction});
+        return Promise.all(financeTransactions.map(function(financeTransaction){
+          return financeTransaction.setUser(user, {transaction:transaction});
+        }));
+      });
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"\\\"quote_middle\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, []);
+
+      result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"prefix\\\"\\\"quote_middle\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      cleanTransactions(result.body);
+      assert.deepEqual(result.body, [newTransactions[0]]);
+
+      result = await superagent.get(baseUrl + "/service/transactions?filterTags=[\"quote_end\\\"\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      cleanTransactions(result.body);
+      assert.deepEqual(result.body, [newTransactions[1]]);
     });
-    it('should get a list of transactions for an authenticated user with a description filter for a non-existing description', function (done) {
+    it('should get a list of transactions for an authenticated user with a description filter for a non-existing description', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?filterDescription=%25transaction 4%25").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, []);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?filterDescription=%25transaction 4%25").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, []);
     });
-    it('should handle paging for transactions', function (done) {
+    it('should handle paging for transactions', async function () {
       this.timeout(5000);
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        var newTransactions = [];
-        for(var i=1;i<250;i++)
-          newTransactions.push({description: "page transaction "+i,});
-        return dbService.sequelize.transaction(function(transaction){
-          return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
-        });
-      }).then(function(){
-        return dbService.sequelize.transaction(function(transaction){
-          return dbService.User.find({where: {username:"user01"}, transaction:transaction}).then(function(user){
-            return dbService.FinanceTransaction.findAll({transaction:transaction}).then(function(financeTransactions){
-              return dbService.sequelize.Promise.all(financeTransactions.map(function(financeTransaction){
-                return financeTransaction.setUser(user, {transaction:transaction});
-              }));
-            });
-          });
-        });
-      }).then(function(){
-        var pageTransactions = [];
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?page=0").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.equal(result.body.length, 100);
-              pageTransactions = pageTransactions.concat(result.body);
-              superagent.get(baseUrl + "/service/transactions?page=1").set(tokenHeader(token)).end(function(err, result){
-                if(err) return done(err);
-                try {
-                  assert.ok(result);
-                  assert.equal(result.status, 200);
-                  assert.equal(result.body.length, 100);
-                  pageTransactions = pageTransactions.concat(result.body);
-                  superagent.get(baseUrl + "/service/transactions?page=2").set(tokenHeader(token)).end(function(err, result){
-                    if(err) return done(err);
-                    try {
-                      assert.ok(result);
-                      assert.equal(result.status, 200);
-                      assert.equal(result.body.length, 53);
-                      pageTransactions = pageTransactions.concat(result.body);
-                      assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 1";}), true);
-                      assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 2";}), true);
-                      assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 3";}), true);
-                      for(var i=1;i<250;i++)
-                        assert.equal(pageTransactions.some(function(tr){return tr.description === "page transaction " + i;}), true);
-                      done();
-                    } catch(err) {done(err);}
-                  });
-                } catch(err) {done(err);}
-              });
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var newTransactions = [];
+      for(var i=1;i<250;i++)
+        newTransactions.push({description: "page transaction "+i,});
+      await dbService.sequelize.transaction(function(transaction){
+        return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
+      });
+      await dbService.sequelize.transaction(async function(transaction){
+        var user = await dbService.User.find({where: {username:"user01"}, transaction:transaction});
+        var financeTransactions = await dbService.FinanceTransaction.findAll({transaction:transaction});
+        return Promise.all(financeTransactions.map(function(financeTransaction){
+          return financeTransaction.setUser(user, {transaction:transaction});
+        }));
+      });
+      var pageTransactions = [];
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?page=0").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.equal(result.body.length, 100);
+      pageTransactions = pageTransactions.concat(result.body);
+
+      result = await superagent.get(baseUrl + "/service/transactions?page=1").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.equal(result.body.length, 100);
+      pageTransactions = pageTransactions.concat(result.body);
+
+      result = await superagent.get(baseUrl + "/service/transactions?page=2").set(tokenHeader(token))
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.equal(result.body.length, 53);
+      pageTransactions = pageTransactions.concat(result.body);
+      assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 1";}), true);
+      assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 2";}), true);
+      assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 3";}), true);
+      for(var i=1;i<250;i++)
+        assert.equal(pageTransactions.some(function(tr){return tr.description === "page transaction " + i;}), true);
     });
-    it('should return an empty list for a non-existing page', function (done) {
+    it('should return an empty list for a non-existing page', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions?page=2").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, []);
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions?page=2").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, []);
     });
-    it('should not be able to get a list of transactions for an unauthenticated user (no token)' , function (done) {
-      prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/transactions").end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get a list of transactions for an unauthenticated user (no token)', async function () {
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/transactions");
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
-    it('should not be able to get a list of transactions for an unauthenticated user (bad token)', function (done) {
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.get(baseUrl + "/service/transactions").set(tokenHeader(token)).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get a list of transactions for an unauthenticated user (bad token)', async function () {
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/transactions").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
   });
 
   describe('transactionchange', function () {
-    it('should be able to change a transaction for an authenticated user', function (done) {
+    it('should be able to change a transaction for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
@@ -532,38 +402,28 @@ describe('Service', function() {
         { UserId: 1, balance: 42 + 15 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedTransactionData);
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-              }).then(function(){
-                return dbService.Account.findAll();
-              }).then(function(accounts){
-                accounts = accounts.map(function(account){return account.toJSON();});
-                assert.deepEqual(accounts, finalAccounts);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedTransactionData);
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
+      var accounts = await dbService.Account.findAll();
+      accounts = accounts.map(function(account){return account.toJSON();});
+      assert.deepEqual(accounts, finalAccounts);
     });
-    it('should be able to create a new transaction for an authenticated user', function (done) {
+    it('should be able to create a new transaction for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','super'], type: 'expenseincome', description: 'test transaction 4', date: '2016-02-07', FinanceTransactionComponents: [
@@ -595,38 +455,28 @@ describe('Service', function() {
         { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedTransactionData);
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-              }).then(function(){
-                return dbService.Account.findAll();
-              }).then(function(accounts){
-                accounts = accounts.map(function(account){return account.toJSON();});
-                assert.deepEqual(accounts, finalAccounts);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedTransactionData);
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
+      var accounts = await dbService.Account.findAll();
+      accounts = accounts.map(function(account){return account.toJSON();});
+      assert.deepEqual(accounts, finalAccounts);
     });
-    it('should be able to delete all transaction components of a transaction for an authenticated user', function (done) {
+    it('should be able to delete all transaction components of a transaction for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: []
@@ -649,38 +499,28 @@ describe('Service', function() {
         { UserId: 1, balance: -3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedTransactionData);
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-              }).then(function(){
-                return dbService.Account.findAll();
-              }).then(function(accounts){
-                accounts = accounts.map(function(account){return account.toJSON();});
-                assert.deepEqual(accounts, finalAccounts);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedTransactionData);
+      financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
+      var accounts = await dbService.Account.findAll();
+      accounts = accounts.map(function(account){return account.toJSON();});
+      assert.deepEqual(accounts, finalAccounts);
     });
-    it('should not be able to change a transaction for an authenticated user with incorrect transaction version numbers', function (done) {
+    it('should not be able to change a transaction for an authenticated user with incorrect transaction version numbers', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
@@ -709,39 +549,36 @@ describe('Service', function() {
         { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
-      prepopulate().then(function(){
-        return dbService.FinanceTransaction.update({version: 1}, {where: {}});
-      }).then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Data was already updated from another session');
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-              }).then(function(){
-                return dbService.Account.findAll();
-              }).then(function(accounts){
-                accounts = accounts.map(function(account){return account.toJSON();});
-                assert.deepEqual(accounts, finalAccounts);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      await dbService.FinanceTransaction.update({version: 1}, {where: {}});
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.text, 'Data was already updated from another session');
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
+      var accounts = await dbService.Account.findAll();
+      accounts = accounts.map(function(account){return account.toJSON();});
+      assert.deepEqual(accounts, finalAccounts);
     });
-    it('should not be able to change a transaction for an authenticated user with incorrect transaction component version numbers', function (done) {
+    it('should not be able to change a transaction for an authenticated user with incorrect transaction component version numbers', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
@@ -770,81 +607,82 @@ describe('Service', function() {
         { UserId: 1, balance: 160 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
-      prepopulate().then(function(){
-        return dbService.FinanceTransactionComponent.update({version: 2}, {where: {}});
-      }).then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Data was already updated from another session');
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-              }).then(function(){
-                return dbService.Account.findAll();
-              }).then(function(accounts){
-                accounts = accounts.map(function(account){return account.toJSON();});
-                assert.deepEqual(accounts, finalAccounts);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+      await dbService.FinanceTransactionComponent.update({version: 2}, {where: {}});
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.text, 'Data was already updated from another session');
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
+      var accounts = await dbService.Account.findAll();
+      accounts = accounts.map(function(account){return account.toJSON();});
+      assert.deepEqual(accounts, finalAccounts);
     });
-    it('should not allow a user to use an AccountId belonging to another user in requests for changing a transaction', function (done) {
+    it('should not allow a user to use an AccountId belonging to another user in requests for changing a transaction', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 3, amount: 42, id: 2, version: 1}, {AccountId: 3, amount: 15}
         ]
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.equal(result.text, "Cannot set an invalid account id");
-              validateDefaultFinanceTransactionsData(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.equal(result.text, "Cannot set an invalid account id");
+      await validateDefaultFinanceTransactionsData();
     });
-    it('should not allow a user to use a non-existing AccountId in requests for changing a transaction', function (done) {
+    it('should not allow a user to use a non-existing AccountId in requests for changing a transaction', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
         tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 160, amount: 42, id: 2, version: 1}, {AccountId: 3, amount: 15}
         ]
       };
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.equal(result.text, "Cannot set an invalid account id");
-              validateDefaultFinanceTransactionsData(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.equal(result.text, "Cannot set an invalid account id");
+      await validateDefaultFinanceTransactionsData();
     });
-    it('should ignore UserId in requests for changing a transaction and use OAuth data instead', function (done) {
+    it('should ignore UserId in requests for changing a transaction and use OAuth data instead', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var updatedTransactionData = {
          UserId: 2, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
@@ -873,38 +711,28 @@ describe('Service', function() {
         { UserId: 1, balance: 42 + 15 - 3.14, id: 2, name: 'test account 2', currency: 'EUR', includeInTotal: true, showInList: true, version: 0 },
         { UserId: 2, balance: 100, id: 3, name: 'test account 3', currency: 'RUB', includeInTotal: true, showInList: true, version: 0 }
       ];
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, expectedTransactionData);
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-              }).then(function(){
-                return dbService.Account.findAll();
-              }).then(function(accounts){
-                accounts = accounts.map(function(account){return account.toJSON();});
-                assert.deepEqual(accounts, finalAccounts);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactionData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, expectedTransactionData);
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
+      var accounts = await dbService.Account.findAll();
+      accounts = accounts.map(function(account){return account.toJSON();});
+      assert.deepEqual(accounts, finalAccounts);
     });
-    it('should not be able to change a specific requested transaction for an unauthenticated user (no token)' , function (done) {
+    it('should not be able to change a specific requested transaction for an unauthenticated user (no token)', async function () {
       var updatedTransactions = [
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
@@ -913,18 +741,22 @@ describe('Service', function() {
           {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
         ] }
       ];
-      prepopulate().then(function(){
-        superagent.post(baseUrl + "/service/transactions").send(updatedTransactions).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultFinanceTransactionsData(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/transactions").send(updatedTransactions);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+      await validateDefaultFinanceTransactionsData();
     });
-    it('should not be able to change a specific requested transaction for an unauthenticated user (bad token)', function (done) {
+    it('should not be able to change a specific requested transaction for an unauthenticated user (bad token)', async function () {
       var updatedTransactions = [
         { UserId: 1, tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1a', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
           {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
@@ -933,43 +765,40 @@ describe('Service', function() {
           {AccountId: 2, amount: -3.14, id: 3, version: 1}, {AccountId: 1, amount: 100500, id: 4, version: 1},
         ] }
       ];
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactions).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultFinanceTransactionsData(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/transactions").set(tokenHeader(token)).send(updatedTransactions);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+      await validateDefaultFinanceTransactionsData();
     });
   });
 
   describe('transaction', function () {
-    it('should get a specific requested transaction for an authenticated user', function (done) {
+    it('should get a specific requested transaction for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, {
-                tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
-                ]
-              });
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ]
+      });
     });
-    it('should delete a specific requested transaction for an authenticated user', function (done) {
+    it('should delete a specific requested transaction for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var finalFinanceTransactions = [
         { UserId: 1, tags: [], id: 2, type: 'transfer', description: 'test transaction 3', date: '2014-02-17', version: 0, FinanceTransactionComponents: [] },
@@ -980,149 +809,153 @@ describe('Service', function() {
           {AccountId: 3, amount: 100, id: 5, version: 1}
         ] }
       ];
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.delete(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, {
-                tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
-                  {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
-                ]
-              });
-              dbService.FinanceTransaction.findAll({
-                model: dbService.FinanceTransaction,
-                include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
-                order: [
-                  ['id', 'ASC'],
-                  [dbService.FinanceTransactionComponent, 'id', 'ASC']
-                ]
-              }).then(function(financeTransactions){
-                financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
-                assert.deepEqual(financeTransactions, finalFinanceTransactions);
-                done();
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
-    });
-    it('should not be able to get a specific non-existing requested transaction for an authenticated user', function (done) {
-      var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions/transaction/160").set(tokenHeader(token)).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.equal(result.text, "Transaction does not exist");
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
-    });
-    it('should not be able to delete a specific non-existing requested transaction for an authenticated user', function (done) {
-      var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.delete(baseUrl + "/service/transactions/transaction/160").set(tokenHeader(token)).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.equal(result.text, "Cannot delete non-existing transaction");
-              validateDefaultFinanceTransactionsData(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
-    });
-    it('should not allow an authenticated user to get a specific requested transaction beloging to another user', function (done) {
-      var userData = {username: "user02", password: "mypassword2"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.equal(result.text, "Transaction does not exist");
-              done();
-            } catch(err) {done(err);}
-          });
-        });
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.delete(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, {
+        tags: ['hello','world'], id: 1, type: 'expenseincome', description: 'test transaction 1', date: '2014-02-17', version: 0, FinanceTransactionComponents: [
+          {AccountId: 1, amount: 42, id: 1, version: 1}, {AccountId: 2, amount: 160, id: 2, version: 1}
+        ]
       });
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        model: dbService.FinanceTransaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['FinanceTransactionId']}}],
+        order: [
+          ['id', 'ASC'],
+          [dbService.FinanceTransactionComponent, 'id', 'ASC']
+        ]
+      });
+      financeTransactions = financeTransactions.map(function(financeTransaction){return financeTransaction.toJSON();});
+      assert.deepEqual(financeTransactions, finalFinanceTransactions);
     });
-    it('should not allow an authenticated user to delete a specific requested transaction beloging to another user', function (done) {
+    it('should not be able to get a specific non-existing requested transaction for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.delete(baseUrl + "/service/transactions/transaction/4").set(tokenHeader(token)).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.equal(result.text, "Cannot delete non-existing transaction");
-              validateDefaultFinanceTransactionsData(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+          await superagent.get(baseUrl + "/service/transactions/transaction/160").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.equal(result.text, "Transaction does not exist");
     });
-    it('should not be able to get a specific requested transaction for an unauthenticated user (no token)' , function (done) {
-      prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/transactions/transaction/1").end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to delete a specific non-existing requested transaction for an authenticated user', async function () {
+      var userData = {username: "user01", password: "mypassword"};
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.delete(baseUrl + "/service/transactions/transaction/160").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.equal(result.text, "Cannot delete non-existing transaction");
+      await validateDefaultFinanceTransactionsData();
     });
-    it('should not be able to get a specific requested transaction for an unauthenticated user (bad token)', function (done) {
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not allow an authenticated user to get a specific requested transaction beloging to another user', async function () {
+      var userData = {username: "user02", password: "mypassword2"};
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.equal(result.text, "Transaction does not exist");
     });
-    it('should not be able to delete a specific requested transaction for an unauthenticated user (no token)' , function (done) {
-      prepopulate().then(function(){
-        superagent.delete(baseUrl + "/service/transactions/transaction/1").end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultFinanceTransactionsData(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not allow an authenticated user to delete a specific requested transaction beloging to another user', async function () {
+      var userData = {username: "user01", password: "mypassword"};
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.delete(baseUrl + "/service/transactions/transaction/4").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.equal(result.text, "Cannot delete non-existing transaction");
+      await validateDefaultFinanceTransactionsData();
     });
-    it('should not be able to delete a specific requested transaction for an unauthenticated user (bad token)', function (done) {
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.delete(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token)).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultFinanceTransactionsData(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get a specific requested transaction for an unauthenticated user (no token)', async function () {
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/transactions/transaction/1");
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+    });
+    it('should not be able to get a specific requested transaction for an unauthenticated user (bad token)', async function () {
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+    });
+    it('should not be able to delete a specific requested transaction for an unauthenticated user (no token)', async function () {
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.delete(baseUrl + "/service/transactions/transaction/1");
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+      await validateDefaultFinanceTransactionsData();
+    });
+    it('should not be able to delete a specific requested transaction for an unauthenticated user (bad token)', async function () {
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.delete(baseUrl + "/service/transactions/transaction/1").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+      await validateDefaultFinanceTransactionsData();
     });
   });
 });

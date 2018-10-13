@@ -18,72 +18,77 @@ var expireDate = function(){
   return date;
 };
 
-passport.use(new BearerStrategy(function(token, cb) {
-  dbService.Token.findById(token, {include: [dbService.User]}).then(function(token) {
+passport.use(new BearerStrategy(async function(token, cb) {
+  try {
+  var token = await dbService.Token.findById(token, {include: [dbService.User]});
     if(token === undefined || token === null)
       return cb(null, false);
-    if(new Date(token.expires) <= new Date())
-      return token.destroy().then(function(){
-        cb(null, false);
-      });
+    if(new Date(token.expires) <= new Date()) {
+      await token.destroy()
+      return cb(null, false);
+    }
     var user = token.User;
     cb(null, user);
     return user;
-  }).catch(cb);
+  } catch(err) {
+    cb(err);
+  }
 }));
 
-passport.use(new LocalStrategy(function(username, password, done) {
-  dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
+passport.use(new LocalStrategy(async function(username, password, done) {
+  try {
+    var user = await dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}});
     if (!user)
       throw new Error("Bad credentials");
-    return user.validatePassword(password).then(function(passwordValid) {
-      if(!passwordValid)
-        throw new Error("Bad credentials");
-      done(null, user);
-      return null;
-    });
-  }).catch(done);
+    var passwordValid = await user.validatePassword(password);
+    if(!passwordValid)
+      throw new Error("Bad credentials");
+    done(null, user);
+    return null;
+  } catch(err) {
+    done(err);
+  }
 }));
 
-server.exchange(oauth2orize.exchange.password(function(client, username, password, scope, done) {
-  dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}}).then(function (user) {
+server.exchange(oauth2orize.exchange.password(async function(client, username, password, scope, done) {
+  try {
+    var user = await dbService.User.findOne({where: {username: dbService.normalizeUsername(username)}});
     if (!user)
       throw new Error("Bad credentials");
-    return user.validatePassword(password).then(function(passwordValid) {
-      if(!passwordValid)
-        throw new Error("Bad credentials");
-      return null;
-    }).then(function() {
-      var createToken = function(remainingAttempts){
-        var accessToken = uuid.v4();
-        return user.createToken({id: accessToken, expires: expireDate()}).then(function(){
-          done(null, accessToken);
-          return tokencleaner.rescheduleCleaner();
-        }).catch(function(err){
-          logger.logException(err);
-          remainingAttempts--;
-          if(remainingAttempts > 0)
-            return createToken(remainingAttempts);
-          throw new Error("Cannot create token");
-        });
-      };
-      return createToken(5);
-    });
-  }).catch(done);
+    var passwordValid = await user.validatePassword(password);
+    if(!passwordValid)
+      throw new Error("Bad credentials");
+    var createToken = async function(remainingAttempts){
+      var accessToken = uuid.v4();
+      try {
+        await user.createToken({id: accessToken, expires: expireDate()});
+        done(null, accessToken);
+        return tokencleaner.rescheduleCleaner();
+      } catch(err) {
+        logger.logException(err);
+        remainingAttempts--;
+        if(remainingAttempts > 0)
+          return createToken(remainingAttempts);
+        throw new Error("Cannot create token");
+      }
+    };
+    await createToken(5);
+  } catch(err) {
+    done(err);
+  }
 }));
 
 var allowRegistration= function(){
   return JSON.parse(process.env.ALLOW_REGISTRATION || false);
 };
 
-var logout = function(token){
-  return dbService.Token.findById(token).then(function(foundToken){
-    if(foundToken === null || foundToken === undefined){
-      logger.logger.error("Token %s does not exist", token)
-      throw new Error("Cannot delete non-existing token");
-    }
-    return foundToken.destroy();
-  });
+var logout = async function(token){
+  var foundToken = await dbService.Token.findById(token);
+  if(foundToken === null || foundToken === undefined){
+    logger.logger.error("Token %s does not exist", token)
+    throw new Error("Cannot delete non-existing token");
+  }
+  return foundToken.destroy();
 };
 
 exports.allowRegistration = allowRegistration;

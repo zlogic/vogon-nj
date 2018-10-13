@@ -5,10 +5,11 @@ var auth = require('../services/auth');
 var logger = require('../services/logger').logger;
 
 /* Register. */
-router.post('/', function (req, res, next) {
+router.post('/', async function (req, res, next) {
   var user = req.body;
   if(auth.allowRegistration()){
-    dbService.User.findOrCreate({where: {username: dbService.normalizeUsername(user.username)}, defaults: user}).spread(function(user, created){
+    try {
+    var [user, created] = await dbService.User.findOrCreate({where: {username: dbService.normalizeUsername(user.username)}, defaults: user});
       if(created){
         user = user.toJSON();
         delete user.password;
@@ -19,11 +20,11 @@ router.post('/', function (req, res, next) {
         res.status(500);
         res.send({exception: 'User already exists'});
       }
-    }).catch(function(err){
+    } catch(err) {
       logger.error(err);
       res.status(500);
       res.send({exception: 'Cannot register user because of error: {0}', args:[err.name]});
-    });
+    }
   } else {
     res.status(500);
     res.send({exception: 'Registration is not allowed'});

@@ -15,25 +15,27 @@ var storage = multer.memoryStorage();
 var upload = multer({ storage: storage });
 
 /* GET accounts. */
-router.get('/accounts', function(req, res, next) {
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction}).then(function(accounts){
-      return accounts;
-    })
-  }).then(function(response){
+router.get('/accounts', async function(req, res, next) {
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      return dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction});
+    });
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* POST accounts. */
-router.post('/accounts', function(req, res, next) {
+router.post('/accounts', async function(req, res, next) {
   var reqAccounts = req.body;
   var reqAccountsIds = {};
   reqAccounts.forEach(function(account){
     return reqAccountsIds[account.id] = account;
   });
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction}).then(function(dbAccounts){
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var dbAccounts = await dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction});
       var existingAccountIds = {};
       dbAccounts.forEach(function(account){
         existingAccountIds[account.id] = account;
@@ -55,35 +57,31 @@ router.post('/accounts', function(req, res, next) {
         delete account.UserId;
         return account;
       });
-      return dbService.sequelize.Promise.all(
+      await Promise.all(
         deletedAccounts.map(function(account){
           return account.destroy({transaction: transaction});
         })
-      ).then(function(){
-        return dbService.sequelize.Promise.all(newAccounts.map(function(account){
-          return dbService.Account.create(account, {transaction: transaction}).then(function(newAccount){
-            return newAccount.setUser(req.user, {transaction: transaction});
-          });
-        }));
-      }).then(function(){
-        return dbService.sequelize.Promise.all(updatedAccounts.map(function(account){
-          return existingAccountIds[account.id].update(account, {transaction: transaction});
-        }));
-      }).then(function(){
-        return dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction});
-      }).then(function(accounts){
-        return accounts.map(function(account){
-          return account.toJSON();
-        });
+      );
+      await Promise.all(newAccounts.map(async function(account){
+        var newAccount = await dbService.Account.create(account, {transaction: transaction});
+        return newAccount.setUser(req.user, {transaction: transaction});
+      }));
+      await Promise.all(updatedAccounts.map(function(account){
+        return existingAccountIds[account.id].update(account, {transaction: transaction});
+      }));
+      var accounts = await dbService.Account.findAll({where: {UserId: req.user.id}, attributes: {exclude: 'UserId'}, transaction: transaction});
+      return accounts.map(function(account){
+        return account.toJSON();
       });
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* GET transactions. */
-router.get('/transactions', function(req, res, next) {
+router.get('/transactions', async function(req, res, next) {
   var pageSize = 100;
   var page = req.query.page;
   var sortColumn = req.query.sortColumn || 'date';
@@ -114,45 +112,49 @@ router.get('/transactions', function(req, res, next) {
         ]
       }).reduce(function(a, b) {return a.concat(b);},[])
     });
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.FinanceTransaction.findAll({
-      where: {[Sequelize.Op.and]: where},
-      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
-      attributes: {exclude: 'UserId'},
-      transaction: transaction,
-      order: sortOrder,
-      offset: offset, limit: pageSize
-    }).then(function(financeTransactions){
+  try{
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var financeTransactions = await dbService.FinanceTransaction.findAll({
+        where: {[Sequelize.Op.and]: where},
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
+        attributes: {exclude: 'UserId'},
+        transaction: transaction,
+        order: sortOrder,
+        offset: offset, limit: pageSize
+      })
       return financeTransactions.map(function(financeTransaction){
         //console.log(financeTransaction.toJSON());
         return financeTransaction;
       });
     })
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* GET transaction. */
-router.get('/transactions/transaction/:id', function(req, res, next) {
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.FinanceTransaction.findOne({
-      where: {id: req.params.id, UserId: req.user.id},
-      attributes: {exclude: 'UserId'},
-      transaction: transaction,
-      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
-    }).then(function(financeTransaction){
+router.get('/transactions/transaction/:id', async function(req, res, next) {
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var financeTransaction = await dbService.FinanceTransaction.findOne({
+        where: {id: req.params.id, UserId: req.user.id},
+        attributes: {exclude: 'UserId'},
+        transaction: transaction,
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}]
+      })
       if(financeTransaction !== null)
         return financeTransaction.toJSON();
       throw new Error("Transaction does not exist");
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* POST transactions. */
-router.post('/transactions', function(req, res, next) {
+router.post('/transactions', async function(req, res, next) {
   var reqFinanceTransaction = req.body;
   var reqFinanceTransactionComponents = reqFinanceTransaction.FinanceTransactionComponents || [];
   delete reqFinanceTransaction.FinanceTransactionComponents;
@@ -165,29 +167,26 @@ router.post('/transactions', function(req, res, next) {
   var dbFinanceTransaction = undefined;
   var dbFinanceTransactionComponents = undefined;
   var validateAccount = function(){};
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction}).then(function(accounts){
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var accounts = await dbService.Account.findAll({where: {UserId: req.user.id}, transaction: transaction});
       validateAccount = function(financeTransactionComponent){
         if(accounts.some(function(account){return financeTransactionComponent.AccountId === account.id;}))
           return financeTransactionComponent;
         logger.logger.error("Invalid account id: %s", financeTransactionComponent.AccountId);
         throw new Error('Cannot set an invalid account id');
       };
-    }).then(function(){
-      return dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction}).then(function(financeTransaction){
-        if(financeTransaction == null){
-          return dbService.FinanceTransaction.create(reqFinanceTransaction, {transaction: transaction}).then(function(createdTransaction){
-            dbFinanceTransaction = createdTransaction;
-            dbFinanceTransactionComponents = [];
-            return createdTransaction.setUser(req.user, {transaction: transaction});
-          });
-        } else {
-          dbFinanceTransaction = financeTransaction;
-          dbFinanceTransactionComponents = financeTransaction.FinanceTransactionComponents;
-          return dbFinanceTransaction.update(reqFinanceTransaction, {transaction: transaction});
-        }
-      });
-    }).then(function(){
+      var financeTransaction = await dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction});
+      if(financeTransaction == null){
+        var createdTransaction = await dbService.FinanceTransaction.create(reqFinanceTransaction, {transaction: transaction});
+        dbFinanceTransaction = createdTransaction;
+        dbFinanceTransactionComponents = [];
+        await createdTransaction.setUser(req.user, {transaction: transaction});
+      } else {
+        dbFinanceTransaction = financeTransaction;
+        dbFinanceTransactionComponents = financeTransaction.FinanceTransactionComponents;
+        await dbFinanceTransaction.update(reqFinanceTransaction, {transaction: transaction});
+      }
       var existingFinanceTransactionComponentIds = {};
       dbFinanceTransactionComponents.forEach(function(financeTransactionComponent){
         existingFinanceTransactionComponentIds[financeTransactionComponent.id] = financeTransactionComponent;
@@ -204,61 +203,57 @@ router.post('/transactions', function(req, res, next) {
       var updatedFinanceTransactionComponents = reqFinanceTransactionComponents.filter(function(financeTransactionComponent){
         return existingFinanceTransactionComponentIds[financeTransactionComponent.id] !== undefined;
       });
-      return dbService.sequelize.Promise.all(
+      await Promise.all(
         deletedFinanceTransactionComponents.map(function(financeTransactionComponent){
           return financeTransactionComponent.destroy({transaction: transaction});
         })
-      ).then(function(){
-        return dbService.sequelize.Promise.all(newFinanceTransactionComponents.map(function(financeTransactionComponent){
-          var accountId = financeTransactionComponent.AccountId;
-          delete financeTransactionComponent.AccountId;
-          return dbService.FinanceTransactionComponent.create(financeTransactionComponent, {transaction: transaction}).then(function(financeTransactionComponent){
-            return financeTransactionComponent.setFinanceTransaction(dbFinanceTransaction, {transaction: transaction}).then(function(){
-              return dbService.Account.findOne({where: {UserId: req.user.id, id: accountId}, transaction: transaction}).then(function(account){
-                return financeTransactionComponent.setAccount(account, {transaction: transaction});
-              });
-            });
-          });
-        }));
-      }).then(function(){
-        return dbService.sequelize.Promise.all(updatedFinanceTransactionComponents.map(function(financeTransactionComponent){
-          financeTransactionComponent = validateAccount(financeTransactionComponent);
-          return existingFinanceTransactionComponentIds[financeTransactionComponent.id].update(financeTransactionComponent, {transaction: transaction});
-        }));
-      }).then(function(){
-        return dbFinanceTransaction.reload({transaction: transaction, include: [dbService.FinanceTransactionComponent]});
-      }).then(function(financeTransaction){
-        financeTransaction = financeTransaction.toJSON();
-        delete financeTransaction.UserId;
-        if(financeTransaction.FinanceTransactionComponents !== undefined)
-          financeTransaction.FinanceTransactionComponents.forEach(function(financeTransactionComponent){
-            delete financeTransactionComponent.FinanceTransactionId;
-          });
-        return financeTransaction;
-      });
+      );
+      await Promise.all(newFinanceTransactionComponents.map(async function(financeTransactionComponent){
+        var accountId = financeTransactionComponent.AccountId;
+        delete financeTransactionComponent.AccountId;
+        var financeTransactionComponent = await dbService.FinanceTransactionComponent.create(financeTransactionComponent, {transaction: transaction})
+        await financeTransactionComponent.setFinanceTransaction(dbFinanceTransaction, {transaction: transaction});
+        var account = await dbService.Account.findOne({where: {UserId: req.user.id, id: accountId}, transaction: transaction});
+        await financeTransactionComponent.setAccount(account, {transaction: transaction});
+      }));
+      await Promise.all(updatedFinanceTransactionComponents.map(function(financeTransactionComponent){
+        financeTransactionComponent = validateAccount(financeTransactionComponent);
+        return existingFinanceTransactionComponentIds[financeTransactionComponent.id].update(financeTransactionComponent, {transaction: transaction});
+      }));
+      financeTransaction = await dbFinanceTransaction.reload({transaction: transaction, include: [dbService.FinanceTransactionComponent]});
+      financeTransaction = financeTransaction.toJSON();
+      delete financeTransaction.UserId;
+      if(financeTransaction.FinanceTransactionComponents !== undefined)
+        financeTransaction.FinanceTransactionComponents.forEach(function(financeTransactionComponent){
+          delete financeTransactionComponent.FinanceTransactionId;
+        });
+      return financeTransaction;
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* DELETE transaction. */
-router.delete('/transactions/transaction/:id', function(req, res, next) {
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.FinanceTransaction.findOne({
-      where: {UserId: req.user.id, id: req.params.id},
-      include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
-      attributes: {exclude: ['UserId']},
-      transaction: transaction}).then(function(financeTransaction){
+router.delete('/transactions/transaction/:id', async function(req, res, next) {
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var financeTransaction = await dbService.FinanceTransaction.findOne({
+        where: {UserId: req.user.id, id: req.params.id},
+        include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
+        attributes: {exclude: ['UserId']},
+        transaction: transaction});
       if(financeTransaction !== null)
         return financeTransaction.destroy({transaction: transaction}).then(function(){
           return financeTransaction.toJSON();
         });
       throw new Error("Cannot delete non-existing transaction");
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* GET user. */
@@ -270,25 +265,28 @@ router.get('/user', function(req, res, next) {
 });
 
 /* POST user. */
-router.post('/user', function(req, res, next) {
+router.post('/user', async function(req, res, next) {
   var reqUser = req.body;
   delete reqUser.id;
-  dbService.sequelize.transaction(function(transaction){
-    return req.user.update(reqUser, {transaction: transaction}).then(function(user){
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var user = await req.user.update(reqUser, {transaction: transaction});
       user = user.toJSON();
       delete user.password;
       delete user.id;
       return user;
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* GET analytics tags. */
-router.get('/analytics/tags', function(req, res, next) {
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.FinanceTransaction.findAll({where: {UserId: req.user.id}, attributes: ['tags'], transaction: transaction}).then(function(financeTransactions){
+router.get('/analytics/tags', async function(req, res, next) {
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      var financeTransactions = await dbService.FinanceTransaction.findAll({where: {UserId: req.user.id}, attributes: ['tags'], transaction: transaction});
       var tagsSet = new Set([""]);
       financeTransactions.forEach(function(financeTransaction){
         financeTransaction.tags.forEach(function(tag){
@@ -299,36 +297,45 @@ router.get('/analytics/tags', function(req, res, next) {
       tagsArray.sort();
       return tagsArray;
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* POST analytics. */
-router.post('/analytics', function(req, res, next) {
-  analyticsService.buildReport(req.user, req.body).then(function(report){
+router.post('/analytics', async function(req, res, next) {
+  try{
+    var report = await analyticsService.buildReport(req.user, req.body)
     res.send(report);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* GET export */
-router.post('/export', function(req, res, next) {
-  dbService.exportData(req.user).then(function(exportedData){
+router.post('/export', async function(req, res, next) {
+  try {
+    var exportedData = await dbService.exportData(req.user);
     res.attachment('vogon-' + new Date().toJSON() + '.json');
     res.send(JSON.stringify(exportedData, null, "\t"));
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* POST import */
-router.post('/import', upload.single('file'), function(req, res, next) {
+router.post('/import', upload.single('file'), async function(req, res, next) {
   var data = req.file.buffer.toString();
-  dbService.sequelize.transaction(function(transaction){
-    return dbService.importData(req.user, JSON.parse(data), {transaction: transaction}).then(function(){
+  try {
+    var response = await dbService.sequelize.transaction(async function(transaction){
+      await dbService.importData(req.user, JSON.parse(data), {transaction: transaction});
       return true;
     });
-  }).then(function(response){
     res.send(response);
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 });
 
 /* Error handler */

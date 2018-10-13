@@ -7,10 +7,8 @@ var logger = require('../../services/logger');
 
 var reconfigureDb = function() {
   var currentDbService = model.model("sqlite:", {storage: ":memory:", isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
-  var promise = dbService.sequelize.close();
   for(var k in currentDbService)
     dbService[k] = currentDbService[k];
-  return promise || Sequelize.Promise.resolve();
 }
 
 module.exports.reconfigureDb = reconfigureDb;

@@ -3,7 +3,7 @@ var logger = require('./logger').logger;
 
 var plannedRun;
 
-var rescheduleCleaner = function(){
+var rescheduleCleaner = async function(){
   if(plannedRun)
     clearTimeout(plannedRun);
   delete plannedRun;
@@ -21,10 +21,9 @@ var rescheduleCleaner = function(){
     }, sleepMillis);
   };
 
-  return dbService.Token.min('expires').then(function(expires){
-    if(expires !== null)
-      planNextRun(expires);
-  })
+  var expires = await dbService.Token.min('expires');
+  if(expires !== null)
+    planNextRun(expires);
 };
 
 module.exports.rescheduleCleaner = rescheduleCleaner;

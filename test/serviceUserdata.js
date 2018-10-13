@@ -11,274 +11,228 @@ var tokenHeader = serviceBase.tokenHeader;
 describe('Service', function() {
   serviceBase.hooks();
 
-  var validateDefaultUserdata = function(done){
-    dbService.User.findAll().then(function(users){
-      assert.equal(users.length, 2);
-      assert.equal(users[0].username, 'user01');
-      assert.equal(users[1].username, 'user02');
-      return users[0].validatePassword('mypassword').then(function(passwordValid) {
-        assert.equal(passwordValid, true);
-        return users[1].validatePassword('mypassword2');
-      }).then(function(passwordValid) {
-        assert.equal(passwordValid, true);
-        done();
-      }).catch(done);
-    }).catch(done);
+  var validateDefaultUserdata = async function(){
+    var users = await dbService.User.findAll();
+    assert.equal(users.length, 2);
+    assert.equal(users[0].username, 'user01');
+    assert.equal(users[1].username, 'user02');
+    var passwordValid = await users[0].validatePassword('mypassword');
+    assert.equal(passwordValid, true);
+    passwordValid = await users[1].validatePassword('mypassword2');
+    assert.equal(passwordValid, true);
   };
 
   describe('userdata', function () {
-    it('should get details for an authenticated user', function (done) {
+    it('should get details for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/user").set(tokenHeader(token)).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, { username: 'user01', version: 0 });
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/user").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { username: 'user01', version: 0 });
     });
-    it('should be able to change the username for an authenticated user', function (done) {
+    it('should be able to change the username for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {username: "user03"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, { username: 'user03', version: 1 });
-              dbService.User.findAll().then(function(users){
-                assert.equal(users.length, 2);
-                assert.equal(users[0].username, 'user03');
-                assert.equal(users[1].username, 'user02');
-                return users[0].validatePassword('mypassword').then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  return users[1].validatePassword('mypassword2');
-                }).then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  done();
-                }).catch(done);
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { username: 'user03', version: 1 });
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 2);
+      assert.equal(users[0].username, 'user03');
+      assert.equal(users[1].username, 'user02');
+      var passwordValid = await users[0].validatePassword('mypassword');
+      assert.equal(passwordValid, true);
+      passwordValid = await users[1].validatePassword('mypassword2');
+      assert.equal(passwordValid, true);
     });
-    it('should be able to change the password for an authenticated user', function (done) {
+    it('should be able to change the password for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {password: "mypassword1"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, { username: 'user01', version: 1 });
-              dbService.User.findAll().then(function(users){
-                assert.equal(users.length, 2);
-                assert.equal(users[0].username, 'user01');
-                assert.equal(users[1].username, 'user02');
-                return users[0].validatePassword('mypassword1').then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  return users[1].validatePassword('mypassword2');
-                }).then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  done();
-                }).catch(done);
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { username: 'user01', version: 1 });
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 2);
+      assert.equal(users[0].username, 'user01');
+      assert.equal(users[1].username, 'user02');
+      passwordValid = await users[0].validatePassword('mypassword1');
+      assert.equal(passwordValid, true);
+      passwordValid = await users[1].validatePassword('mypassword2');
+      assert.equal(passwordValid, true);
     });
-    it('should be able to change the username and password for an authenticated user', function (done) {
+    it('should be able to change the username and password for an authenticated user', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {username: "user03", password: "mypassword1"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, { username: 'user03', version: 1 });
-              dbService.User.findAll().then(function(users){
-                assert.equal(users.length, 2);
-                assert.equal(users[0].username, 'user03');
-                assert.equal(users[1].username, 'user02');
-                return users[0].validatePassword('mypassword1').then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  return users[1].validatePassword('mypassword2');
-                }).then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  done();
-                }).catch(done);
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { username: 'user03', version: 1 });
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 2);
+      assert.equal(users[0].username, 'user03');
+      assert.equal(users[1].username, 'user02');
+      var passwordValid = await users[0].validatePassword('mypassword1');
+      assert.equal(passwordValid, true);
+      passwordValid = await users[1].validatePassword('mypassword2');
+      assert.equal(passwordValid, true);
     });
-    it('should not be able to change the username for an authenticated user if the username is already in use', function (done) {
+    it('should not be able to change the username for an authenticated user if the username is already in use', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {username: "user02"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Validation error');
-              validateDefaultUserdata(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.text, 'Validation error');
+      await validateDefaultUserdata();
     });
-    it('should not be able to change the username for an authenticated user if the new username is empty', function (done) {
+    it('should not be able to change the username for an authenticated user if the new username is empty', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {username: ""};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Validation error: Validation notEmpty on username failed');
-              validateDefaultUserdata(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.text, 'Validation error: Validation notEmpty on username failed');
+      await validateDefaultUserdata();
     });
-    it('should not be able to change the password for an authenticated user if the new password is empty', function (done) {
+    it('should not be able to change the password for an authenticated user if the new password is empty', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {password: ""};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            try {
-              assert.ok(err);
-              assert.equal(result.status, 500);
-              assert.deepEqual(result.text, 'Validation error: Validation notEmpty on password failed');
-              validateDefaultUserdata(done);
-            } catch(err) {done(err);}
-          });
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.text, 'Validation error: Validation notEmpty on password failed');
+      await validateDefaultUserdata();
     });
-    it('should ignore id in requests for getting user data and use OAuth data instead', function (done) {
+    it('should ignore id in requests for getting user data and use OAuth data instead', async function () {
       var userData = {username: "user01", password: "mypassword"};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.get(baseUrl + "/service/user").set(tokenHeader(token)).send({id: 2}).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, { username: 'user01', version: 0 });
-              done();
-            } catch(err) {done(err);}
-          });
-        });
-      });
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/user").set(tokenHeader(token)).send({id: 2});
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { username: 'user01', version: 0 });
     });
-    it('should ignore id in requests for changing user data and use OAuth data instead', function (done) {
+    it('should ignore id in requests for changing user data and use OAuth data instead', async function () {
       var userData = {username: "user01", password: "mypassword"};
       var newUserData = {username: "user03", password: "mypassword1", id: 2};
-      prepopulate().then(function(){
-        authenticateUser(userData, function(err, token, result){
-          if(err) return done(err);
-          superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-            if(err) return done(err);
-            try {
-              assert.ok(result);
-              assert.equal(result.status, 200);
-              assert.deepEqual(result.body, { username: 'user03', version: 1 });
-              dbService.User.findAll().then(function(users){
-                assert.equal(users.length, 2);
-                assert.equal(users[0].username, 'user03');
-                assert.equal(users[1].username, 'user02');
-                return users[0].validatePassword('mypassword1').then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  return users[1].validatePassword('mypassword2');
-                }).then(function(passwordValid) {
-                  assert.equal(passwordValid, true);
-                  done();
-                }).catch(done);
-              }).catch(done);
-            } catch(err) {done(err);}
-          });
-        });
-      });
+      await prepopulate();
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.post(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, { username: 'user03', version: 1 });
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 2);
+      assert.equal(users[0].username, 'user03');
+      assert.equal(users[1].username, 'user02');
+      var passwordValid = await users[0].validatePassword('mypassword1');
+      assert.equal(passwordValid, true);
+      passwordValid = await users[1].validatePassword('mypassword2');
+      assert.equal(passwordValid, true);
     });
-    it('should not be able to get user data for an unauthenticated user (no token)' , function (done) {
-      prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/user").end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get user data for an unauthenticated user (no token)', async function () {
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/user");
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
-    it('should not be able to get user data for an unauthenticated user (bad token)', function (done) {
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.get(baseUrl + "/service/user").set(tokenHeader(token)).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            done();
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+    it('should not be able to get user data for an unauthenticated user (bad token)', async function () {
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/user").set(tokenHeader(token));
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
     });
-    it('should not be able to change user data for an unauthenticated user (no token)' , function (done) {
+    it('should not be able to change user data for an unauthenticated user (no token)', async function () {
       var newUserData = {username: "user03", password: "mypassword1", id: 2};
-      prepopulate().then(function(){
-        superagent.get(baseUrl + "/service/user").send(newUserData).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultUserdata(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/user").send(newUserData);
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+      await validateDefaultUserdata();
     });
-    it('should not be able to change user data for an unauthenticated user (bad token)', function (done) {
+    it('should not be able to change user data for an unauthenticated user (bad token)', async function () {
       var newUserData = {username: "user03", password: "mypassword1", id: 2};
-      prepopulate().then(function(){
-        var token = 'aaaa';
-        superagent.get(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(err.status, 401);
-            assert.equal(err.response.text, 'Unauthorized');
-            validateDefaultUserdata(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var token = 'aaaa';
+      var error;
+      try {
+        await superagent.get(baseUrl + "/service/user").set(tokenHeader(token)).send(newUserData);
+      } catch(err) {
+        error = err;
+      }
+      assert.ok(error);
+      assert.equal(error.status, 401);
+      assert.equal(error.response.text, 'Unauthorized');
+      await validateDefaultUserdata();
     });
   });
 });

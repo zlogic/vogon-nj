@@ -63,7 +63,7 @@ var buildBalanceChart = function(financeTransactions, earliestDate, latestDate){
   return dayBalances;
 };
 
-var buildReport = function(user, request){
+var buildReport = async function(user, request){
   var earliestDate = new Date(request.earliestDate);
   var latestDate = new Date(request.latestDate);
   var enabledTransferTransactions = request.enabledTransferTransactions;
@@ -102,88 +102,82 @@ var buildReport = function(user, request){
       || (financeTransaction.type === "expenseincome" && financeTransaction.rawAmount >= 0 && enabledIncomeTransactions);
   };
 
-  return dbService.Account.findAll({where: {UserId: user.id, id: {[Sequelize.Op.in]: selectedAccounts}}}).then(function(accounts){
-    //Find and validate accounts
-    var currencies = {};
-    accounts.forEach(function(account){
-      var currency = account.currency;
-      if(currencies[currency] === undefined)
-         currencies[currency] = [];
-      currencies[currency].push(account);
-    });
-    return currencies;
-  }).then(function(currencies){
-    var financeTransactionComponentWhere = function(currency){
-      var accountsIds = currencies[currency].map(function(account){
-        return account.id;
-      });
-      return {AccountId: {[Sequelize.Op.in]: accountsIds}};
-    };
-    return Promise.all(Object.keys(currencies).map(function(currency){
-      return dbService.FinanceTransaction.findAll({
-        where: buildTransactionsWhere(true),
-        include: [
-          {model: dbService.FinanceTransactionComponent, where: financeTransactionComponentWhere(currency)}
-        ]
-      }).then(function(financeTransactions){
-        report[currency] = {};
-        if(financeTransactions.length > 0){
-          var sortFunction = function(a, b){ return Math.abs(b.rawAmount) - Math.abs(a.rawAmount); };
-          var processedFinanceTransactions = financeTransactions.map(function(financeTransaction){
-            return {
-              description: financeTransaction.description,
-              rawAmount: calculateTransactionAmount(financeTransaction, false),
-              date: financeTransaction.date,
-              type: financeTransaction.type,
-              tags: financeTransaction.tags
-            };
-          }).filter(finalTransactionFilter);
-          var tagExpenses = groupTagExpenses(processedFinanceTransactions);
-          var sortedTagExpenses = Object.keys(tagExpenses).map(function(tag){
-            return {tag: tag, rawAmount: tagExpenses[tag]};
-          }).sort(sortFunction).map(function(tagExpense){
-            tagExpense.amount = dbService.convertAmountToFloat(tagExpense.rawAmount);
-            delete tagExpense.rawAmount;
-            return tagExpense;
-          });
-          var sortedTransactions = processedFinanceTransactions.sort(sortFunction).map(function(financeTransaction){
-            delete financeTransaction.tags;
-            financeTransaction.amount = dbService.convertAmountToFloat(financeTransaction.rawAmount);
-            financeTransaction.date = financeTransaction.date;
-            delete financeTransaction.rawAmount;
-            return financeTransaction;
-          });
-          report[currency].financeTransactions = sortedTransactions;
-          report[currency].tagExpenses = sortedTagExpenses;
-        }
-      }).then(function(){
-        return dbService.FinanceTransaction.findAll({
-          where: buildTransactionsWhere(false),
-          include: [
-            {model: dbService.FinanceTransactionComponent, where: financeTransactionComponentWhere(currency)}
-          ]
-        });
-      }).then(function(financeTransactions){
-        var processedFinanceTransactions = financeTransactions.map(function(financeTransaction){
-          return {
-            rawAmount: calculateTransactionAmount(financeTransaction, false),
-            rawRealAmount: calculateTransactionAmount(financeTransaction, true),
-            date: financeTransaction.date,
-            type: financeTransaction.type
-          };
-        }).filter(finalTransactionFilter);
-        var accountsBalanceGraph = buildBalanceChart(processedFinanceTransactions, earliestDate, latestDate);
-        report[currency].accountsBalanceGraph = accountsBalanceGraph;
-      });
-    }));
-  }).then(function(){
-    Object.keys(report).forEach(function(currency){
-      var reportForCurrency = report[currency];
-      if(Object.keys(reportForCurrency.accountsBalanceGraph).length === 0 && reportForCurrency.financeTransactions === undefined && reportForCurrency.tagExpenses === undefined)
-        delete report[currency];
-    });
-    return report;
+  var accounts = await dbService.Account.findAll({where: {UserId: user.id, id: {[Sequelize.Op.in]: selectedAccounts}}});
+  //Find and validate accounts
+  var currencies = {};
+  accounts.forEach(function(account){
+    var currency = account.currency;
+    if(currencies[currency] === undefined)
+        currencies[currency] = [];
+    currencies[currency].push(account);
   });
+
+  var financeTransactionComponentWhere = function(currency){
+    var accountsIds = currencies[currency].map(function(account){
+      return account.id;
+    });
+    return {AccountId: {[Sequelize.Op.in]: accountsIds}};
+  };
+  await Promise.all(Object.keys(currencies).map(async function(currency){
+    var financeTransactions = await dbService.FinanceTransaction.findAll({
+      where: buildTransactionsWhere(true),
+      include: [
+        {model: dbService.FinanceTransactionComponent, where: financeTransactionComponentWhere(currency)}
+      ]
+    });
+    report[currency] = {};
+    if(financeTransactions.length > 0){
+      var sortFunction = function(a, b){ return Math.abs(b.rawAmount) - Math.abs(a.rawAmount); };
+      var processedFinanceTransactions = financeTransactions.map(function(financeTransaction){
+        return {
+          description: financeTransaction.description,
+          rawAmount: calculateTransactionAmount(financeTransaction, false),
+          date: financeTransaction.date,
+          type: financeTransaction.type,
+          tags: financeTransaction.tags
+        };
+      }).filter(finalTransactionFilter);
+      var tagExpenses = groupTagExpenses(processedFinanceTransactions);
+      var sortedTagExpenses = Object.keys(tagExpenses).map(function(tag){
+        return {tag: tag, rawAmount: tagExpenses[tag]};
+      }).sort(sortFunction).map(function(tagExpense){
+        tagExpense.amount = dbService.convertAmountToFloat(tagExpense.rawAmount);
+        delete tagExpense.rawAmount;
+        return tagExpense;
+      });
+      var sortedTransactions = processedFinanceTransactions.sort(sortFunction).map(function(financeTransaction){
+        delete financeTransaction.tags;
+        financeTransaction.amount = dbService.convertAmountToFloat(financeTransaction.rawAmount);
+        financeTransaction.date = financeTransaction.date;
+        delete financeTransaction.rawAmount;
+        return financeTransaction;
+      });
+      report[currency].financeTransactions = sortedTransactions;
+      report[currency].tagExpenses = sortedTagExpenses;
+    }
+    var financeTransactions = await dbService.FinanceTransaction.findAll({
+      where: buildTransactionsWhere(false),
+      include: [
+        {model: dbService.FinanceTransactionComponent, where: financeTransactionComponentWhere(currency)}
+      ]
+    });
+    var processedFinanceTransactions = financeTransactions.map(function(financeTransaction){
+      return {
+        rawAmount: calculateTransactionAmount(financeTransaction, false),
+        rawRealAmount: calculateTransactionAmount(financeTransaction, true),
+        date: financeTransaction.date,
+        type: financeTransaction.type
+      };
+    }).filter(finalTransactionFilter);
+    var accountsBalanceGraph = buildBalanceChart(processedFinanceTransactions, earliestDate, latestDate);
+    report[currency].accountsBalanceGraph = accountsBalanceGraph;
+  }));
+  Object.keys(report).forEach(function(currency){
+    var reportForCurrency = report[currency];
+    if(Object.keys(reportForCurrency.accountsBalanceGraph).length === 0 && reportForCurrency.financeTransactions === undefined && reportForCurrency.tagExpenses === undefined)
+      delete report[currency];
+  });
+  return report;
 };
 
 exports.buildReport = buildReport;

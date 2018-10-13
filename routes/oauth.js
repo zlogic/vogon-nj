@@ -21,10 +21,13 @@ router.post('/token',
   errorLogger,
   auth.oauth2server.errorHandler());
 
-router.post('/logout', passport.authenticate('bearer', { session: false }), function (req, res, next) {
-  auth.logout(req.body.token).then(function(){
+router.post('/logout', passport.authenticate('bearer', { session: false }), async function (req, res, next) {
+  try {
+    await auth.logout(req.body.token)
     res.send("");
-  }).catch(next);
+  } catch(err) {
+    next(err);
+  }
 }, errorLogger, auth.oauth2server.errorHandler());
 
 module.exports = router;

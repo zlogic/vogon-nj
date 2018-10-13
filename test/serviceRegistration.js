@@ -12,94 +12,97 @@ describe('Service', function() {
   serviceBase.hooks();
 
   describe('registration', function () {
-    it('should be able to register a new user if registration is allowed', function (done) {
+    it('should be able to register a new user if registration is allowed', async function () {
       var userData = {username: "user01", password: "password"};
       process.env.ALLOW_REGISTRATION = true;
-      superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
-        if(err) return done(err);
-        try {
-          assert.equal(result.status, 200);
-          assert.deepEqual(result.body, {username : 'user01'});
-          dbService.User.findAll().then(function(users){
-            assert.equal(users.length, 1);
-            assert.equal(users[0].username, 'user01');
-            return users[0].validatePassword('password').then(function(passwordValid) {
-              assert.equal(passwordValid, true);
-              done();
-            }).catch(done);
-          }).catch(done);
-        } catch(err) {done(err);}
-      });
+
+      var result = await superagent.post(baseUrl + "/register").send(userData);
+      assert.equal(result.status, 200);
+      assert.deepEqual(result.body, {username : 'user01'});
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 1);
+      assert.equal(users[0].username, 'user01');
+      var passwordValid = await users[0].validatePassword('password');
+      assert.equal(passwordValid, true);
     });
-    it('should not be able to register a new user if registration is not allowed', function (done) {
+    it('should not be able to register a new user if registration is not allowed', async function () {
       var userData = {username: "user01", password: "password"};
       process.env.ALLOW_REGISTRATION = false;
-      superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
-        try {
-          assert.ok(err);
-          assert.equal(result.status, 500);
-          assert.deepEqual(result.body, {exception : 'Registration is not allowed'});
-          dbService.User.findAll().then(function(users){
-            assert.equal(users.length, 0);
-            done();
-          }).catch(done)
-        } catch(err) {done(err);}
-      });
+
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/register").send(userData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.body, {exception : 'Registration is not allowed'});
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 0);
     });
-    it('should not be able to register a new user if the username is already in use', function (done) {
+    it('should not be able to register a new user if the username is already in use', async function () {
       var userData = {username: "user01", password: "anotherpassword"};
       process.env.ALLOW_REGISTRATION = true;
-      prepopulate().then(function(){
-        superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
-          try {
-            assert.ok(err);
-            assert.equal(result.status, 500);
-            assert.deepEqual(result.body, {exception : 'User already exists'});
-            dbService.User.findAll().then(function(users){
-              assert.equal(users.length, 2);
-              assert.equal(users[0].username, 'user01');
-              assert.equal(users[1].username, 'user02');
-              return users[0].validatePassword('mypassword').then(function(passwordValid) {
-                assert.equal(passwordValid, true);
-                return users[1].validatePassword('mypassword2');
-              }).then(function(passwordValid) {
-                assert.equal(passwordValid, true);
-                done();
-              }).catch(done);
-            }).catch(done);
-          } catch(err) {done(err);}
-        });
-      }).catch(done);
+      await prepopulate();
+
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/register").send(userData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.body, {exception : 'User already exists'});
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 2);
+      assert.equal(users[0].username, 'user01');
+      assert.equal(users[1].username, 'user02');
+      var passwordValid = await users[0].validatePassword('mypassword');
+      assert.equal(passwordValid, true);
+      passwordValid = await users[1].validatePassword('mypassword2');
+      assert.equal(passwordValid, true);
     });
-    it('should not be able to register a new user if the username is empty', function (done) {
+    it('should not be able to register a new user if the username is empty', async function () {
       var userData = {username: "", password: "anotherpassword"};
       process.env.ALLOW_REGISTRATION = true;
-      superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
-        try {
-          assert.ok(err);
-          assert.equal(result.status, 500);
-          assert.deepEqual(result.body, {exception : 'Cannot register user because of error: {0}', args : ['SequelizeValidationError']});
-          dbService.User.findAll().then(function(users){
-            assert.equal(users.length, 0);
-            done();
-          }).catch(done);
-        } catch(err) {done(err);}
-      });
+
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/register").send(userData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.body, {exception : 'Cannot register user because of error: {0}', args : ['SequelizeValidationError']});
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 0);
     });
-    it('should not be able to register a new user if the password is empty', function (done) {
+    it('should not be able to register a new user if the password is empty', async function () {
       var userData = {username: "user01", password: ""};
       process.env.ALLOW_REGISTRATION = true;
-      superagent.post(baseUrl + "/register").send(userData).end(function(err, result){
-        try {
-          assert.ok(err);
-          assert.equal(result.status, 500);
-          assert.deepEqual(result.body, {exception : 'Cannot register user because of error: {0}', args : ['SequelizeValidationError']});
-          dbService.User.findAll().then(function(users){
-            assert.equal(users.length, 0);
-            done();
-          }).catch(done);
-        } catch(err) {done(err);}
-      });
+
+      var error;
+      var result;
+      try {
+        await superagent.post(baseUrl + "/register").send(userData);
+      } catch(err) {
+        error = err;
+        result = err.response;
+      }
+      assert.ok(error);
+      assert.equal(result.status, 500);
+      assert.deepEqual(result.body, {exception : 'Cannot register user because of error: {0}', args : ['SequelizeValidationError']});
+      var users = await dbService.User.findAll();
+      assert.equal(users.length, 0);
     });
   });
 });
