@@ -212,7 +212,7 @@ describe('Service', function() {
         return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
       });
       await dbService.sequelize.transaction(async function(transaction){
-        var user = await dbService.User.find({where: {username:"user01"}, transaction:transaction});
+        var user = await dbService.User.findOne({where: {username:"user01"}, transaction:transaction});
         return Promise.all(financeTransactions.map(function(financeTransaction){
           return financeTransaction.setUser(user, {transaction:transaction});
         }));
@@ -255,7 +255,7 @@ describe('Service', function() {
         return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
       });
       await dbService.sequelize.transaction(async function(transaction){
-        var user = await dbService.User.find({where: {username:"user01"}, transaction:transaction});
+        var user = await dbService.User.findOne({where: {username:"user01"}, transaction:transaction});
         return Promise.all(financeTransactions.map(function(financeTransaction){
           return financeTransaction.setUser(user, {transaction:transaction});
         }));
@@ -301,7 +301,7 @@ describe('Service', function() {
         return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
       });
       await dbService.sequelize.transaction(async function(transaction){
-        var user = await dbService.User.find({where: {username:"user01"}, transaction:transaction});
+        var user = await dbService.User.findOne({where: {username:"user01"}, transaction:transaction});
         var financeTransactions = await dbService.FinanceTransaction.findAll({transaction:transaction});
         return Promise.all(financeTransactions.map(function(financeTransaction){
           return financeTransaction.setUser(user, {transaction:transaction});

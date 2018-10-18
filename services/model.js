@@ -211,11 +211,11 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
    * Hooks
    */
   //TODO: set default values or do validation for all fields
-  Account.hook('beforeCreate', async function(account, options){
+  Account.addHook('beforeCreate', async function(account, options){
     account.balance = 0;
   });
 
-  FinanceTransactionComponent.hook('afterUpdate', async function(financeTransactionComponent, options){
+  FinanceTransactionComponent.addHook('afterUpdate', async function(financeTransactionComponent, options){
     var previousAccount = financeTransactionComponent.previous("AccountId");
     var newAccount = financeTransactionComponent.AccountId;
     var previousAmount = parseInt(financeTransactionComponent.previous("amount"), 10);
@@ -233,7 +233,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
 
     //Update previous account
     if(previousAccount !== undefined && previousAccount !== null && financeTransactionComponent.changed("AccountId")) {
-      var account = await Account.findById(previousAccount, {transaction: transaction})
+      var account = await Account.findByPk(previousAccount, {transaction: transaction})
       await account.increment("balance", {by: -previousAmount, transaction: transaction});
     }
     //Update new account
@@ -242,11 +242,11 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     var incrementAmount = newAmount;
     if(!financeTransactionComponent.changed("AccountId") && financeTransactionComponent.changed("amount"))
       incrementAmount = newAmount - previousAmount;
-    var account = await Account.findById(newAccount, {transaction: transaction})
+    var account = await Account.findByPk(newAccount, {transaction: transaction})
     await account.increment("balance", {by: incrementAmount, transaction: transaction});
   });
 
-  FinanceTransactionComponent.hook('afterDestroy', async function(financeTransactionComponent, options){
+  FinanceTransactionComponent.addHook('afterDestroy', async function(financeTransactionComponent, options){
     if(financeTransactionComponent.AccountId === undefined || financeTransactionComponent.AccountId === null)
       return;
 
@@ -254,7 +254,7 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       throw new Error("FinanceTransactionComponent afterDestroy hook can only be run from a transaction");
 
     var transaction = options.transaction;
-    var account = await Account.findById(financeTransactionComponent.AccountId, {transaction: transaction});
+    var account = await Account.findByPk(financeTransactionComponent.AccountId, {transaction: transaction});
     await account.increment("balance", {by: -parseInt(financeTransactionComponent.getDataValue("amount"), 10), transaction: transaction});
   });
 
@@ -266,8 +266,8 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     user.setDataValue('password', hashedPassword);
     return null;
   };
-  User.hook('beforeCreate', userPasswordHashingHook);
-  User.hook('beforeUpdate', userPasswordHashingHook);
+  User.addHook('beforeCreate', userPasswordHashingHook);
+  User.addHook('beforeUpdate', userPasswordHashingHook);
 
   var conflictResolutionHook = async function(instance, options){
     if(options === undefined || options.transaction === undefined)
@@ -281,10 +281,10 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
       return dbInstance.increment('version', {transaction: transaction});
     }
   };
-  Account.hook('beforeUpdate', conflictResolutionHook);
-  FinanceTransaction.hook('beforeUpdate', conflictResolutionHook);
-  FinanceTransactionComponent.hook('beforeUpdate', conflictResolutionHook);
-  User.hook('beforeUpdate', conflictResolutionHook);
+  Account.addHook('beforeUpdate', conflictResolutionHook);
+  FinanceTransaction.addHook('beforeUpdate', conflictResolutionHook);
+  FinanceTransactionComponent.addHook('beforeUpdate', conflictResolutionHook);
+  User.addHook('beforeUpdate', conflictResolutionHook);
 
   //TODO: move reusable components from controller/routes here and add tests
 

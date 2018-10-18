@@ -20,7 +20,7 @@ var expireDate = function(){
 
 passport.use(new BearerStrategy(async function(token, cb) {
   try {
-  var token = await dbService.Token.findById(token, {include: [dbService.User]});
+  var token = await dbService.Token.findByPk(token, {include: [dbService.User]});
     if(token === undefined || token === null)
       return cb(null, false);
     if(new Date(token.expires) <= new Date()) {
@@ -83,7 +83,7 @@ var allowRegistration= function(){
 };
 
 var logout = async function(token){
-  var foundToken = await dbService.Token.findById(token);
+  var foundToken = await dbService.Token.findByPk(token);
   if(foundToken === null || foundToken === undefined){
     logger.logger.error("Token %s does not exist", token)
     throw new Error("Cannot delete non-existing token");

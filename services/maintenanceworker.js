@@ -4,7 +4,7 @@ var logger = require('./logger').logger;
 var tasks = [];
 
 var runTask = async function(task){
-  var workerTask = dbService.WorkerTask.findById(task.name);
+  var workerTask = dbService.WorkerTask.findByPk(task.name);
   if(workerTask === null)
     workerTask = await dbService.WorkerTask.create({name: task.name});
   logger.info("Starting " + task.name + " task");
@@ -35,7 +35,7 @@ tasks.push({
   run: dbService.performMaintenance,
   reschedule: async function(){
     var task = this;
-    var workerTask = await dbService.WorkerTask.findById(task.name);
+    var workerTask = await dbService.WorkerTask.findByPk(task.name);
     var lastRun = workerTask !== null ? workerTask.lastRun : undefined;
     lastRun = lastRun || new Date();
     lastRun = new Date(lastRun);

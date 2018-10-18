@@ -1,4 +1,4 @@
-FROM node:8-alpine as builder
+FROM node:10-alpine as builder
 
 # Create app directory
 RUN mkdir -p /usr/src/vogon-nj
@@ -30,7 +30,7 @@ RUN rm -rf \
   Procfile package-lock.json
 
 # Copy into a fresh image
-FROM node:8-alpine
+FROM node:10-alpine
 
 WORKDIR /usr/src/vogon-nj
 COPY --from=builder /usr/src/vogon-nj /usr/src/vogon-nj
