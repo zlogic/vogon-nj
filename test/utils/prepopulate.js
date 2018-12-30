@@ -70,9 +70,7 @@ var prepopulate = function() {
         }
       ]
     }, {include: [dbService.Account, {model: dbService.FinanceTransaction, include: [dbService.FinanceTransactionComponent]}], transaction: transaction})
-    await Promise.all([
-      user.FinanceTransactions[0].FinanceTransactionComponents[0].setAccount(user.Accounts[0], {transaction: transaction})
-    ]);
+    await user.FinanceTransactions[0].FinanceTransactionComponents[0].setAccount(user.Accounts[0], {transaction: transaction});
   });
 };
 

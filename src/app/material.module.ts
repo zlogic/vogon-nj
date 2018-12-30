@@ -20,9 +20,11 @@ import {
   MatStepperModule,
   MatChipsModule,
   MatProgressBarModule,
+  MatProgressSpinnerModule,
   MatNativeDateModule,
   MatAutocompleteModule,
-  MatSortModule
+  MatSortModule,
+  MatPaginatorModule
 } from '@angular/material';
 
 @NgModule({
@@ -43,12 +45,14 @@ import {
     MatToolbarModule,
     MatChipsModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTabsModule,
     MatStepperModule,
     MatNativeDateModule,
     MatAutocompleteModule,
-    MatSortModule
+    MatSortModule,
+    MatPaginatorModule
   ],
   exports: [
     MatButtonModule,
@@ -67,12 +71,14 @@ import {
     MatToolbarModule,
     MatChipsModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTabsModule,
     MatStepperModule,
     MatNativeDateModule,
     MatAutocompleteModule,
-    MatSortModule
+    MatSortModule,
+    MatPaginatorModule
   ]
 })
 export class VogonMaterialModule { }

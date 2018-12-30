@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Response } from '@angular/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, throwError, merge } from 'rxjs';
 import { map, mergeMap, catchError } from 'rxjs/operators';
 
 import { AuthorizationService } from './auth.service';
@@ -62,8 +62,9 @@ export class Transaction {
 export class TransactionsService {
   transactions: Transaction[] = [];
   readonly defaultTransactionType = "expenseincome";
-  private currentPage: number = 0;
-  private lastPage: boolean = false;
+  offset: number = 0;
+  count: number = 0;
+  pageSize: number = 100;
   sortColumn: string = "date";
   sortAsc: boolean = false;
   filterDescription: string = undefined;
@@ -71,21 +72,23 @@ export class TransactionsService {
   filterTags: string[] = [];
   private doUpdate: UpdateHelper;
   reset() {
-    this.currentPage = 0;
+    this.offset = 0;
+    this.count = 0;
     this.transactions = [];
-    this.lastPage = false;
+  }
+  resetIndex() {
+    this.offset = 0;
   }
   private processReceivedTransaction(transactionJson: any): Transaction {
     transactionJson.date = dateToJson(new Date(transactionJson.date));
     return Transaction.fromJson(transactionJson);
   }
-  update(): Observable<Response> {
-    this.reset();
+  update(reset: boolean): Observable<Response> {
+    if (reset === true)
+      this.reset();
     return this.doUpdate.update();
   }
-  nextPage() {
-    this.doUpdate.update().subscribe();
-  }
+
   private updateTransactionLocal(data: Transaction) {
     var found = false;
     this.transactions.forEach(
@@ -99,16 +102,16 @@ export class TransactionsService {
   }
   updateTransaction(id: number): Observable<Response> {
     if (id === undefined)
-      return this.update();
+      return this.update(false);
     return this.httpService.get("service/transactions/transaction/" + id)
       .pipe(
         mergeMap((res: Response) => {
           var transaction = Transaction.fromJson(res.json());
           if (!this.updateTransactionLocal(transaction))
-            this.reset();// infinite scroll will automatically call update()
+            this.update(true);// TODO: navigate to the transaction's page?
           return of(res);
         }),
-        catchError(() => this.update())
+        catchError(() => this.update(true))
       );
   }
   removeTransaction(transaction: Transaction){
@@ -122,15 +125,15 @@ export class TransactionsService {
           var transaction: Transaction = Transaction.fromJson(res.json());
           this.accountsService.update().subscribe();
           if (!this.updateTransactionLocal(transaction))
-            this.reset();// infinite scroll will automatically call update()
+            this.update(true);// TODO: navigate to the transaction's page?
           return of(res);
         }),
-        catchError(() => this.update())
+        catchError(() => this.update(false))
       );
   }
   deleteTransaction(transaction: Transaction): Observable<Response> {
     if (transaction === undefined || transaction.id === undefined)
-      return this.update();
+      return this.update(false);
     var afterDeletion = (res: Response) => {
       // transactions will be reloaded after accounts are updated
       return this.accountsService.update();
@@ -223,21 +226,18 @@ export class TransactionsService {
     }
     return totals;
   }
-  isLoadingNextPage(): boolean {
+  isLoading(): boolean {
     return this.doUpdate.inProgress();
-  }
-  isLastPage(): boolean {
-    return this.lastPage;
   }
   constructor(private httpService: HTTPService, private authorizationService: AuthorizationService, private accountsService: AccountsService) {
     this.doUpdate = new UpdateHelper(() => {
-      if (this.lastPage || !this.authorizationService.isAuthorized()) {
-        if(!this.authorizationService.isAuthorized())
-          this.reset();
+      if (!this.authorizationService.isAuthorized()) {
+        this.reset();
         return;
       }
       var params = {
-        page: this.currentPage++,
+        offset: this.offset,
+        pageSize: this.pageSize,
         sortColumn: this.sortColumn,
         sortDirection: this.sortAsc ? "ASC" : "DESC"
       };
@@ -249,24 +249,33 @@ export class TransactionsService {
         if (this.filterTags.length > 0)
           params['filterTags'] = JSON.stringify(this.filterTags);
       }
-      return this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
+      var getCount = this.httpService.get("service/transactions/count/?" + this.httpService.encodeForm(params))
+        .pipe(
+          map((res: Response) => {
+            this.count = res.json();
+            return res;
+          }),
+          catchError((err) => {
+            this.reset();
+            return throwError(err);
+          })
+        );
+      var getTransactions = this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
         .pipe(
           map((res: Response) => {
             if (res.json().length !== 0) {
-              this.transactions = this.transactions.concat(res.json().map(this.processReceivedTransaction));
-            } else {
-              this.lastPage = true;
+              this.transactions = res.json().map(this.processReceivedTransaction);
             }
             return res;
           }),
           catchError((err) => {
             this.reset();
-            this.lastPage = true;
             return throwError(err);
           })
         );
+      return merge(getCount, getTransactions);
     });
     // transactions will be reloaded after accounts are updated
-    this.accountsService.accountsObservable.subscribe(() => this.update().subscribe());
+    this.accountsService.accountsObservable.subscribe(() => this.update(true).subscribe());
   }
 }

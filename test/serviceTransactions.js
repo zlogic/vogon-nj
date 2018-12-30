@@ -295,42 +295,42 @@ describe('Service', function() {
       await prepopulate();
 
       var newTransactions = [];
-      for(var i=1;i<250;i++)
-        newTransactions.push({description: "page transaction "+i,});
-      await dbService.sequelize.transaction(function(transaction){
+      for(var i=1;i<=25;i++)
+        newTransactions.push({description: "page transaction "+i});
+      newTransactions = await dbService.sequelize.transaction(function(transaction){
         return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
       });
       await dbService.sequelize.transaction(async function(transaction){
         var user = await dbService.User.findOne({where: {username:"user01"}, transaction:transaction});
-        var financeTransactions = await dbService.FinanceTransaction.findAll({transaction:transaction});
-        return Promise.all(financeTransactions.map(function(financeTransaction){
+        return Promise.all(newTransactions.map(function(financeTransaction){
           return financeTransaction.setUser(user, {transaction:transaction});
         }));
       });
       var pageTransactions = [];
 
       var {token, result} = await authenticateUser(userData);
-      var result = await superagent.get(baseUrl + "/service/transactions?page=0").set(tokenHeader(token));
+      var result = await superagent.get(baseUrl + "/service/transactions?offset=0&pageSize=10").set(tokenHeader(token));
       assert.ok(result);
       assert.equal(result.status, 200);
-      assert.equal(result.body.length, 100);
+      assert.equal(result.body.length, 10);
       pageTransactions = pageTransactions.concat(result.body);
 
-      result = await superagent.get(baseUrl + "/service/transactions?page=1").set(tokenHeader(token));
+      result = await superagent.get(baseUrl + "/service/transactions?offset=10&pageSize=10").set(tokenHeader(token));
       assert.ok(result);
       assert.equal(result.status, 200);
-      assert.equal(result.body.length, 100);
+      assert.equal(result.body.length, 10);
       pageTransactions = pageTransactions.concat(result.body);
 
-      result = await superagent.get(baseUrl + "/service/transactions?page=2").set(tokenHeader(token))
+      result = await superagent.get(baseUrl + "/service/transactions?offset=20&pageSize=10").set(tokenHeader(token))
       assert.ok(result);
       assert.equal(result.status, 200);
-      assert.equal(result.body.length, 53);
+      assert.equal(result.body.length, 8);
       pageTransactions = pageTransactions.concat(result.body);
       assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 1";}), true);
       assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 2";}), true);
       assert.equal(pageTransactions.some(function(tr){return tr.description === "test transaction 3";}), true);
-      for(var i=1;i<250;i++)
+      assert.equal(pageTransactions.filter(function(tr){return tr.description === "test transaction 3";}).length, 1);
+      for(var i=1;i<=25;i++)
         assert.equal(pageTransactions.some(function(tr){return tr.description === "page transaction " + i;}), true);
     });
     it('should return an empty list for a non-existing page', async function () {
@@ -338,10 +338,43 @@ describe('Service', function() {
       await prepopulate();
 
       var {token, result} = await authenticateUser(userData);
-      var result = await superagent.get(baseUrl + "/service/transactions?page=2").set(tokenHeader(token));
+      var result = await superagent.get(baseUrl + "/service/transactions?offset=100").set(tokenHeader(token));
       assert.ok(result);
       assert.equal(result.status, 200);
       assert.deepEqual(result.body, []);
+    });
+    it('should handle counting for transactions', async function () {
+      var userData = {username: "user01", password: "mypassword"};
+      await prepopulate();
+
+      var newTransactions = [];
+      for(var i=1;i<=25;i++)
+        newTransactions.push({description: "page transaction "+i});
+      newTransactions = await dbService.sequelize.transaction(function(transaction){
+        return dbService.FinanceTransaction.bulkCreate(newTransactions, {transaction: transaction, hooks: true});
+      });
+      await dbService.sequelize.transaction(async function(transaction){
+        var user = await dbService.User.findOne({where: {username:"user01"}, transaction:transaction});
+        return Promise.all(newTransactions.map(function(financeTransaction){
+          return financeTransaction.setUser(user, {transaction:transaction});
+        }));
+      });
+
+      var {token, result} = await authenticateUser(userData);
+      var result = await superagent.get(baseUrl + "/service/transactions/count").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.equal(Number(result.text), 28);
+
+      result = await superagent.get(baseUrl + "/service/transactions/count?filterTags=[\"hello\"]").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.equal(Number(result.text), 2);
+
+      result = await superagent.get(baseUrl + "/service/transactions/count?filterDescription=%25page transaction%25").set(tokenHeader(token));
+      assert.ok(result);
+      assert.equal(result.status, 200);
+      assert.equal(Number(result.text), 25);
     });
     it('should not be able to get a list of transactions for an unauthenticated user (no token)', async function () {
       await prepopulate();

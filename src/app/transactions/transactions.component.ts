@@ -1,6 +1,6 @@
 import { Component, ViewChild, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { Sort } from '@angular/material';
+import { Sort, PageEvent } from '@angular/material';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { debounceTime } from 'rxjs/operators';
 
@@ -35,7 +35,7 @@ export class TransactionsComponent {
       var prepare = () => {
         this.addTransaction();
       }
-      this.transactionsService.update().subscribe(prepare, prepare);
+      this.transactionsService.update(true).subscribe(prepare, prepare);
       return;
     }
     var transaction = new Transaction();
@@ -67,13 +67,18 @@ export class TransactionsComponent {
   ngOnInit() {
     this.filterForm.valueChanges.pipe(debounceTime(1000)).subscribe(() => {
       if(this.filterForm.dirty)
-        this.transactionsService.update().subscribe();
+        this.transactionsService.update(true).subscribe();
     });
   }
   sortData(sort: Sort) {
     this.transactionsService.sortColumn = sort.active;
     this.transactionsService.sortAsc = sort.direction === "asc";
-    this.transactionsService.update().subscribe();
+    this.transactionsService.update(true).subscribe();
+  }
+  loadPage(page: PageEvent) {
+    this.transactionsService.offset = page.pageIndex;
+    this.transactionsService.pageSize = page.pageSize;
+    this.transactionsService.update(false).subscribe();
   }
   getSortDirection() {
     return this.transactionsService.sortAsc ? "asc" : "desc";

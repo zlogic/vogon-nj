@@ -452,10 +452,34 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
     });
   };
 
+  var getTransactionsQuery = function(userId, query){
+    var filterDescription = query.filterDescription;
+    var filterDate = query.filterDate;
+    var filterTags = query.filterTags;
+    var where = [{UserId: userId}];
+    if(filterDescription !== undefined && filterDescription.length > 0)
+      where.push(Sequelize.where(Sequelize.fn('lower', Sequelize.col('description')), 'LIKE', filterDescription.toLowerCase()));
+    if(filterDate !== undefined && filterDate.length > 0)
+      where.push({date: new Date(filterDate)});
+    if(filterTags !== undefined && filterTags.length > 0)
+      filterTags = JSON.parse(filterTags);
+    if(filterTags !== undefined && filterTags.length > 0)
+      where.push({[Sequelize.Op.or]: filterTags.map(function(tag){
+          return [
+            {tags: {[Sequelize.Op.like]: '[' + JSON.stringify(tag) + '%'}},
+            {tags: {[Sequelize.Op.like]: '%,' + JSON.stringify(tag) + ',%'}},
+            {tags: {[Sequelize.Op.like]: '%,' + JSON.stringify(tag) + ']'}}
+          ]
+        }).reduce(function(a, b) {return a.concat(b);},[])
+      });
+    return {[Sequelize.Op.and]: where};
+  }
+
   return {
     sequelize: sequelize,
     importData: importData,
     exportData: exportData,
+    getTransactionsQuery: getTransactionsQuery,
     performMaintenance: performMaintenance,
     deleteExpiredTokens: deleteExpiredTokens,
 

@@ -5,7 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import { APP_BASE_HREF } from '@angular/common';
 
-import { InfiniteScrollModule } from 'ngx-infinite-scroll';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 import { VogonMaterialModule } from './material.module';
@@ -42,7 +41,6 @@ import { I18nService } from './service/i18n.service';
     FormsModule,
     ReactiveFormsModule,
     HttpModule,
-    InfiniteScrollModule,
     NgxChartsModule
   ],
   declarations: [

@@ -43,7 +43,7 @@ export class TransactionEditorComponent {
     if(this.transaction.id !== undefined)
       this.transactionsService.updateTransaction(this.transaction.id).subscribe();
     else
-      this.transactionsService.update().subscribe();
+      this.transactionsService.update(false).subscribe();
     this.done.emit();
   }
 

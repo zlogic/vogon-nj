@@ -80,42 +80,39 @@ router.post('/accounts', async function(req, res, next) {
   }
 });
 
-/* GET transactions. */
-router.get('/transactions', async function(req, res, next) {
-  var pageSize = 100;
-  var page = req.query.page;
-  var sortColumn = req.query.sortColumn || 'date';
-  var sortDirection = req.query.sortDirection || 'DESC';
-  var filterDescription = req.query.filterDescription;
-  var filterDate = req.query.filterDate;
-  var filterTags = req.query.filterTags;
-  page = page || 0;
-  var offset = page * pageSize;
-  var sortOrder = [
-    [sortColumn, sortDirection],
-    ['id', sortDirection],
-    [dbService.FinanceTransactionComponent, 'id', sortDirection]
-  ];
-  var where = [{UserId: req.user.id}];
-  if(filterDescription !== undefined && filterDescription.length > 0)
-    where.push(dbService.sequelize.where(dbService.sequelize.fn('lower', dbService.sequelize.col('description')), 'LIKE', filterDescription.toLowerCase()));
-  if(filterDate !== undefined && filterDate.length > 0)
-    where.push({date: new Date(filterDate)});
-  if(filterTags !== undefined && filterTags.length > 0)
-    filterTags = JSON.parse(filterTags);
-  if(filterTags !== undefined && filterTags.length > 0)
-    where.push({[Sequelize.Op.or]: filterTags.map(function(tag){
-        return [
-          {tags: {[Sequelize.Op.like]: '[' + JSON.stringify(tag) + '%'}},
-          {tags: {[Sequelize.Op.like]: '%,' + JSON.stringify(tag) + ',%'}},
-          {tags: {[Sequelize.Op.like]: '%,' + JSON.stringify(tag) + ']'}}
-        ]
-      }).reduce(function(a, b) {return a.concat(b);},[])
-    });
+/* GET transactions count. */
+router.get('/transactions/count', async function(req, res, next) {
   try{
     var response = await dbService.sequelize.transaction(async function(transaction){
+      var transactionsQuery = dbService.getTransactionsQuery(req.user.id, req.query);
+      var count = await dbService.FinanceTransaction.count({
+        where: transactionsQuery,
+        transaction: transaction
+      });
+      return count;
+    })
+    // toString prevents sending a response code instead
+    res.send(response.toString());
+  } catch(err) {
+    next(err);
+  }
+});
+
+/* GET transactions. */
+router.get('/transactions', async function(req, res, next) {
+  try{  
+    var pageSize = req.query.pageSize || 100;
+    var offset = req.query.offset;
+    var sortColumn = req.query.sortColumn || 'date';
+    var sortDirection = req.query.sortDirection || 'DESC';
+    var sortOrder = [
+      [sortColumn, sortDirection],
+      ['id', sortDirection],
+      [dbService.FinanceTransactionComponent, 'id', sortDirection]
+    ];
+    var response = await dbService.sequelize.transaction(async function(transaction){
       var financeTransactions = await dbService.FinanceTransaction.findAll({
-        where: {[Sequelize.Op.and]: where},
+        where: dbService.getTransactionsQuery(req.user.id, req.query),
         include: [{model: dbService.FinanceTransactionComponent, attributes: {exclude: ['UserId', 'FinanceTransactionId']}}],
         attributes: {exclude: 'UserId'},
         transaction: transaction,
@@ -123,7 +120,6 @@ router.get('/transactions', async function(req, res, next) {
         offset: offset, limit: pageSize
       })
       return financeTransactions.map(function(financeTransaction){
-        //console.log(financeTransaction.toJSON());
         return financeTransaction;
       });
     })

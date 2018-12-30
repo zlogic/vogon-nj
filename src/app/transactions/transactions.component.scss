@@ -33,3 +33,30 @@
 .wrap-row-contents {
   flex: 1 1 auto;
 }
+
+.transactions-table-container {
+  position: relative;
+}
+
+.transactions-table {
+  position: relative;
+}
+
+.transactions-loading-shade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.15);
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Add some space so that the fab button doesn't cover paging controls */
+.bottom-spacer {
+  height: 56px+32px;
+}
