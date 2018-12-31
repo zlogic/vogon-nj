@@ -1,5 +1,3 @@
-import { Injectable } from '@angular/core';
-
 // Error and status code translations
 var translations = {
   //Angular UI

@@ -3,9 +3,10 @@
     <mat-chip *ngFor="let tag of tags; let i=index" [selectable]="true" [removable]="true" (removed)="removeTag(i)">{{tag}}
       <mat-icon matChipRemove="matChipRemove">cancel</mat-icon>
     </mat-chip>
-    <input [placeholder]="placeholder" #tagsInput [formControl]="tagsControl" [matChipInputFor]="tagsList" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="false" (matChipInputTokenEnd)="addTag($event)"/>
+    <input [placeholder]="placeholder" #tagsInput [formControl]="tagsControl" [matChipInputFor]="tagsList" [matAutocomplete]="auto" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" [matChipInputAddOnBlur]="false"/>
   </mat-chip-list>
-  <mat-autocomplete #auto="matAutocomplete" (optionSelected)="selectedTag($event)">
+  <mat-autocomplete #auto="matAutocomplete" [autoActiveFirstOption]="true" (optionSelected)="selectedTag($event)">
+    <mat-option *ngIf="getUserInput()" [value]="getUserInput()" i18n>{{getUserInput()}} <small>(new tag)</small></mat-option>
     <mat-option *ngFor="let tag of filteredTags | async" [value]="tag">{{tag}}</mat-option>
   </mat-autocomplete>
 </mat-form-field>
