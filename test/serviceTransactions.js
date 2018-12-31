@@ -309,19 +309,19 @@ describe('Service', function() {
       var pageTransactions = [];
 
       var {token, result} = await authenticateUser(userData);
-      var result = await superagent.get(baseUrl + "/service/transactions?offset=0&pageSize=10").set(tokenHeader(token));
+      var result = await superagent.get(baseUrl + "/service/transactions?pageIndex=0&pageSize=10").set(tokenHeader(token));
       assert.ok(result);
       assert.equal(result.status, 200);
       assert.equal(result.body.length, 10);
       pageTransactions = pageTransactions.concat(result.body);
 
-      result = await superagent.get(baseUrl + "/service/transactions?offset=10&pageSize=10").set(tokenHeader(token));
+      result = await superagent.get(baseUrl + "/service/transactions?pageIndex=1&pageSize=10").set(tokenHeader(token));
       assert.ok(result);
       assert.equal(result.status, 200);
       assert.equal(result.body.length, 10);
       pageTransactions = pageTransactions.concat(result.body);
 
-      result = await superagent.get(baseUrl + "/service/transactions?offset=20&pageSize=10").set(tokenHeader(token))
+      result = await superagent.get(baseUrl + "/service/transactions?pageIndex=2&pageSize=10").set(tokenHeader(token))
       assert.ok(result);
       assert.equal(result.status, 200);
       assert.equal(result.body.length, 8);
@@ -338,7 +338,7 @@ describe('Service', function() {
       await prepopulate();
 
       var {token, result} = await authenticateUser(userData);
-      var result = await superagent.get(baseUrl + "/service/transactions?offset=100").set(tokenHeader(token));
+      var result = await superagent.get(baseUrl + "/service/transactions?pageIndex=100").set(tokenHeader(token));
       assert.ok(result);
       assert.equal(result.status, 200);
       assert.deepEqual(result.body, []);

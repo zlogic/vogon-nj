@@ -76,7 +76,7 @@ export class TransactionsComponent {
     this.transactionsService.update(true).subscribe();
   }
   loadPage(page: PageEvent) {
-    this.transactionsService.offset = page.pageIndex;
+    this.transactionsService.pageIndex = page.pageIndex;
     this.transactionsService.pageSize = page.pageSize;
     this.transactionsService.update(false).subscribe();
   }

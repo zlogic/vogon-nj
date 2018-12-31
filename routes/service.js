@@ -102,7 +102,8 @@ router.get('/transactions/count', async function(req, res, next) {
 router.get('/transactions', async function(req, res, next) {
   try{  
     var pageSize = req.query.pageSize || 100;
-    var offset = req.query.offset;
+    var pageIndex = req.query.pageIndex || 0;
+    var offset = pageSize * pageIndex;
     var sortColumn = req.query.sortColumn || 'date';
     var sortDirection = req.query.sortDirection || 'DESC';
     var sortOrder = [

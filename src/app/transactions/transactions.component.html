@@ -121,6 +121,6 @@
       <tr mat-row *matRowDef="let row; columns: getDisplayedColumns();"></tr>
     </table>
   </div>
-  <mat-paginator [length]="transactionsService.count" [pageSize]="transactionsService.pageSize" [pageIndex]="transactionsService.offset" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons (page)="loadPage($event)" class="mat-elevation-z4 transactions-table"></mat-paginator>
+  <mat-paginator [length]="transactionsService.count" [pageSize]="transactionsService.pageSize" [pageIndex]="transactionsService.pageIndex" [pageSizeOptions]="[10, 25, 50, 100]" showFirstLastButtons (page)="loadPage($event)" class="mat-elevation-z4 transactions-table"></mat-paginator>
 </div>
 <div class="bottom-spacer"></div>

@@ -62,7 +62,7 @@ export class Transaction {
 export class TransactionsService {
   transactions: Transaction[] = [];
   readonly defaultTransactionType = "expenseincome";
-  offset: number = 0;
+  pageIndex: number = 0;
   count: number = 0;
   pageSize: number = 100;
   sortColumn: string = "date";
@@ -72,12 +72,12 @@ export class TransactionsService {
   filterTags: string[] = [];
   private doUpdate: UpdateHelper;
   reset() {
-    this.offset = 0;
+    this.pageIndex = 0;
     this.count = 0;
     this.transactions = [];
   }
   resetIndex() {
-    this.offset = 0;
+    this.pageIndex = 0;
   }
   private processReceivedTransaction(transactionJson: any): Transaction {
     transactionJson.date = dateToJson(new Date(transactionJson.date));
@@ -236,7 +236,7 @@ export class TransactionsService {
         return;
       }
       var params = {
-        offset: this.offset,
+        pageIndex: this.pageIndex,
         pageSize: this.pageSize,
         sortColumn: this.sortColumn,
         sortDirection: this.sortAsc ? "ASC" : "DESC"
