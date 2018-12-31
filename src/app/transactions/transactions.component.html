@@ -31,7 +31,7 @@
       <ng-template let-transaction="transaction" #transactionItemDescription>{{transaction.description}}</ng-template>
       <ng-template let-transaction="transaction" #transactionItemTags>
         <div class="tags-container">
-          <mat-chip-list>
+          <mat-chip-list selectable="false" disabled="true">
             <mat-chip *ngFor="let tag of transaction.tags" disabled="true">{{tag}}</mat-chip>
           </mat-chip-list>
         </div>
