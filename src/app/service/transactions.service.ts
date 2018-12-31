@@ -102,13 +102,13 @@ export class TransactionsService {
   }
   updateTransaction(id: number): Observable<Response> {
     if (id === undefined)
-      return this.update(false);
+      return this.update(true);
     return this.httpService.get("service/transactions/transaction/" + id)
       .pipe(
         mergeMap((res: Response) => {
           var transaction = Transaction.fromJson(res.json());
           if (!this.updateTransactionLocal(transaction))
-            this.update(true);// TODO: navigate to the transaction's page?
+            return this.update(true);// TODO: navigate to the transaction's page?
           return of(res);
         }),
         catchError(() => this.update(true))
@@ -117,7 +117,7 @@ export class TransactionsService {
   removeTransaction(transaction: Transaction){
     this.transactions.unshift(transaction);
   }
-  submitTransaction(transaction: Transaction) {
+  submitTransaction(transaction: Transaction): Observable<Response>{
     transaction.date = dateToJson(transaction.date);
     return this.httpService.post("service/transactions", transaction)
       .pipe(
@@ -125,10 +125,10 @@ export class TransactionsService {
           var transaction: Transaction = Transaction.fromJson(res.json());
           this.accountsService.update().subscribe();
           if (!this.updateTransactionLocal(transaction))
-            this.update(true);// TODO: navigate to the transaction's page?
+            return this.update(true);// TODO: navigate to the transaction's page?
           return of(res);
         }),
-        catchError(() => this.update(false))
+        catchError(() => this.update(true))
       );
   }
   deleteTransaction(transaction: Transaction): Observable<Response> {
@@ -263,9 +263,7 @@ export class TransactionsService {
       var getTransactions = this.httpService.get("service/transactions/?" + this.httpService.encodeForm(params))
         .pipe(
           map((res: Response) => {
-            if (res.json().length !== 0) {
-              this.transactions = res.json().map(this.processReceivedTransaction);
-            }
+            this.transactions = res.json().map(this.processReceivedTransaction);
             return res;
           }),
           catchError((err) => {
@@ -276,6 +274,6 @@ export class TransactionsService {
       return merge(getCount, getTransactions);
     });
     // transactions will be reloaded after accounts are updated
-    this.accountsService.accountsObservable.subscribe(() => this.update(true).subscribe());
+    this.accountsService.accountsObservable.subscribe(() => this.update(false).subscribe());
   }
 }

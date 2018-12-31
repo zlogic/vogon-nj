@@ -118,7 +118,7 @@ export class UpdateHelper {
     if(this.updateFunctionObservable !== undefined)
       return this.updateFunctionObservable
         .pipe(
-          mergeMap((res) => {
+          mergeMap((res: Response | any) => {
             return this.updateCompleted(res);
           }),
           catchError((error: Response | any) => {
