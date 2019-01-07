@@ -22,7 +22,9 @@ var logger = winston.createLogger({
 });
 logger.level = 'silly';
 
-var stream = split().on('data', logger.info);
+var stream = split().on('data', function(line) {
+  logger.info(line);
+});
 
 var logException = function(err){
   logger.error("An error has occurred: %s, status %s, stack trace:\n%s", err, err.status, err.stack);
