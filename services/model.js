@@ -22,9 +22,9 @@ var sequelizeConfigurer = function(databaseUrl, sequelizeOptions){
   if(databaseUrl && sequelizeOptions)
     sequelize = new Sequelize(databaseUrl, sequelizeOptions);
   else if(process.env.DATABASE_URL !== undefined)
-    sequelize = new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
+    sequelize = new Sequelize(process.env.DATABASE_URL, {isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
   else
-    sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
+    sequelize = new Sequelize("sqlite:", {storage: path.resolve(os.tmpdir(), "vogon-nj.sqlite"), isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
 
   var cryptopbkdf2 = util.promisify(crypto.pbkdf2);
   var cryptoRandomBytes = util.promisify(crypto.randomBytes);

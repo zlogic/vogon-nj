@@ -6,7 +6,7 @@ var Sequelize = require('sequelize');
 var logger = require('../../services/logger');
 
 var reconfigureDb = function() {
-  var currentDbService = model.model("sqlite:", {storage: ":memory:", isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger, operatorsAliases: false});
+  var currentDbService = model.model("sqlite:", {storage: ":memory:", isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE, logging: logger.sequelizeLogger});
   for(var k in currentDbService)
     dbService[k] = currentDbService[k];
 }

@@ -173,7 +173,9 @@ router.post('/transactions', async function(req, res, next) {
         logger.logger.error("Invalid account id: %s", financeTransactionComponent.AccountId);
         throw new Error('Cannot set an invalid account id');
       };
-      var financeTransaction = await dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction});
+      var financeTransaction = null;
+      if(reqFinanceTransaction.id !== undefined)
+        financeTransaction = await dbService.FinanceTransaction.findOne({where: {UserId: req.user.id, id: reqFinanceTransaction.id}, include: [dbService.FinanceTransactionComponent], transaction: transaction});
       if(financeTransaction == null){
         var createdTransaction = await dbService.FinanceTransaction.create(reqFinanceTransaction, {transaction: transaction});
         dbFinanceTransaction = createdTransaction;
