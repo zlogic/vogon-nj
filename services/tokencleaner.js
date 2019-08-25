@@ -22,7 +22,7 @@ var rescheduleCleaner = async function(){
   };
 
   var expires = await dbService.Token.min('expires');
-  if(expires !== null)
+  if(expires !== null && expires !== undefined && expires !== 0)
     planNextRun(expires);
 };
 
